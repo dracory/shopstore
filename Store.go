@@ -49,6 +49,9 @@ func (store *Store) AutoMigrate() error {
 	}
 
 	for _, sql := range sqls {
+
+		store.logSql("create table", sql)
+
 		_, err := store.db.Exec(sql)
 		if err != nil {
 			log.Println(err)
