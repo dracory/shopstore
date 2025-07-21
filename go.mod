@@ -8,7 +8,7 @@ require (
 	github.com/gouniverse/base v0.9.0
 	github.com/gouniverse/dataobject v1.3.0
 	github.com/gouniverse/maputils v0.7.0
-	github.com/gouniverse/sb v0.8.0
+	github.com/gouniverse/sb v0.9.0
 	github.com/gouniverse/strutils v0.7.0
 	github.com/gouniverse/uid v1.5.0
 	github.com/gouniverse/utils v1.45.4
