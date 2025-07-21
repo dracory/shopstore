@@ -1,4 +1,4 @@
-module github.com/gouniverse/shopstore
+module github.com/dracory/shopstore
 
 go 1.23.3
 
