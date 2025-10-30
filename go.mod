@@ -4,12 +4,12 @@ go 1.24.0
 
 require (
 	github.com/doug-martin/goqu/v9 v9.19.0
+	github.com/dracory/sb v0.11.0
 	github.com/dracory/uid v1.8.0
 	github.com/dromara/carbon/v2 v2.6.11
 	github.com/gouniverse/base v0.9.0
 	github.com/gouniverse/dataobject v1.3.0
 	github.com/gouniverse/maputils v0.7.0
-	github.com/gouniverse/sb v0.9.0
 	github.com/gouniverse/strutils v0.7.0
 	github.com/gouniverse/utils v1.45.4
 	github.com/samber/lo v1.51.0
@@ -24,6 +24,7 @@ require (
 
 require (
 	github.com/darkoatanasovski/htmltags v1.0.0 // indirect
+	github.com/dracory/database v0.3.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/georgysavva/scany v1.2.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect

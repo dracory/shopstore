@@ -1,6 +1,6 @@
 package shopstore
 
-import "github.com/gouniverse/sb"
+import "github.com/dracory/sb"
 
 // sqlCategoryTableCreate returns a SQL string for creating the category table
 func (st *Store) sqlCategoryTableCreate() string {
