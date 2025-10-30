@@ -1,11 +1,11 @@
 package shopstore
 
 import (
+	"github.com/dracory/uid"
 	"github.com/dromara/carbon/v2"
 	"github.com/gouniverse/dataobject"
 	"github.com/gouniverse/maputils"
 	"github.com/gouniverse/sb"
-	"github.com/gouniverse/uid"
 	"github.com/gouniverse/utils"
 	"github.com/spf13/cast"
 )
