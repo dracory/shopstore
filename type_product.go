@@ -120,11 +120,11 @@ func (product *Product) SetMemo(memo string) ProductInterface {
 func (product *Product) Metas() (map[string]string, error) {
 	metasStr := product.Get(COLUMN_METAS)
 
-	if metasStr == "" {
+	if metasStr == "" || metasStr == "null" {
 		metasStr = "{}"
 	}
 
-	metasJson := map[string]string{}
+	var metasJson map[string]string
 	errJson := json.Unmarshal([]byte(metasStr), &metasJson)
 	if errJson != nil {
 		return map[string]string{}, errJson

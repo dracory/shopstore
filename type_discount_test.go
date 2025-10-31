@@ -290,6 +290,29 @@ func TestDiscountMetasInvalidJSON(t *testing.T) {
 	}
 }
 
+func TestDiscountMetasHandlesNullJSON(t *testing.T) {
+	discount := NewDiscountFromExistingData(map[string]string{
+		COLUMN_METAS: "null",
+	})
+
+	metas, err := discount.Metas()
+	if err != nil {
+		t.Fatalf("unexpected error retrieving metas: %v", err)
+	}
+
+	if len(metas) != 0 {
+		t.Fatalf("expected empty metas map for null JSON, got %v", metas)
+	}
+
+	if err := discount.MetasUpsert(map[string]string{"alpha": "beta"}); err != nil {
+		t.Fatalf("unexpected error upserting metas: %v", err)
+	}
+
+	if got := discount.Meta("alpha"); got != "beta" {
+		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	}
+}
+
 func TestDiscountSetMetaConvenience(t *testing.T) {
 	discount := &Discount{}
 

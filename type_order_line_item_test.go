@@ -214,6 +214,29 @@ func TestOrderLineItemMetasInvalidJSON(t *testing.T) {
 	}
 }
 
+func TestOrderLineItemMetasHandlesNullJSON(t *testing.T) {
+	item := NewOrderLineItemFromExistingData(map[string]string{
+		COLUMN_METAS: "null",
+	})
+
+	metas, err := item.Metas()
+	if err != nil {
+		t.Fatalf("unexpected error retrieving metas: %v", err)
+	}
+
+	if len(metas) != 0 {
+		t.Fatalf("expected empty metas map for null JSON, got %v", metas)
+	}
+
+	if err := item.UpsertMetas(map[string]string{"alpha": "beta"}); err != nil {
+		t.Fatalf("unexpected error upserting metas: %v", err)
+	}
+
+	if got := item.Meta("alpha"); got != "beta" {
+		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	}
+}
+
 func TestOrderLineItemSetMetaConvenience(t *testing.T) {
 	item := &OrderLineItem{}
 

@@ -202,6 +202,29 @@ func TestOrderMetasInvalidJSON(t *testing.T) {
 	}
 }
 
+func TestOrderMetasHandlesNullJSON(t *testing.T) {
+	order := NewOrderFromExistingData(map[string]string{
+		COLUMN_METAS: "null",
+	})
+
+	metas, err := order.Metas()
+	if err != nil {
+		t.Fatalf("unexpected error retrieving metas: %v", err)
+	}
+
+	if len(metas) != 0 {
+		t.Fatalf("expected empty metas map for null JSON, got %v", metas)
+	}
+
+	if err := order.UpsertMetas(map[string]string{"alpha": "beta"}); err != nil {
+		t.Fatalf("unexpected error upserting metas: %v", err)
+	}
+
+	if got := order.Meta("alpha"); got != "beta" {
+		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	}
+}
+
 func TestOrderSetMetaConvenience(t *testing.T) {
 	order := &Order{}
 
