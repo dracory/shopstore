@@ -100,10 +100,14 @@ func (order *Media) Metas() (map[string]string, error) {
 		metasStr = "{}"
 	}
 
-	var metasJson map[string]string
+	metasJson := map[string]string{}
 	errJson := json.Unmarshal([]byte(metasStr), &metasJson)
 	if errJson != nil {
 		return map[string]string{}, errJson
+	}
+
+	if metasJson == nil {
+		metasJson = map[string]string{}
 	}
 
 	return metasJson, nil
