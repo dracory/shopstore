@@ -204,6 +204,29 @@ func TestMediaMetasInvalidJSON(t *testing.T) {
 	}
 }
 
+func TestMediaMetasHandlesNullJSON(t *testing.T) {
+	media := NewMediaFromExistingData(map[string]string{
+		COLUMN_METAS: "null",
+	})
+
+	metas, err := media.Metas()
+	if err != nil {
+		t.Fatalf("unexpected error retrieving metas: %v", err)
+	}
+
+	if len(metas) != 0 {
+		t.Fatalf("expected empty metas map for null JSON, got %v", metas)
+	}
+
+	if err := media.UpsertMetas(map[string]string{"alpha": "beta"}); err != nil {
+		t.Fatalf("unexpected error upserting metas: %v", err)
+	}
+
+	if got := media.Meta("alpha"); got != "beta" {
+		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	}
+}
+
 func TestMediaSetMetaConvenience(t *testing.T) {
 	media := &Media{}
 

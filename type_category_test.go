@@ -119,6 +119,29 @@ func TestCategoryMetaHandlesInvalidJSON(t *testing.T) {
 	}
 }
 
+func TestCategoryMetasHandlesNullJSON(t *testing.T) {
+	category := NewCategoryFromExistingData(map[string]string{
+		COLUMN_METAS: "null",
+	})
+
+	metas, err := category.Metas()
+	if err != nil {
+		t.Fatalf("unexpected error retrieving metas: %v", err)
+	}
+
+	if len(metas) != 0 {
+		t.Fatalf("expected empty metas map for null JSON, got %v", metas)
+	}
+
+	if err := category.UpsertMetas(map[string]string{"alpha": "beta"}); err != nil {
+		t.Fatalf("unexpected error upserting metas: %v", err)
+	}
+
+	if got := category.Meta("alpha"); got != "beta" {
+		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	}
+}
+
 func TestCategoryStatusPredicates(t *testing.T) {
 	category := &Category{}
 

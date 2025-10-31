@@ -200,6 +200,29 @@ func TestProductMetasUpsertMergesValues(t *testing.T) {
 	}
 }
 
+func TestProductMetasHandlesNullJSON(t *testing.T) {
+	product := NewProductFromExistingData(map[string]string{
+		COLUMN_METAS: "null",
+	})
+
+	metas, err := product.Metas()
+	if err != nil {
+		t.Fatalf("unexpected error retrieving metas: %v", err)
+	}
+
+	if len(metas) != 0 {
+		t.Fatalf("expected empty metas map for null JSON, got %v", metas)
+	}
+
+	if err := product.UpsertMetas(map[string]string{"alpha": "beta"}); err != nil {
+		t.Fatalf("unexpected error upserting metas: %v", err)
+	}
+
+	if got := product.Meta("alpha"); got != "beta" {
+		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	}
+}
+
 func TestProductMetasInvalidJSON(t *testing.T) {
 	product := NewProductFromExistingData(map[string]string{
 		COLUMN_METAS: "{invalid",
