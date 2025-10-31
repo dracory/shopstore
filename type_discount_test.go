@@ -1,6 +1,7 @@
 package shopstore
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/dracory/sb"
@@ -76,6 +77,18 @@ func TestNewDiscountDefaults(t *testing.T) {
 
 	if discount.Meta("missing") != "" {
 		t.Fatal("expected Meta for missing key to return empty string")
+	}
+}
+
+func TestNewDiscountCodeUsesCrockfordAlphabet(t *testing.T) {
+	discount := NewDiscount()
+	code := strings.ToUpper(discount.Code())
+
+	const allowed = "BCDFGHJKLMNPQRSTVWXYZ23456789"
+	for _, r := range code {
+		if !strings.ContainsRune(allowed, r) {
+			t.Fatalf("generated code %q contains disallowed character %q", code, r)
+		}
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
+	"github.com/dracory/str"
 	"github.com/dracory/uid"
 	"github.com/dromara/carbon/v2"
 	"github.com/spf13/cast"
@@ -36,7 +37,7 @@ var _ DiscountInterface = (*Discount)(nil)
 // == CONSTRUCTORS ===========================================================
 
 func NewDiscount() DiscountInterface {
-	code := uid.Timestamp()
+	code := generateDiscountCode()
 
 	d := (&Discount{}).
 		SetID(uid.HumanUid()).
@@ -56,6 +57,16 @@ func NewDiscount() DiscountInterface {
 	d.SetMetas(map[string]string{})
 
 	return d
+}
+
+func generateDiscountCode() string {
+	code, err := str.RandomFromGamma(12, "BCDFGHJKLMNPQRSTVWXYZ23456789")
+
+	if err != nil {
+		code = str.Random(12)
+	}
+
+	return code
 }
 
 func NewDiscountFromExistingData(data map[string]string) DiscountInterface {
