@@ -1,12 +1,12 @@
 package shopstore
 
 import (
+	"encoding/json"
+
+	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
 	"github.com/dracory/uid"
 	"github.com/dromara/carbon/v2"
-	"github.com/gouniverse/dataobject"
-	"github.com/gouniverse/maputils"
-	"github.com/gouniverse/utils"
 )
 
 // == CLASS ====================================================================
@@ -117,12 +117,13 @@ func (category *Category) Metas() (map[string]string, error) {
 		metasStr = "{}"
 	}
 
-	metasJson, errJson := utils.FromJSON(metasStr, map[string]string{})
+	var metasJson map[string]string
+	errJson := json.Unmarshal([]byte(metasStr), &metasJson)
 	if errJson != nil {
 		return map[string]string{}, errJson
 	}
 
-	return maputils.MapStringAnyToMapStringString(metasJson.(map[string]any)), nil
+	return metasJson, nil
 }
 
 func (category *Category) Meta(name string) string {
@@ -146,11 +147,11 @@ func (category *Category) SetMeta(name string, value string) error {
 // SetMetas stores metas as json string
 // Warning: it overwrites any existing metas
 func (category *Category) SetMetas(metas map[string]string) error {
-	mapString, err := utils.ToJSON(metas)
+	mapString, err := json.Marshal(metas)
 	if err != nil {
 		return err
 	}
-	category.Set(COLUMN_METAS, mapString)
+	category.Set(COLUMN_METAS, string(mapString))
 	return nil
 }
 

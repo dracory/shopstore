@@ -1,13 +1,14 @@
 package shopstore
 
 import (
+	"encoding/json"
+
+	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
+	"github.com/dracory/str"
 	"github.com/dracory/uid"
 	"github.com/dromara/carbon/v2"
-	"github.com/gouniverse/dataobject"
-	"github.com/gouniverse/maputils"
-	"github.com/gouniverse/strutils"
-	"github.com/gouniverse/utils"
+	"github.com/spf13/cast"
 )
 
 // == CLASS ====================================================================
@@ -71,7 +72,7 @@ func (product *Product) IsFree() bool {
 
 func (product *Product) Slug() string {
 	title := product.Title()
-	return strutils.Slugify(title, '-')
+	return str.Slugify(title, '-')
 }
 
 // == GETTERS & SETTERS ========================================================
@@ -123,12 +124,13 @@ func (product *Product) Metas() (map[string]string, error) {
 		metasStr = "{}"
 	}
 
-	metasJson, errJson := utils.FromJSON(metasStr, map[string]string{})
+	var metasJson map[string]string
+	errJson := json.Unmarshal([]byte(metasStr), &metasJson)
 	if errJson != nil {
 		return map[string]string{}, errJson
 	}
 
-	return maputils.MapStringAnyToMapStringString(metasJson.(map[string]any)), nil
+	return metasJson, nil
 }
 
 func (product *Product) Meta(name string) string {
@@ -152,11 +154,11 @@ func (product *Product) SetMeta(name string, value string) error {
 // SetMetas stores metas as json string
 // Warning: it overwrites any existing metas
 func (product *Product) SetMetas(metas map[string]string) error {
-	mapString, err := utils.ToJSON(metas)
+	mapString, err := json.Marshal(metas)
 	if err != nil {
 		return err
 	}
-	product.Set(COLUMN_METAS, mapString)
+	product.Set(COLUMN_METAS, string(mapString))
 	return nil
 }
 
@@ -184,12 +186,12 @@ func (product *Product) SetPrice(price string) ProductInterface {
 }
 
 func (product *Product) PriceFloat() float64 {
-	price, _ := utils.ToFloat(product.Get(COLUMN_PRICE))
+	price := cast.ToFloat64(product.Get(COLUMN_PRICE))
 	return price
 }
 
 func (product *Product) SetPriceFloat(price float64) ProductInterface {
-	product.SetPrice(utils.ToString(price))
+	product.SetPrice(cast.ToString(price))
 	return product
 }
 
@@ -203,12 +205,12 @@ func (product *Product) SetQuantity(quantity string) ProductInterface {
 }
 
 func (product *Product) QuantityInt() int64 {
-	quantity, _ := utils.ToInt(product.Quantity())
+	quantity := cast.ToInt64(product.Quantity())
 	return quantity
 }
 
 func (product *Product) SetQuantityInt(quantity int64) ProductInterface {
-	product.SetQuantity(utils.ToString(quantity))
+	product.SetQuantity(cast.ToString(quantity))
 	return product
 }
 

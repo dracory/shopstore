@@ -1,12 +1,13 @@
 package shopstore
 
 import (
+	"encoding/json"
+
+	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
 	"github.com/dracory/uid"
 	"github.com/dromara/carbon/v2"
-	"github.com/gouniverse/dataobject"
-	"github.com/gouniverse/maputils"
-	"github.com/gouniverse/utils"
+	"github.com/spf13/cast"
 )
 
 // == CONSTANTS ==============================================================
@@ -69,17 +70,13 @@ func NewDiscountFromExistingData(data map[string]string) DiscountInterface {
 
 func (d *Discount) Amount() float64 {
 	amountStr := d.Get(COLUMN_AMOUNT)
-	amount, err := utils.ToFloat(amountStr)
-
-	if err != nil {
-		return 0
-	}
+	amount := cast.ToFloat64(amountStr)
 
 	return amount
 }
 
 func (d *Discount) SetAmount(amount float64) DiscountInterface {
-	amountStr := utils.ToString(amount)
+	amountStr := cast.ToString(amount)
 	d.Set(COLUMN_AMOUNT, amountStr)
 	return d
 }
@@ -187,12 +184,13 @@ func (d *Discount) Metas() (map[string]string, error) {
 		metasStr = "{}"
 	}
 
-	metasJson, errJson := utils.FromJSON(metasStr, map[string]string{})
+	var metasJson map[string]string
+	errJson := json.Unmarshal([]byte(metasStr), &metasJson)
 	if errJson != nil {
 		return map[string]string{}, errJson
 	}
 
-	return maputils.MapStringAnyToMapStringString(metasJson.(map[string]any)), nil
+	return metasJson, nil
 }
 
 func (d *Discount) MetasRemove(names []string) error {
@@ -224,13 +222,13 @@ func (d *Discount) MetasUpsert(metas map[string]string) error {
 // SetMetas stores metas as json string
 // Warning: it overwrites any existing metas
 func (d *Discount) SetMetas(metas map[string]string) error {
-	mapString, err := utils.ToJSON(metas)
+	mapString, err := json.Marshal(metas)
 
 	if err != nil {
 		return err
 	}
 
-	d.Set(COLUMN_METAS, mapString)
+	d.Set(COLUMN_METAS, string(mapString))
 
 	return nil
 }

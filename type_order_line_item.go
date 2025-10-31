@@ -1,12 +1,13 @@
 package shopstore
 
 import (
+	"encoding/json"
+
+	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
 	"github.com/dracory/uid"
 	"github.com/dromara/carbon/v2"
-	"github.com/gouniverse/dataobject"
-	"github.com/gouniverse/maputils"
-	"github.com/gouniverse/utils"
+	"github.com/spf13/cast"
 )
 
 // == CLASS ====================================================================
@@ -82,12 +83,13 @@ func (o *OrderLineItem) Metas() (map[string]string, error) {
 		metasStr = "{}"
 	}
 
-	metasJson, errJson := utils.FromJSON(metasStr, map[string]string{})
+	var metasJson map[string]string
+	errJson := json.Unmarshal([]byte(metasStr), &metasJson)
 	if errJson != nil {
 		return map[string]string{}, errJson
 	}
 
-	return maputils.MapStringAnyToMapStringString(metasJson.(map[string]any)), nil
+	return metasJson, nil
 }
 
 func (o *OrderLineItem) Meta(name string) string {
@@ -111,11 +113,11 @@ func (o *OrderLineItem) SetMeta(name string, value string) error {
 // SetMetas stores metas as json string
 // Warning: it overwrites any existing metas
 func (o *OrderLineItem) SetMetas(metas map[string]string) error {
-	mapString, err := utils.ToJSON(metas)
+	mapString, err := json.Marshal(metas)
 	if err != nil {
 		return err
 	}
-	o.Set(COLUMN_METAS, mapString)
+	o.Set(COLUMN_METAS, string(mapString))
 	return nil
 }
 
@@ -153,12 +155,12 @@ func (o *OrderLineItem) SetPrice(price string) OrderLineItemInterface {
 
 func (o *OrderLineItem) PriceFloat() float64 {
 	price := o.Price()
-	priceFloat, _ := utils.ToFloat(price)
+	priceFloat := cast.ToFloat64(price)
 	return priceFloat
 }
 
 func (o *OrderLineItem) SetPriceFloat(price float64) OrderLineItemInterface {
-	o.SetPrice(utils.ToString(price))
+	o.SetPrice(cast.ToString(price))
 	return o
 }
 
@@ -182,12 +184,12 @@ func (o *OrderLineItem) SetQuantity(quantity string) OrderLineItemInterface {
 
 func (o *OrderLineItem) QuantityInt() int64 {
 	quantity := o.Quantity()
-	quantityInt, _ := utils.ToInt(quantity)
+	quantityInt := cast.ToInt64(quantity)
 	return quantityInt
 }
 
 func (o *OrderLineItem) SetQuantityInt(quantity int64) OrderLineItemInterface {
-	o.SetQuantity(utils.ToString(quantity))
+	o.SetQuantity(cast.ToString(quantity))
 	return o
 }
 
