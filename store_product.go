@@ -113,9 +113,7 @@ func (store *Store) ProductDeleteByID(ctx context.Context, id string) error {
 		return errSql
 	}
 
-	if store.debugEnabled {
-		log.Println(sqlStr)
-	}
+	store.logSql("delete", sqlStr, params...)
 
 	_, err := database.Execute(store.toQuerableContext(ctx), sqlStr, params...)
 
@@ -249,7 +247,12 @@ func (store *Store) productQuery(options ProductQueryInterface) (selectDataset *
 	}
 
 	if options.HasTitleLike() {
-		q = q.Where(goqu.C(COLUMN_TITLE).ILike(`%` + options.TitleLike() + `%`))
+		// Sanitize the input by escaping special characters
+		// This is a basic example, a more robust solution should be used in production
+		searchTerm := strings.ReplaceAll(options.TitleLike(), "'", "''")
+		searchTerm = strings.ReplaceAll(searchTerm, "%", "%")
+		searchTerm = strings.ReplaceAll(searchTerm, "_", "_")
+		q = q.Where(goqu.C(COLUMN_TITLE).ILike(`%` + searchTerm + `%`))
 	}
 
 	if options.HasStatus() {

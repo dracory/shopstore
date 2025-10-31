@@ -34,9 +34,7 @@ func (store *Store) OrderCount(ctx context.Context, options OrderQueryInterface)
 		return -1, nil
 	}
 
-	if store.debugEnabled {
-		log.Println(sqlStr)
-	}
+	store.logSql("count", sqlStr, params...)
 
 	mapped, err := database.SelectToMapString(store.toQuerableContext(ctx), sqlStr, params...)
 
