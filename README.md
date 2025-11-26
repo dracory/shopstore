@@ -1,7 +1,7 @@
-# Shop Store <a href="https://gitpod.io/#https://github.com/gouniverse/shopstore" style="float:right"><img src="https://gitpod.io/button/open-in-gitpod.svg" alt="Open in Gitpod" loading="lazy"></a>
+# Shop Store <a href="https://gitpod.io/#https://github.com/dracory/shopstore" style="float:right"><img src="https://gitpod.io/button/open-in-gitpod.svg" alt="Open in Gitpod" loading="lazy"></a>
 
-[![Tests Status](https://github.com/gouniverse/shopstore/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/gouniverse/shopstore/actions/workflows/tests.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/gouniverse/shopstore)](https://goreportcard.com/report/github.com/gouniverse/shopstore)
+[![Tests Status](https://github.com/dracory/shopstore/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/dracory/shopstore/actions/workflows/tests.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/dracory/shopstore)](https://goreportcard.com/report/github.com/dracory/shopstore)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/dracory/shopstore)](https://pkg.go.dev/github.com/dracory/shopstore)
 
 Shop Store is a Go package that provides a database-backed store for common commerce entities such as products, orders, discounts, media, and categories. It builds on the [`dataobject`](https://github.com/dracory/dataobject) pattern to give you rich domain objects with change tracking, metadata handling, soft deletion, and query builders out of the box.

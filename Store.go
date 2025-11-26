@@ -6,7 +6,7 @@ import (
 	"log"
 	"log/slog"
 
-	"github.com/gouniverse/base/database"
+	"github.com/dracory/database"
 )
 
 var _ StoreInterface = (*Store)(nil) // verify it extends the interface
