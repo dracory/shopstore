@@ -174,8 +174,8 @@ func TestStoreOrderFindByID(t *testing.T) {
 		t.Fatal("Order quantity MUST BE '1', found: ", orderFound.Quantity())
 	}
 
-	if orderFound.Price() != "19.9900" {
-		t.Fatal("Order price MUST BE '19.9900', found: ", orderFound.Price())
+	if orderFound.Price() != "19.99" {
+		t.Fatal("Order price MUST BE '19.99', found: ", orderFound.Price())
 	}
 
 	if orderFound.Memo() != "test memo" {

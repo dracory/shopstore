@@ -95,8 +95,8 @@ func TestStoreProductFindByID(t *testing.T) {
 		t.Fatal("Product quantity MUST BE '1', found: ", productFound.Quantity())
 	}
 
-	if productFound.Price() != "19.9900" {
-		t.Fatal("Product price MUST BE '19.9900', found: ", productFound.Price())
+	if productFound.Price() != "19.99" {
+		t.Fatal("Product price MUST BE '19.99', found: ", productFound.Price())
 	}
 
 	if productFound.Memo() != "test ruler" {
