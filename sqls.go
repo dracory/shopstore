@@ -3,8 +3,8 @@ package shopstore
 import "github.com/dracory/sb"
 
 // sqlCategoryTableCreate returns a SQL string for creating the category table
-func (st *Store) sqlCategoryTableCreate() string {
-	sql := sb.NewBuilder(st.dbDriverName).
+func (st *Store) sqlCategoryTableCreate() (string, error) {
+	sql, err := sb.NewBuilder(st.dbDriverName).
 		Table(st.categoryTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
@@ -53,12 +53,12 @@ func (st *Store) sqlCategoryTableCreate() string {
 		}).
 		CreateIfNotExists()
 
-	return sql
+	return sql, err
 }
 
 // sqlDiscountTableCreate returns a SQL string for creating the discount table
-func (st *Store) sqlDiscountTableCreate() string {
-	sql := sb.NewBuilder(st.dbDriverName).
+func (st *Store) sqlDiscountTableCreate() (string, error) {
+	sql, err := sb.NewBuilder(st.dbDriverName).
 		Table(st.discountTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
@@ -126,11 +126,11 @@ func (st *Store) sqlDiscountTableCreate() string {
 		}).
 		CreateIfNotExists()
 
-	return sql
+	return sql, err
 }
 
-func (store *Store) sqlMediaTableCreate() string {
-	sql := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
+func (store *Store) sqlMediaTableCreate() (string, error) {
+	sql, err := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
 		Table(store.mediaTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
@@ -193,11 +193,11 @@ func (store *Store) sqlMediaTableCreate() string {
 		}).
 		CreateIfNotExists()
 
-	return sql
+	return sql, err
 }
 
-func (store *Store) sqlOrderLineItemTableCreate() string {
-	sql := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
+func (store *Store) sqlOrderLineItemTableCreate() (string, error) {
+	sql, err := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
 		Table(store.orderLineItemTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
@@ -258,11 +258,11 @@ func (store *Store) sqlOrderLineItemTableCreate() string {
 		}).
 		CreateIfNotExists()
 
-	return sql
+	return sql, err
 }
 
-func (store *Store) sqlOrderTableCreate() string {
-	sql := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
+func (store *Store) sqlOrderTableCreate() (string, error) {
+	sql, err := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
 		Table(store.orderTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
@@ -313,11 +313,11 @@ func (store *Store) sqlOrderTableCreate() string {
 		}).
 		CreateIfNotExists()
 
-	return sql
+	return sql, err
 }
 
-func (store *Store) sqlProductTableCreate() string {
-	sql := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
+func (store *Store) sqlProductTableCreate() (string, error) {
+	sql, err := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
 		Table(store.productTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
@@ -376,5 +376,5 @@ func (store *Store) sqlProductTableCreate() string {
 		}).
 		CreateIfNotExists()
 
-	return sql
+	return sql, err
 }

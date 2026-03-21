@@ -252,7 +252,7 @@ func TestStoreOrderSoftDelete(t *testing.T) {
 	}
 
 	if strings.Contains(orderFindWithDeleted[0].SoftDeletedAt(), sb.MAX_DATETIME) {
-		t.Fatal("Order MUST be soft deleted", orderFound.SoftDeletedAt())
+		t.Fatal("Order MUST be soft deleted", orderFindWithDeleted[0].SoftDeletedAt())
 	}
 
 }

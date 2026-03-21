@@ -39,20 +39,24 @@ func (store *Store) logSql(sqlOperationType string, sql string, params ...interf
 
 // AutoMigrate auto migrate
 func (store *Store) AutoMigrate() error {
-	sqls := []string{
-		store.sqlCategoryTableCreate(),
-		store.sqlDiscountTableCreate(),
-		store.sqlMediaTableCreate(),
-		store.sqlOrderTableCreate(),
-		store.sqlOrderLineItemTableCreate(),
-		store.sqlProductTableCreate(),
+	sqlGenerators := []func() (string, error){
+		store.sqlCategoryTableCreate,
+		store.sqlDiscountTableCreate,
+		store.sqlMediaTableCreate,
+		store.sqlOrderTableCreate,
+		store.sqlOrderLineItemTableCreate,
+		store.sqlProductTableCreate,
 	}
 
-	for _, sql := range sqls {
+	for _, generator := range sqlGenerators {
+		sql, err := generator()
+		if err != nil {
+			return err
+		}
 
 		store.logSql("create table", sql)
 
-		_, err := store.db.Exec(sql)
+		_, err = store.db.Exec(sql)
 		if err != nil {
 			log.Println(err)
 			return err

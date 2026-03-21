@@ -175,7 +175,7 @@ func TestStoreProductSoftDelete(t *testing.T) {
 	}
 
 	if strings.Contains(productFindWithDeleted[0].SoftDeletedAt(), sb.NULL_DATETIME) {
-		t.Fatal("Product MUST be soft deleted", productFound.SoftDeletedAt())
+		t.Fatal("Product MUST be soft deleted", productFindWithDeleted[0].SoftDeletedAt())
 	}
 
 }
