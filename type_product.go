@@ -6,7 +6,6 @@ import (
 	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
 	"github.com/dracory/str"
-	"github.com/dracory/uid"
 	"github.com/dromara/carbon/v2"
 	"github.com/spf13/cast"
 )
@@ -25,7 +24,7 @@ var _ ProductInterface = (*Product)(nil)
 
 func NewProduct() ProductInterface {
 	o := (&Product{}).
-		SetID(uid.HumanUid()).
+		SetID(GenerateShortID()).
 		SetStatus(PRODUCT_STATUS_DRAFT).
 		SetTitle("").
 		SetDescription("").

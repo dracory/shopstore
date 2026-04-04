@@ -6,7 +6,6 @@ import (
 	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
 	"github.com/dracory/str"
-	"github.com/dracory/uid"
 	"github.com/dromara/carbon/v2"
 	"github.com/spf13/cast"
 )
@@ -40,7 +39,7 @@ func NewDiscount() DiscountInterface {
 	code := generateDiscountCode()
 
 	d := (&Discount{}).
-		SetID(uid.HumanUid()).
+		SetID(GenerateShortID()).
 		SetStatus(DISCOUNT_STATUS_DRAFT).
 		SetType(DISCOUNT_TYPE_PERCENT).
 		SetTitle("").

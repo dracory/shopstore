@@ -5,7 +5,6 @@ import (
 
 	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
-	"github.com/dracory/uid"
 	"github.com/dromara/carbon/v2"
 	"github.com/spf13/cast"
 )
@@ -22,7 +21,7 @@ var _ MediaInterface = (*Media)(nil)
 
 func NewMedia() MediaInterface {
 	o := (&Media{}).
-		SetID(uid.HumanUid()).
+		SetID(GenerateShortID()).
 		SetStatus(CATEGORY_STATUS_DRAFT).
 		SetTitle("").       // By default empty, root category
 		SetDescription(""). // By default empty

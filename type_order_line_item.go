@@ -5,7 +5,6 @@ import (
 
 	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
-	"github.com/dracory/uid"
 	"github.com/dromara/carbon/v2"
 	"github.com/spf13/cast"
 )
@@ -22,7 +21,7 @@ var _ OrderLineItemInterface = (*OrderLineItem)(nil)
 
 func NewOrderLineItem() OrderLineItemInterface {
 	o := (&OrderLineItem{}).
-		SetID(uid.HumanUid()).
+		SetID(GenerateShortID()).
 		SetStatus(ORDER_STATUS_PENDING).
 		SetTitle("").
 		SetQuantityInt(1). // By default 1
