@@ -94,7 +94,7 @@ func (store *Store) ProductDelete(ctx context.Context, product ProductInterface)
 		return errors.New("product is nil")
 	}
 
-	return store.ProductDeleteByID(ctx, product.ID())
+	return store.ProductDeleteByID(ctx, product.GetID())
 }
 
 func (store *Store) ProductDeleteByID(ctx context.Context, id string) error {
@@ -210,7 +210,7 @@ func (store *Store) ProductUpdate(ctx context.Context, product ProductInterface)
 		Update(store.productTableName).
 		Prepared(true).
 		Set(dataChanged).
-		Where(goqu.C(COLUMN_ID).Eq(product.ID())).
+		Where(goqu.C(COLUMN_ID).Eq(product.GetID())).
 		ToSQL()
 
 	if errSql != nil {

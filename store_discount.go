@@ -95,7 +95,7 @@ func (store *Store) DiscountDelete(ctx context.Context, discount DiscountInterfa
 		return errors.New("discount is nil")
 	}
 
-	return store.DiscountDeleteByID(ctx, discount.ID())
+	return store.DiscountDeleteByID(ctx, discount.GetID())
 }
 
 func (store *Store) DiscountDeleteByID(ctx context.Context, id string) error {
@@ -237,7 +237,7 @@ func (store *Store) DiscountUpdate(ctx context.Context, discount DiscountInterfa
 		Update(store.discountTableName).
 		Prepared(true).
 		Set(dataChanged).
-		Where(goqu.C("id").Eq(discount.ID())).
+		Where(goqu.C("id").Eq(discount.GetID())).
 		ToSQL()
 
 	if errSql != nil {

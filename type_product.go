@@ -50,38 +50,53 @@ func NewProductFromExistingData(data map[string]string) ProductInterface {
 // == METHODS ==================================================================
 
 func (product *Product) IsActive() bool {
-	return product.Status() == PRODUCT_STATUS_ACTIVE
+	return product.GetStatus() == PRODUCT_STATUS_ACTIVE
 }
 
 func (product *Product) IsDisabled() bool {
-	return product.Status() == PRODUCT_STATUS_DISABLED
+	return product.GetStatus() == PRODUCT_STATUS_DISABLED
 }
 
 func (product *Product) IsDraft() bool {
-	return product.Status() == PRODUCT_STATUS_DRAFT
+	return product.GetStatus() == PRODUCT_STATUS_DRAFT
 }
 
 func (product *Product) IsSoftDeleted() bool {
-	return product.SoftDeletedAtCarbon().Compare("<", carbon.Now(carbon.UTC))
+	return product.GetSoftDeletedAtCarbon().Compare("<", carbon.Now(carbon.UTC))
 }
 
 func (product *Product) IsFree() bool {
-	return product.PriceFloat() <= 0
+	return product.GetPriceFloat() <= 0
+}
+
+// HasStock returns true if the product quantity is greater than 0
+func (product *Product) HasStock() bool {
+	return product.GetQuantityInt() > 0
+}
+
+// IsOutOfStock returns true if the product quantity is less than or equal to 0
+func (product *Product) IsOutOfStock() bool {
+	return product.GetQuantityInt() <= 0
+}
+
+// IsPaid returns true if the product price is greater than 0
+func (product *Product) IsPaid() bool {
+	return product.GetPriceFloat() > 0
 }
 
 func (product *Product) Slug() string {
-	title := product.Title()
+	title := product.GetTitle()
 	return str.Slugify(title, '-')
 }
 
 // == GETTERS & SETTERS ========================================================
 
-func (product *Product) CreatedAt() string {
+func (product *Product) GetCreatedAt() string {
 	return product.Get(COLUMN_CREATED_AT)
 }
 
-func (product *Product) CreatedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(product.CreatedAt(), carbon.UTC)
+func (product *Product) GetCreatedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(product.GetCreatedAt(), carbon.UTC)
 }
 
 func (product *Product) SetCreatedAt(createdAt string) ProductInterface {
@@ -89,7 +104,7 @@ func (product *Product) SetCreatedAt(createdAt string) ProductInterface {
 	return product
 }
 
-func (product *Product) Description() string {
+func (product *Product) GetDescription() string {
 	return product.Get(COLUMN_DESCRIPTION)
 }
 
@@ -98,7 +113,7 @@ func (product *Product) SetDescription(description string) ProductInterface {
 	return product
 }
 
-func (product *Product) ID() string {
+func (product *Product) GetID() string {
 	return product.Get(COLUMN_ID)
 }
 
@@ -107,7 +122,7 @@ func (product *Product) SetID(id string) ProductInterface {
 	return product
 }
 
-func (product *Product) Memo() string {
+func (product *Product) GetMemo() string {
 	return product.Get(COLUMN_MEMO)
 }
 
@@ -116,7 +131,7 @@ func (product *Product) SetMemo(memo string) ProductInterface {
 	return product
 }
 
-func (product *Product) Metas() (map[string]string, error) {
+func (product *Product) GetMetas() (map[string]string, error) {
 	metasStr := product.Get(COLUMN_METAS)
 
 	if metasStr == "" || metasStr == "null" {
@@ -132,8 +147,8 @@ func (product *Product) Metas() (map[string]string, error) {
 	return metasJson, nil
 }
 
-func (product *Product) Meta(name string) string {
-	metas, err := product.Metas()
+func (product *Product) GetMeta(name string) string {
+	metas, err := product.GetMetas()
 
 	if err != nil {
 		return ""
@@ -162,7 +177,7 @@ func (product *Product) SetMetas(metas map[string]string) error {
 }
 
 func (product *Product) MetasUpsert(metas map[string]string) error {
-	currentMetas, err := product.Metas()
+	currentMetas, err := product.GetMetas()
 
 	if err != nil {
 		return err
@@ -176,7 +191,7 @@ func (product *Product) MetasUpsert(metas map[string]string) error {
 }
 
 func (product *Product) MetaRemove(name string) error {
-	metas, err := product.Metas()
+	metas, err := product.GetMetas()
 	if err != nil {
 		return err
 	}
@@ -193,7 +208,7 @@ func (product *Product) MetasRemove(names []string) error {
 	return nil
 }
 
-func (product *Product) Price() string {
+func (product *Product) GetPrice() string {
 	return product.Get(COLUMN_PRICE)
 }
 
@@ -202,7 +217,7 @@ func (product *Product) SetPrice(price string) ProductInterface {
 	return product
 }
 
-func (product *Product) PriceFloat() float64 {
+func (product *Product) GetPriceFloat() float64 {
 	price := cast.ToFloat64(product.Get(COLUMN_PRICE))
 	return price
 }
@@ -212,7 +227,7 @@ func (product *Product) SetPriceFloat(price float64) ProductInterface {
 	return product
 }
 
-func (product *Product) Quantity() string {
+func (product *Product) GetQuantity() string {
 	return product.Get(COLUMN_QUANTITY)
 }
 
@@ -221,8 +236,8 @@ func (product *Product) SetQuantity(quantity string) ProductInterface {
 	return product
 }
 
-func (product *Product) QuantityInt() int64 {
-	quantity := cast.ToInt64(product.Quantity())
+func (product *Product) GetQuantityInt() int64 {
+	quantity := cast.ToInt64(product.GetQuantity())
 	return quantity
 }
 
@@ -231,7 +246,7 @@ func (product *Product) SetQuantityInt(quantity int64) ProductInterface {
 	return product
 }
 
-func (product *Product) ShortDescription() string {
+func (product *Product) GetShortDescription() string {
 	return product.Get(COLUMN_SHORT_DESCRIPTION)
 }
 
@@ -240,12 +255,12 @@ func (product *Product) SetShortDescription(shortDescription string) ProductInte
 	return product
 }
 
-func (product *Product) SoftDeletedAt() string {
+func (product *Product) GetSoftDeletedAt() string {
 	return product.Get(COLUMN_SOFT_DELETED_AT)
 }
 
-func (product *Product) SoftDeletedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(product.SoftDeletedAt(), carbon.UTC)
+func (product *Product) GetSoftDeletedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(product.GetSoftDeletedAt(), carbon.UTC)
 }
 
 func (product *Product) SetSoftDeletedAt(deletedAt string) ProductInterface {
@@ -253,7 +268,7 @@ func (product *Product) SetSoftDeletedAt(deletedAt string) ProductInterface {
 	return product
 }
 
-func (product *Product) Status() string {
+func (product *Product) GetStatus() string {
 	return product.Get(COLUMN_STATUS)
 }
 
@@ -262,7 +277,7 @@ func (product *Product) SetStatus(status string) ProductInterface {
 	return product
 }
 
-func (product *Product) Title() string {
+func (product *Product) GetTitle() string {
 	return product.Get(COLUMN_TITLE)
 }
 
@@ -271,12 +286,12 @@ func (product *Product) SetTitle(title string) ProductInterface {
 	return product
 }
 
-func (product *Product) UpdatedAt() string {
+func (product *Product) GetUpdatedAt() string {
 	return product.Get(COLUMN_UPDATED_AT)
 }
 
-func (product *Product) UpdatedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(product.UpdatedAt(), carbon.UTC)
+func (product *Product) GetUpdatedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(product.GetUpdatedAt(), carbon.UTC)
 }
 
 func (product *Product) SetUpdatedAt(updatedAt string) ProductInterface {

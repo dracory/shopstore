@@ -70,7 +70,7 @@ func TestStoreOderDelete(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	orderFound, err := store.OrderFindByID(ctx, order.ID())
+	orderFound, err := store.OrderFindByID(ctx, order.GetID())
 	if err != nil {
 		t.Fatal("unexpected error:", err)
 	}
@@ -103,13 +103,13 @@ func TestStoreOderDeleteByID(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	err = store.OrderDeleteByID(ctx, order.ID())
+	err = store.OrderDeleteByID(ctx, order.GetID())
 
 	if err != nil {
 		t.Fatal("unexpected error:", err)
 	}
 
-	orderFound, err := store.OrderFindByID(ctx, order.ID())
+	orderFound, err := store.OrderFindByID(ctx, order.GetID())
 	if err != nil {
 		t.Fatal("unexpected error:", err)
 	}
@@ -152,7 +152,7 @@ func TestStoreOrderFindByID(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	orderFound, errFind := store.OrderFindByID(ctx, order.ID())
+	orderFound, errFind := store.OrderFindByID(ctx, order.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -162,36 +162,36 @@ func TestStoreOrderFindByID(t *testing.T) {
 		t.Fatal("Order MUST NOT be nil")
 	}
 
-	if orderFound.CustomerID() != "CUSTOMER01_ID" {
-		t.Fatal("Order user id MUST BE 'CUSTOMER01_ID', found: ", orderFound.CustomerID())
+	if orderFound.GetCustomerID() != "CUSTOMER01_ID" {
+		t.Fatal("Order user id MUST BE 'CUSTOMER01_ID', found: ", orderFound.GetCustomerID())
 	}
 
-	if orderFound.Status() != ORDER_STATUS_PENDING {
-		t.Fatal("Order status MUST BE 'pending', found: ", orderFound.Status())
+	if orderFound.GetStatus() != ORDER_STATUS_PENDING {
+		t.Fatal("Order status MUST BE 'pending', found: ", orderFound.GetStatus())
 	}
 
-	if orderFound.Quantity() != "1" {
-		t.Fatal("Order quantity MUST BE '1', found: ", orderFound.Quantity())
+	if orderFound.GetQuantity() != "1" {
+		t.Fatal("Order quantity MUST BE '1', found: ", orderFound.GetQuantity())
 	}
 
-	if orderFound.Price() != "19.99" {
-		t.Fatal("Order price MUST BE '19.99', found: ", orderFound.Price())
+	if orderFound.GetPrice() != "19.99" {
+		t.Fatal("Order price MUST BE '19.99', found: ", orderFound.GetPrice())
 	}
 
-	if orderFound.Memo() != "test memo" {
-		t.Fatal("Order memo MUST BE 'test memo', found: ", orderFound.Memo())
+	if orderFound.GetMemo() != "test memo" {
+		t.Fatal("Order memo MUST BE 'test memo', found: ", orderFound.GetMemo())
 	}
 
-	if orderFound.Meta("color") != "green" {
-		t.Fatal("Order color meta MUST BE 'green', found: ", orderFound.Meta("color"))
+	if orderFound.GetMeta("color") != "green" {
+		t.Fatal("Order color meta MUST BE 'green', found: ", orderFound.GetMeta("color"))
 	}
 
-	if orderFound.Meta("size") != "xxl" {
-		t.Fatal("Order size meta MUST BE 'xxl', found: ", orderFound.Meta("xxl"))
+	if orderFound.GetMeta("size") != "xxl" {
+		t.Fatal("Order size meta MUST BE 'xxl', found: ", orderFound.GetMeta("xxl"))
 	}
 
-	if !strings.Contains(orderFound.SoftDeletedAt(), sb.MAX_DATETIME) {
-		t.Fatal("Order MUST NOT be soft deleted", orderFound.SoftDeletedAt())
+	if !strings.Contains(orderFound.GetSoftDeletedAt(), sb.MAX_DATETIME) {
+		t.Fatal("Order MUST NOT be soft deleted", orderFound.GetSoftDeletedAt())
 	}
 }
 
@@ -218,17 +218,17 @@ func TestStoreOrderSoftDelete(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	err = store.OrderSoftDeleteByID(ctx, order.ID())
+	err = store.OrderSoftDeleteByID(ctx, order.GetID())
 
 	if err != nil {
 		t.Fatal("unexpected error:", err)
 	}
 
-	if order.SoftDeletedAt() != sb.MAX_DATETIME {
+	if order.GetSoftDeletedAt() != sb.MAX_DATETIME {
 		t.Fatal("Order MUST NOT be soft deleted")
 	}
 
-	orderFound, errFind := store.OrderFindByID(ctx, order.ID())
+	orderFound, errFind := store.OrderFindByID(ctx, order.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -239,7 +239,7 @@ func TestStoreOrderSoftDelete(t *testing.T) {
 	}
 
 	orderFindWithDeleted, errFind := store.OrderList(ctx, NewOrderQuery().
-		SetID(order.ID()).
+		SetID(order.GetID()).
 		SetSoftDeletedIncluded(true))
 
 	if errFind != nil {
@@ -251,8 +251,8 @@ func TestStoreOrderSoftDelete(t *testing.T) {
 		return
 	}
 
-	if strings.Contains(orderFindWithDeleted[0].SoftDeletedAt(), sb.MAX_DATETIME) {
-		t.Fatal("Order MUST be soft deleted", orderFindWithDeleted[0].SoftDeletedAt())
+	if strings.Contains(orderFindWithDeleted[0].GetSoftDeletedAt(), sb.MAX_DATETIME) {
+		t.Fatal("Order MUST be soft deleted", orderFindWithDeleted[0].GetSoftDeletedAt())
 	}
 
 }
@@ -287,7 +287,7 @@ func TestStoreOrderUpdate(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	orderFound, errFind := store.OrderFindByID(ctx, order.ID())
+	orderFound, errFind := store.OrderFindByID(ctx, order.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -297,8 +297,8 @@ func TestStoreOrderUpdate(t *testing.T) {
 		t.Fatal("Order MUST NOT be nil")
 	}
 
-	if orderFound.Memo() != "test memo" {
-		t.Fatal("Order memo MUST BE 'test memo', found: ", orderFound.Memo())
+	if orderFound.GetMemo() != "test memo" {
+		t.Fatal("Order memo MUST BE 'test memo', found: ", orderFound.GetMemo())
 	}
 }
 
@@ -354,7 +354,7 @@ func TestStoreOrderLineItemDelete(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	orderLineItemFound, errFind := store.OrderLineItemFindByID(ctx, orderLineItem.ID())
+	orderLineItemFound, errFind := store.OrderLineItemFindByID(ctx, orderLineItem.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -388,7 +388,7 @@ func TestStoreOrderLineItemFindByID(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	orderLineItemFound, errFind := store.OrderLineItemFindByID(ctx, orderLineItem.ID())
+	orderLineItemFound, errFind := store.OrderLineItemFindByID(ctx, orderLineItem.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -437,7 +437,7 @@ func TestStoreOrderLineItemList(t *testing.T) {
 	}
 
 	orderLineItemsFound, errFind := store.OrderLineItemList(ctx, NewOrderLineItemQuery().
-		SetOrderID(orderLineItem.OrderID()))
+		SetOrderID(orderLineItem.GetOrderID()))
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -471,12 +471,12 @@ func TestStoreOrderLineItemSoftDeleteByID(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	err = store.OrderLineItemSoftDeleteByID(ctx, orderLineItem.ID())
+	err = store.OrderLineItemSoftDeleteByID(ctx, orderLineItem.GetID())
 	if err != nil {
 		t.Fatal("unexpected error:", err)
 	}
 
-	orderLineItemFound, errFind := store.OrderLineItemFindByID(ctx, orderLineItem.ID())
+	orderLineItemFound, errFind := store.OrderLineItemFindByID(ctx, orderLineItem.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -487,7 +487,7 @@ func TestStoreOrderLineItemSoftDeleteByID(t *testing.T) {
 	}
 
 	orderLineItems, errFind := store.OrderLineItemList(ctx, NewOrderLineItemQuery().
-		SetOrderID(orderLineItem.OrderID()).
+		SetOrderID(orderLineItem.GetOrderID()).
 		SetSoftDeletedIncluded(true))
 
 	if errFind != nil {

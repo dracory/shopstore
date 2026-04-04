@@ -43,29 +43,39 @@ func NewCategoryFromExistingData(data map[string]string) CategoryInterface {
 // == METHODS ==================================================================
 
 func (category *Category) IsActive() bool {
-	return category.Status() == CATEGORY_STATUS_ACTIVE
+	return category.GetStatus() == CATEGORY_STATUS_ACTIVE
 }
 
 func (category *Category) IsDraft() bool {
-	return category.Status() == CATEGORY_STATUS_DRAFT
+	return category.GetStatus() == CATEGORY_STATUS_DRAFT
 }
 
 func (category *Category) IsInactive() bool {
-	return category.Status() == CATEGORY_STATUS_INACTIVE
+	return category.GetStatus() == CATEGORY_STATUS_INACTIVE
 }
 
 func (category *Category) IsSoftDeleted() bool {
-	return category.SoftDeletedAt() != sb.MAX_DATETIME
+	return category.GetSoftDeletedAt() != sb.MAX_DATETIME
+}
+
+// IsRoot returns true if the category has no parent (parent_id is empty)
+func (category *Category) IsRoot() bool {
+	return category.GetParentID() == ""
+}
+
+// IsChild returns true if the category has a parent (parent_id is not empty)
+func (category *Category) IsChild() bool {
+	return category.GetParentID() != ""
 }
 
 // == GETTERS & SETTERS ========================================================
 
-func (category *Category) CreatedAt() string {
+func (category *Category) GetCreatedAt() string {
 	return category.Get(COLUMN_CREATED_AT)
 }
 
-func (category *Category) CreatedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(category.CreatedAt(), carbon.UTC)
+func (category *Category) GetCreatedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(category.GetCreatedAt(), carbon.UTC)
 }
 
 func (category *Category) SetCreatedAt(createdAt string) CategoryInterface {
@@ -73,7 +83,7 @@ func (category *Category) SetCreatedAt(createdAt string) CategoryInterface {
 	return category
 }
 
-func (category *Category) Description() string {
+func (category *Category) GetDescription() string {
 	return category.Get(COLUMN_DESCRIPTION)
 }
 
@@ -82,7 +92,7 @@ func (category *Category) SetDescription(description string) CategoryInterface {
 	return category
 }
 
-func (category *Category) ID() string {
+func (category *Category) GetID() string {
 	return category.Get(COLUMN_ID)
 }
 
@@ -91,7 +101,7 @@ func (category *Category) SetID(id string) CategoryInterface {
 	return category
 }
 
-func (category *Category) Memo() string {
+func (category *Category) GetMemo() string {
 	return category.Get(COLUMN_MEMO)
 }
 
@@ -100,7 +110,7 @@ func (category *Category) SetMemo(memo string) CategoryInterface {
 	return category
 }
 
-func (category *Category) Metas() (map[string]string, error) {
+func (category *Category) GetMetas() (map[string]string, error) {
 	metasStr := category.Get(COLUMN_METAS)
 
 	if metasStr == "" {
@@ -120,8 +130,8 @@ func (category *Category) Metas() (map[string]string, error) {
 	return metasJson, nil
 }
 
-func (category *Category) Meta(name string) string {
-	metas, err := category.Metas()
+func (category *Category) GetMeta(name string) string {
+	metas, err := category.GetMetas()
 
 	if err != nil {
 		return ""
@@ -150,7 +160,7 @@ func (category *Category) SetMetas(metas map[string]string) error {
 }
 
 func (category *Category) MetasUpsert(metas map[string]string) error {
-	currentMetas, err := category.Metas()
+	currentMetas, err := category.GetMetas()
 
 	if err != nil {
 		return err
@@ -164,7 +174,7 @@ func (category *Category) MetasUpsert(metas map[string]string) error {
 }
 
 func (category *Category) MetaRemove(name string) error {
-	metas, err := category.Metas()
+	metas, err := category.GetMetas()
 	if err != nil {
 		return err
 	}
@@ -181,7 +191,7 @@ func (category *Category) MetasRemove(names []string) error {
 	return nil
 }
 
-func (category *Category) ParentID() string {
+func (category *Category) GetParentID() string {
 	return category.Get(COLUMN_PARENT_ID)
 }
 
@@ -190,7 +200,7 @@ func (category *Category) SetParentID(parentID string) CategoryInterface {
 	return category
 }
 
-func (category *Category) SoftDeletedAt() string {
+func (category *Category) GetSoftDeletedAt() string {
 	return category.Get(COLUMN_SOFT_DELETED_AT)
 }
 
@@ -199,11 +209,11 @@ func (category *Category) SetSoftDeletedAt(softDeletedAt string) CategoryInterfa
 	return category
 }
 
-func (category *Category) SoftDeletedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(category.SoftDeletedAt(), carbon.UTC)
+func (category *Category) GetSoftDeletedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(category.GetSoftDeletedAt(), carbon.UTC)
 }
 
-func (category *Category) Status() string {
+func (category *Category) GetStatus() string {
 	return category.Get(COLUMN_STATUS)
 }
 
@@ -212,7 +222,7 @@ func (category *Category) SetStatus(status string) CategoryInterface {
 	return category
 }
 
-func (category *Category) Title() string {
+func (category *Category) GetTitle() string {
 	return category.Get(COLUMN_TITLE)
 }
 
@@ -221,12 +231,12 @@ func (category *Category) SetTitle(title string) CategoryInterface {
 	return category
 }
 
-func (category *Category) UpdatedAt() string {
+func (category *Category) GetUpdatedAt() string {
 	return category.Get(COLUMN_UPDATED_AT)
 }
 
-func (category *Category) UpdatedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(category.UpdatedAt(), carbon.UTC)
+func (category *Category) GetUpdatedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(category.GetUpdatedAt(), carbon.UTC)
 }
 
 func (category *Category) SetUpdatedAt(updatedAt string) CategoryInterface {

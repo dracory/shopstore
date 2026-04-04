@@ -92,7 +92,7 @@ func (store *Store) CategoryDelete(ctx context.Context, category CategoryInterfa
 		return errors.New("category is nil")
 	}
 
-	return store.CategoryDeleteByID(ctx, category.ID())
+	return store.CategoryDeleteByID(ctx, category.GetID())
 }
 
 func (store *Store) CategoryDeleteByID(ctx context.Context, id string) error {
@@ -228,7 +228,7 @@ func (store *Store) CategoryUpdate(ctx context.Context, category CategoryInterfa
 		Update(store.categoryTableName).
 		Prepared(true).
 		Set(dataChanged).
-		Where(goqu.C("id").Eq(category.ID())).
+		Where(goqu.C("id").Eq(category.GetID())).
 		ToSQL()
 
 	if errSql != nil {

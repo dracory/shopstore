@@ -91,7 +91,7 @@ func (store *Store) MediaDelete(ctx context.Context, media MediaInterface) error
 		return errors.New("media is nil")
 	}
 
-	return store.MediaDeleteByID(ctx, media.ID())
+	return store.MediaDeleteByID(ctx, media.GetID())
 }
 
 func (store *Store) MediaDeleteByID(ctx context.Context, id string) error {
@@ -227,7 +227,7 @@ func (store *Store) MediaUpdate(ctx context.Context, media MediaInterface) (err 
 		Update(store.mediaTableName).
 		Prepared(true).
 		Set(dataChanged).
-		Where(goqu.C(COLUMN_ID).Eq(media.ID())).
+		Where(goqu.C(COLUMN_ID).Eq(media.GetID())).
 		ToSQL()
 
 	if errSql != nil {

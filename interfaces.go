@@ -15,43 +15,53 @@ type CategoryInterface interface {
 
 	// Setters and Getters
 
-	CreatedAt() string
-	CreatedAtCarbon() *carbon.Carbon
+	GetCreatedAt() string
+	GetCreatedAtCarbon() *carbon.Carbon
 	SetCreatedAt(createdAt string) CategoryInterface
 
-	Description() string
+	GetDescription() string
 	SetDescription(description string) CategoryInterface
 
-	ID() string
+	GetID() string
 	SetID(id string) CategoryInterface
 
-	Memo() string
+	GetMemo() string
 	SetMemo(memo string) CategoryInterface
 
-	Metas() (map[string]string, error)
-	Meta(name string) string
+	GetMetas() (map[string]string, error)
+	GetMeta(name string) string
 	SetMeta(name string, value string) error
 	SetMetas(metas map[string]string) error
 	MetasUpsert(metas map[string]string) error
 	MetaRemove(name string) error
 	MetasRemove(names []string) error
 
-	ParentID() string
+	GetParentID() string
 	SetParentID(parentID string) CategoryInterface
 
-	Status() string
+	GetStatus() string
 	SetStatus(status string) CategoryInterface
 
-	Title() string
+	GetTitle() string
 	SetTitle(title string) CategoryInterface
 
-	SoftDeletedAt() string
-	SoftDeletedAtCarbon() *carbon.Carbon
+	GetSoftDeletedAt() string
+	GetSoftDeletedAtCarbon() *carbon.Carbon
 	SetSoftDeletedAt(deletedAt string) CategoryInterface
 
-	UpdatedAt() string
-	UpdatedAtCarbon() *carbon.Carbon
+	GetUpdatedAt() string
+	GetUpdatedAtCarbon() *carbon.Carbon
 	SetUpdatedAt(updatedAt string) CategoryInterface
+
+	// Status predicates
+	IsActive() bool
+	IsDraft() bool
+	IsInactive() bool
+	IsSoftDeleted() bool
+
+	// Hierarchy predicates
+	IsRoot() bool
+	IsChild() bool
 }
 
 type DiscountInterface interface {
@@ -61,58 +71,68 @@ type DiscountInterface interface {
 
 	// Setters and Getters
 
-	Amount() float64
+	GetAmount() float64
 	SetAmount(amount float64) DiscountInterface
 
-	Code() string
+	GetCode() string
 	SetCode(code string) DiscountInterface
 
-	CreatedAt() string
-	CreatedAtCarbon() *carbon.Carbon
+	GetCreatedAt() string
+	GetCreatedAtCarbon() *carbon.Carbon
 	SetCreatedAt(createdAt string) DiscountInterface
 
-	Description() string
+	GetDescription() string
 	SetDescription(description string) DiscountInterface
 
-	EndsAt() string
-	EndsAtCarbon() *carbon.Carbon
+	GetEndsAt() string
+	GetEndsAtCarbon() *carbon.Carbon
 	SetEndsAt(endsAt string) DiscountInterface
 
-	ID() string
+	GetID() string
 	SetID(id string) DiscountInterface
 
-	Memo() string
+	GetMemo() string
 	SetMemo(memo string) DiscountInterface
 
-	Meta(name string) string
-	MetaRemove(name string) error
+	GetMeta(name string) string
+	GetMetas() (map[string]string, error)
 	SetMeta(name string, value string) error
-
-	Metas() (map[string]string, error)
-	MetasRemove(names []string) error
-	MetasUpsert(metas map[string]string) error
 	SetMetas(metas map[string]string) error
+	MetasUpsert(metas map[string]string) error
+	MetaRemove(name string) error
+	MetasRemove(names []string) error
 
-	SoftDeletedAt() string
-	SoftDeletedAtCarbon() *carbon.Carbon
+	GetSoftDeletedAt() string
+	GetSoftDeletedAtCarbon() *carbon.Carbon
 	SetSoftDeletedAt(deletedAt string) DiscountInterface
 
-	StartsAt() string
-	StartsAtCarbon() *carbon.Carbon
+	GetStartsAt() string
+	GetStartsAtCarbon() *carbon.Carbon
 	SetStartsAt(startsAt string) DiscountInterface
 
-	Status() string
+	GetStatus() string
 	SetStatus(status string) DiscountInterface
 
-	Title() string
+	GetTitle() string
 	SetTitle(title string) DiscountInterface
 
-	Type() string
+	GetType() string
 	SetType(type_ string) DiscountInterface
 
-	UpdatedAt() string
-	UpdatedAtCarbon() *carbon.Carbon
+	GetUpdatedAt() string
+	GetUpdatedAtCarbon() *carbon.Carbon
 	SetUpdatedAt(updatedAt string) DiscountInterface
+
+	// Status predicates
+	IsActive() bool
+	IsDraft() bool
+	IsInactive() bool
+
+	// Temporal predicates
+	IsStarted() bool
+	IsEnded() bool
+	IsExpired() bool
+	IsValidNow() bool
 }
 
 type MediaInterface interface {
@@ -122,52 +142,62 @@ type MediaInterface interface {
 
 	// Setters and Getters
 
-	CreatedAt() string
-	CreatedAtCarbon() *carbon.Carbon
+	GetCreatedAt() string
+	GetCreatedAtCarbon() *carbon.Carbon
 	SetCreatedAt(createdAt string) MediaInterface
 
-	Description() string
+	GetDescription() string
 	SetDescription(description string) MediaInterface
 
-	EntityID() string
+	GetEntityID() string
 	SetEntityID(entityID string) MediaInterface
 
-	ID() string
+	GetID() string
 	SetID(id string) MediaInterface
 
-	Memo() string
+	GetMemo() string
 	SetMemo(memo string) MediaInterface
 
-	Metas() (map[string]string, error)
-	Meta(name string) string
+	GetMetas() (map[string]string, error)
+	GetMeta(name string) string
 	SetMeta(name string, value string) error
 	SetMetas(metas map[string]string) error
 	MetasUpsert(metas map[string]string) error
 	MetaRemove(name string) error
 	MetasRemove(names []string) error
 
-	Sequence() int
+	GetSequence() int
 	SetSequence(sequence int) MediaInterface
 
-	SoftDeletedAt() string
-	SoftDeletedAtCarbon() *carbon.Carbon
+	GetSoftDeletedAt() string
+	GetSoftDeletedAtCarbon() *carbon.Carbon
 	SetSoftDeletedAt(softDeletedAt string) MediaInterface
 
-	Status() string
+	GetStatus() string
 	SetStatus(status string) MediaInterface
 
-	Title() string
+	GetTitle() string
 	SetTitle(title string) MediaInterface
 
-	Type() string
+	GetType() string
 	SetType(type_ string) MediaInterface
 
-	URL() string
+	GetURL() string
 	SetURL(url string) MediaInterface
 
-	UpdatedAt() string
-	UpdatedAtCarbon() *carbon.Carbon
+	GetUpdatedAt() string
+	GetUpdatedAtCarbon() *carbon.Carbon
 	SetUpdatedAt(updatedAt string) MediaInterface
+
+	// Status predicates
+	IsActive() bool
+	IsDraft() bool
+	IsInactive() bool
+	IsSoftDeleted() bool
+
+	// Type predicates
+	IsImage() bool
+	IsVideo() bool
 }
 
 type OrderInterface interface {
@@ -191,46 +221,46 @@ type OrderInterface interface {
 	IsShipped() bool
 
 	// Setters and Getters
-	CreatedAt() string
-	CreatedAtCarbon() *carbon.Carbon
+	GetCreatedAt() string
+	GetCreatedAtCarbon() *carbon.Carbon
 	SetCreatedAt(createdAt string) OrderInterface
 
-	CustomerID() string
+	GetCustomerID() string
 	SetCustomerID(customerID string) OrderInterface
 
-	ID() string
+	GetID() string
 	SetID(id string) OrderInterface
 
-	Memo() string
+	GetMemo() string
 	SetMemo(memo string) OrderInterface
 
-	Meta(name string) string
+	GetMeta(name string) string
 	SetMeta(name string, value string) error
-	Metas() (map[string]string, error)
+	GetMetas() (map[string]string, error)
 	SetMetas(metas map[string]string) error
 	MetasUpsert(metas map[string]string) error
 	MetaRemove(name string) error
 	MetasRemove(names []string) error
 
-	Price() string
+	GetPrice() string
 	SetPrice(price string) OrderInterface
-	PriceFloat() float64
+	GetPriceFloat() float64
 	SetPriceFloat(price float64) OrderInterface
 
-	Quantity() string
+	GetQuantity() string
 	SetQuantity(quantity string) OrderInterface
-	QuantityInt() int64
+	GetQuantityInt() int64
 	SetQuantityInt(quantity int64) OrderInterface
 
-	SoftDeletedAt() string
-	SoftDeletedAtCarbon() *carbon.Carbon
+	GetSoftDeletedAt() string
+	GetSoftDeletedAtCarbon() *carbon.Carbon
 	SetSoftDeletedAt(deletedAt string) OrderInterface
 
-	Status() string
+	GetStatus() string
 	SetStatus(status string) OrderInterface
 
-	UpdatedAt() string
-	UpdatedAtCarbon() *carbon.Carbon
+	GetUpdatedAt() string
+	GetUpdatedAtCarbon() *carbon.Carbon
 	SetUpdatedAt(updatedAt string) OrderInterface
 }
 
@@ -239,55 +269,63 @@ type OrderLineItemInterface interface {
 	DataChanged() map[string]string
 	MarkAsNotDirty()
 
-	CreatedAt() string
-	CreatedAtCarbon() *carbon.Carbon
+	GetCreatedAt() string
+	GetCreatedAtCarbon() *carbon.Carbon
 	SetCreatedAt(createdAt string) OrderLineItemInterface
 
-	ID() string
+	GetID() string
 	SetID(id string) OrderLineItemInterface
 
-	Memo() string
+	GetMemo() string
 	SetMemo(memo string) OrderLineItemInterface
 
-	Metas() (map[string]string, error)
+	GetMetas() (map[string]string, error)
 	SetMetas(metas map[string]string) error
-	Meta(name string) string
+	GetMeta(name string) string
 	SetMeta(name string, value string) error
 	MetasUpsert(metas map[string]string) error
 	MetaRemove(name string) error
 	MetasRemove(names []string) error
 
-	OrderID() string
+	GetOrderID() string
 	SetOrderID(orderID string) OrderLineItemInterface
 
-	Price() string
+	GetPrice() string
 	SetPrice(price string) OrderLineItemInterface
-
-	PriceFloat() float64
+	GetPriceFloat() float64
 	SetPriceFloat(price float64) OrderLineItemInterface
 
-	ProductID() string
+	GetProductID() string
 	SetProductID(productID string) OrderLineItemInterface
 
-	Quantity() string
+	GetQuantity() string
 	SetQuantity(quantity string) OrderLineItemInterface
-
-	QuantityInt() int64
+	GetQuantityInt() int64
 	SetQuantityInt(quantity int64) OrderLineItemInterface
 
-	SoftDeletedAt() string
-	SoftDeletedAtCarbon() *carbon.Carbon
+	GetSoftDeletedAt() string
+	GetSoftDeletedAtCarbon() *carbon.Carbon
 	SetSoftDeletedAt(deletedAt string) OrderLineItemInterface
 
-	Status() string
+	GetStatus() string
 	SetStatus(status string) OrderLineItemInterface
 
-	Title() string
+	GetTitle() string
 	SetTitle(title string) OrderLineItemInterface
 
-	UpdatedAt() string
-	UpdatedAtCarbon() *carbon.Carbon
+	GetUpdatedAt() string
+	GetUpdatedAtCarbon() *carbon.Carbon
 	SetUpdatedAt(updatedAt string) OrderLineItemInterface
+
+	// Status predicates
+	IsActive() bool
+	IsCancelled() bool
+	IsCompleted() bool
+	IsDraft() bool
+
+	// Business logic predicates
+	HasQuantity() bool
+	IsFree() bool
 }
 
 type ProductInterface interface {
@@ -296,7 +334,6 @@ type ProductInterface interface {
 	MarkAsNotDirty()
 
 	// Methods
-
 	IsActive() bool
 	IsDisabled() bool
 	IsDraft() bool
@@ -304,55 +341,62 @@ type ProductInterface interface {
 	IsFree() bool
 	Slug() string
 
+	// Stock predicates
+	HasStock() bool
+	IsOutOfStock() bool
+
+	// Price predicates
+	IsPaid() bool
+
 	// Setters and Getters
 
-	CreatedAt() string
-	CreatedAtCarbon() *carbon.Carbon
+	GetCreatedAt() string
+	GetCreatedAtCarbon() *carbon.Carbon
 	SetCreatedAt(createdAt string) ProductInterface
 
-	Description() string
+	GetDescription() string
 	SetDescription(description string) ProductInterface
 
-	ID() string
+	GetID() string
 	SetID(id string) ProductInterface
 
-	Memo() string
+	GetMemo() string
 	SetMemo(memo string) ProductInterface
 
-	Meta(name string) string
+	GetMeta(name string) string
 	SetMeta(name string, value string) error
 
-	Metas() (map[string]string, error)
+	GetMetas() (map[string]string, error)
 	SetMetas(metas map[string]string) error
 	MetasUpsert(metas map[string]string) error
 	MetaRemove(name string) error
 	MetasRemove(names []string) error
 
-	Price() string
+	GetPrice() string
 	SetPrice(price string) ProductInterface
-	PriceFloat() float64
+	GetPriceFloat() float64
 	SetPriceFloat(price float64) ProductInterface
 
-	Quantity() string
+	GetQuantity() string
 	SetQuantity(quantity string) ProductInterface
-	QuantityInt() int64
+	GetQuantityInt() int64
 	SetQuantityInt(quantity int64) ProductInterface
 
-	SoftDeletedAt() string
-	SoftDeletedAtCarbon() *carbon.Carbon
+	GetSoftDeletedAt() string
+	GetSoftDeletedAtCarbon() *carbon.Carbon
 	SetSoftDeletedAt(deletedAt string) ProductInterface
 
-	ShortDescription() string
+	GetShortDescription() string
 	SetShortDescription(shortDescription string) ProductInterface
 
-	Status() string
+	GetStatus() string
 	SetStatus(status string) ProductInterface
 
-	Title() string
+	GetTitle() string
 	SetTitle(title string) ProductInterface
 
-	UpdatedAt() string
-	UpdatedAtCarbon() *carbon.Carbon
+	GetUpdatedAt() string
+	GetUpdatedAtCarbon() *carbon.Carbon
 	SetUpdatedAt(updatedAt string) ProductInterface
 }
 

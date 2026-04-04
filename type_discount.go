@@ -78,7 +78,7 @@ func NewDiscountFromExistingData(data map[string]string) DiscountInterface {
 
 // == SETTERS AND GETTERS ====================================================
 
-func (d *Discount) Amount() float64 {
+func (d *Discount) GetAmount() float64 {
 	amountStr := d.Get(COLUMN_AMOUNT)
 	amount := cast.ToFloat64(amountStr)
 
@@ -91,7 +91,7 @@ func (d *Discount) SetAmount(amount float64) DiscountInterface {
 	return d
 }
 
-func (d *Discount) Code() string {
+func (d *Discount) GetCode() string {
 	return d.Get(COLUMN_CODE)
 }
 
@@ -100,12 +100,12 @@ func (d *Discount) SetCode(code string) DiscountInterface {
 	return d
 }
 
-func (d *Discount) CreatedAt() string {
+func (d *Discount) GetCreatedAt() string {
 	return d.Get(COLUMN_CREATED_AT)
 }
 
-func (d *Discount) CreatedAtCarbon() *carbon.Carbon {
-	createdAt := d.CreatedAt()
+func (d *Discount) GetCreatedAtCarbon() *carbon.Carbon {
+	createdAt := d.GetCreatedAt()
 	return carbon.Parse(createdAt)
 }
 
@@ -114,7 +114,7 @@ func (d *Discount) SetCreatedAt(createdAt string) DiscountInterface {
 	return d
 }
 
-func (d *Discount) Description() string {
+func (d *Discount) GetDescription() string {
 	return d.Get(COLUMN_DESCRIPTION)
 }
 
@@ -123,12 +123,12 @@ func (d *Discount) SetDescription(description string) DiscountInterface {
 	return d
 }
 
-func (d *Discount) EndsAt() string {
+func (d *Discount) GetEndsAt() string {
 	return d.Get(COLUMN_ENDS_AT)
 }
 
-func (d *Discount) EndsAtCarbon() *carbon.Carbon {
-	endsAt := d.EndsAt()
+func (d *Discount) GetEndsAtCarbon() *carbon.Carbon {
+	endsAt := d.GetEndsAt()
 	return carbon.Parse(endsAt)
 }
 
@@ -137,18 +137,18 @@ func (d *Discount) SetEndsAt(endsAt string) DiscountInterface {
 	return d
 }
 
-// ID returns the ID of the exam
-func (o *Discount) ID() string {
-	return o.Get(COLUMN_ID)
+// GetID returns the ID of the discount
+func (d *Discount) GetID() string {
+	return d.Get(COLUMN_ID)
 }
 
-// SetID sets the ID of the exam
-func (o *Discount) SetID(id string) DiscountInterface {
-	o.Set(COLUMN_ID, id)
-	return o
+// SetID sets the ID of the discount
+func (d *Discount) SetID(id string) DiscountInterface {
+	d.Set(COLUMN_ID, id)
+	return d
 }
 
-func (d *Discount) Memo() string {
+func (d *Discount) GetMemo() string {
 	return d.Get(COLUMN_MEMO)
 }
 
@@ -157,8 +157,8 @@ func (d *Discount) SetMemo(memo string) DiscountInterface {
 	return d
 }
 
-func (d *Discount) Meta(name string) string {
-	metas, err := d.Metas()
+func (d *Discount) GetMeta(name string) string {
+	metas, err := d.GetMetas()
 
 	if err != nil {
 		return ""
@@ -172,7 +172,7 @@ func (d *Discount) Meta(name string) string {
 }
 
 func (d *Discount) MetaRemove(name string) error {
-	metas, err := d.Metas()
+	metas, err := d.GetMetas()
 
 	if err != nil {
 		return err
@@ -187,7 +187,7 @@ func (d *Discount) SetMeta(name string, value string) error {
 	return d.MetasUpsert(map[string]string{name: value})
 }
 
-func (d *Discount) Metas() (map[string]string, error) {
+func (d *Discount) GetMetas() (map[string]string, error) {
 	metasStr := d.Get(COLUMN_METAS)
 
 	if metasStr == "" {
@@ -220,7 +220,7 @@ func (d *Discount) MetasRemove(names []string) error {
 }
 
 func (d *Discount) MetasUpsert(metas map[string]string) error {
-	currentMetas, err := d.Metas()
+	currentMetas, err := d.GetMetas()
 
 	if err != nil {
 		return err
@@ -247,12 +247,12 @@ func (d *Discount) SetMetas(metas map[string]string) error {
 	return nil
 }
 
-func (d *Discount) SoftDeletedAt() string {
+func (d *Discount) GetSoftDeletedAt() string {
 	return d.Get(COLUMN_SOFT_DELETED_AT)
 }
 
-func (d *Discount) SoftDeletedAtCarbon() *carbon.Carbon {
-	deletedAt := d.SoftDeletedAt()
+func (d *Discount) GetSoftDeletedAtCarbon() *carbon.Carbon {
+	deletedAt := d.GetSoftDeletedAt()
 	return carbon.Parse(deletedAt)
 }
 
@@ -261,12 +261,12 @@ func (d *Discount) SetSoftDeletedAt(deletedAt string) DiscountInterface {
 	return d
 }
 
-func (d *Discount) StartsAt() string {
+func (d *Discount) GetStartsAt() string {
 	return d.Get(COLUMN_STARTS_AT)
 }
 
-func (d *Discount) StartsAtCarbon() *carbon.Carbon {
-	startsAt := d.StartsAt()
+func (d *Discount) GetStartsAtCarbon() *carbon.Carbon {
+	startsAt := d.GetStartsAt()
 	return carbon.Parse(startsAt)
 }
 
@@ -275,7 +275,7 @@ func (d *Discount) SetStartsAt(startsAt string) DiscountInterface {
 	return d
 }
 
-func (d *Discount) Status() string {
+func (d *Discount) GetStatus() string {
 	return d.Get(COLUMN_STATUS)
 }
 
@@ -284,7 +284,7 @@ func (d *Discount) SetStatus(status string) DiscountInterface {
 	return d
 }
 
-func (d *Discount) Title() string {
+func (d *Discount) GetTitle() string {
 	return d.Get(COLUMN_TITLE)
 }
 
@@ -293,7 +293,7 @@ func (d *Discount) SetTitle(title string) DiscountInterface {
 	return d
 }
 
-func (d *Discount) Type() string {
+func (d *Discount) GetType() string {
 	return d.Get(COLUMN_TYPE)
 }
 
@@ -302,16 +302,59 @@ func (d *Discount) SetType(type_ string) DiscountInterface {
 	return d
 }
 
-func (d *Discount) UpdatedAt() string {
+func (d *Discount) GetUpdatedAt() string {
 	return d.Get(COLUMN_UPDATED_AT)
 }
 
-func (d *Discount) UpdatedAtCarbon() *carbon.Carbon {
-	updatedAt := d.UpdatedAt()
+func (d *Discount) GetUpdatedAtCarbon() *carbon.Carbon {
+	updatedAt := d.GetUpdatedAt()
 	return carbon.Parse(updatedAt)
 }
 
 func (d *Discount) SetUpdatedAt(updatedAt string) DiscountInterface {
 	d.Set(COLUMN_UPDATED_AT, updatedAt)
 	return d
+}
+
+// IsActive returns true if the discount status is active
+func (d *Discount) IsActive() bool {
+	return d.GetStatus() == DISCOUNT_STATUS_ACTIVE
+}
+
+// IsDraft returns true if the discount status is draft
+func (d *Discount) IsDraft() bool {
+	return d.GetStatus() == DISCOUNT_STATUS_DRAFT
+}
+
+// IsInactive returns true if the discount status is inactive
+func (d *Discount) IsInactive() bool {
+	return d.GetStatus() == DISCOUNT_STATUS_INACTIVE
+}
+
+// IsStarted returns true if the discount has started (starts_at <= now)
+func (d *Discount) IsStarted() bool {
+	startsAt := d.GetStartsAtCarbon()
+	if startsAt == nil {
+		return false
+	}
+	return !startsAt.IsFuture()
+}
+
+// IsEnded returns true if the discount has ended (ends_at <= now)
+func (d *Discount) IsEnded() bool {
+	endsAt := d.GetEndsAtCarbon()
+	if endsAt == nil {
+		return false
+	}
+	return endsAt.IsPast()
+}
+
+// IsExpired is an alias for IsEnded
+func (d *Discount) IsExpired() bool {
+	return d.IsEnded()
+}
+
+// IsValidNow returns true if the discount is active, started, and not ended
+func (d *Discount) IsValidNow() bool {
+	return d.IsActive() && d.IsStarted() && !d.IsEnded()
 }

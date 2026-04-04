@@ -13,39 +13,39 @@ func TestNewCategoryDefaults(t *testing.T) {
 		t.Fatal("NewCategory returned nil")
 	}
 
-	if category.Status() != CATEGORY_STATUS_DRAFT {
-		t.Fatalf("expected status %q, got %q", CATEGORY_STATUS_DRAFT, category.Status())
+	if category.GetStatus() != CATEGORY_STATUS_DRAFT {
+		t.Fatalf("expected status %q, got %q", CATEGORY_STATUS_DRAFT, category.GetStatus())
 	}
 
-	if category.ParentID() != "" {
-		t.Fatalf("expected empty parent ID, got %q", category.ParentID())
+	if category.GetParentID() != "" {
+		t.Fatalf("expected empty parent ID, got %q", category.GetParentID())
 	}
 
-	if category.Description() != "" {
-		t.Fatalf("expected empty description, got %q", category.Description())
+	if category.GetDescription() != "" {
+		t.Fatalf("expected empty description, got %q", category.GetDescription())
 	}
 
-	if category.Memo() != "" {
-		t.Fatalf("expected empty memo, got %q", category.Memo())
+	if category.GetMemo() != "" {
+		t.Fatalf("expected empty memo, got %q", category.GetMemo())
 	}
 
-	if category.ID() == "" {
+	if category.GetID() == "" {
 		t.Fatal("expected generated ID to be non-empty")
 	}
 
-	if category.CreatedAt() == "" {
+	if category.GetCreatedAt() == "" {
 		t.Fatal("expected created at to be set")
 	}
 
-	if category.UpdatedAt() == "" {
+	if category.GetUpdatedAt() == "" {
 		t.Fatal("expected updated at to be set")
 	}
 
-	if category.SoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected soft deleted at to be %q, got %q", sb.MAX_DATETIME, category.SoftDeletedAt())
+	if category.GetSoftDeletedAt() != sb.MAX_DATETIME {
+		t.Fatalf("expected soft deleted at to be %q, got %q", sb.MAX_DATETIME, category.GetSoftDeletedAt())
 	}
 
-	metas, err := category.Metas()
+	metas, err := category.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -54,8 +54,8 @@ func TestNewCategoryDefaults(t *testing.T) {
 		t.Fatalf("expected no metas by default, got %v", metas)
 	}
 
-	if category.Meta("missing") != "" {
-		t.Fatal("expected Meta for missing key to return empty string")
+	if category.GetMeta("missing") != "" {
+		t.Fatal("expected GetMeta for missing key to return empty string")
 	}
 }
 
@@ -66,7 +66,7 @@ func TestCategorySetMetasRoundTrip(t *testing.T) {
 		t.Fatalf("unexpected error setting metas: %v", err)
 	}
 
-	metas, err := category.Metas()
+	metas, err := category.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -75,8 +75,8 @@ func TestCategorySetMetasRoundTrip(t *testing.T) {
 		t.Fatalf("expected meta to be %q, got %q", "beta", got)
 	}
 
-	if got := category.Meta("alpha"); got != "beta" {
-		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	if got := category.GetMeta("alpha"); got != "beta" {
+		t.Fatalf("expected GetMeta helper to return %q, got %q", "beta", got)
 	}
 }
 
@@ -91,7 +91,7 @@ func TestCategoryUpsertMetasMergesValues(t *testing.T) {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
-	metas, err := category.Metas()
+	metas, err := category.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -110,12 +110,12 @@ func TestCategoryMetaHandlesInvalidJSON(t *testing.T) {
 		COLUMN_METAS: "{invalid",
 	})
 
-	if _, err := category.Metas(); err == nil {
+	if _, err := category.GetMetas(); err == nil {
 		t.Fatal("expected error when parsing invalid metas JSON")
 	}
 
-	if got := category.Meta("anything"); got != "" {
-		t.Fatalf("expected Meta to return empty string on invalid JSON, got %q", got)
+	if got := category.GetMeta("anything"); got != "" {
+		t.Fatalf("expected GetMeta to return empty string on invalid JSON, got %q", got)
 	}
 }
 
@@ -124,7 +124,7 @@ func TestCategoryMetasHandlesNullJSON(t *testing.T) {
 		COLUMN_METAS: "null",
 	})
 
-	metas, err := category.Metas()
+	metas, err := category.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -137,8 +137,8 @@ func TestCategoryMetasHandlesNullJSON(t *testing.T) {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
-	if got := category.Meta("alpha"); got != "beta" {
-		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	if got := category.GetMeta("alpha"); got != "beta" {
+		t.Fatalf("expected GetMeta helper to return %q, got %q", "beta", got)
 	}
 }
 
@@ -237,37 +237,37 @@ func TestCategoryCarbonHelpers(t *testing.T) {
 	if _, ok := category.SetCreatedAt(createdAt).(*Category); !ok {
 		t.Fatal("expected SetCreatedAt to return *Category")
 	}
-	if category.CreatedAt() != createdAt {
-		t.Fatalf("expected CreatedAt to be %q, got %q", createdAt, category.CreatedAt())
+	if category.GetCreatedAt() != createdAt {
+		t.Fatalf("expected CreatedAt to be %q, got %q", createdAt, category.GetCreatedAt())
 	}
-	createdCarbon := category.CreatedAtCarbon()
+	createdCarbon := category.GetCreatedAtCarbon()
 	if createdCarbon == nil {
-		t.Fatal("expected CreatedAtCarbon to return value")
+		t.Fatal("expected GetCreatedAtCarbon to return value")
 	}
 	if createdCarbon.ToDateTimeString(carbon.UTC) != createdAt {
-		t.Fatalf("expected CreatedAtCarbon to match input, got %q", createdCarbon.ToDateTimeString(carbon.UTC))
+		t.Fatalf("expected GetCreatedAtCarbon to match input, got %q", createdCarbon.ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := category.SetUpdatedAt(updatedAt).(*Category); !ok {
 		t.Fatal("expected SetUpdatedAt to return *Category")
 	}
-	updatedCarbon := category.UpdatedAtCarbon()
+	updatedCarbon := category.GetUpdatedAtCarbon()
 	if updatedCarbon == nil {
-		t.Fatal("expected UpdatedAtCarbon to return value")
+		t.Fatal("expected GetUpdatedAtCarbon to return value")
 	}
 	if updatedCarbon.ToDateTimeString(carbon.UTC) != updatedAt {
-		t.Fatalf("expected UpdatedAtCarbon to match input, got %q", updatedCarbon.ToDateTimeString(carbon.UTC))
+		t.Fatalf("expected GetUpdatedAtCarbon to match input, got %q", updatedCarbon.ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := category.SetSoftDeletedAt(softDeletedAt).(*Category); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Category")
 	}
-	softDeletedCarbon := category.SoftDeletedAtCarbon()
+	softDeletedCarbon := category.GetSoftDeletedAtCarbon()
 	if softDeletedCarbon == nil {
-		t.Fatal("expected SoftDeletedAtCarbon to return value")
+		t.Fatal("expected GetSoftDeletedAtCarbon to return value")
 	}
 	if softDeletedCarbon.ToDateTimeString(carbon.UTC) != softDeletedAt {
-		t.Fatalf("expected SoftDeletedAtCarbon to match input, got %q", softDeletedCarbon.ToDateTimeString(carbon.UTC))
+		t.Fatalf("expected GetSoftDeletedAtCarbon to match input, got %q", softDeletedCarbon.ToDateTimeString(carbon.UTC))
 	}
 }
 
@@ -277,36 +277,36 @@ func TestCategorySetterChainingAndGetters(t *testing.T) {
 	if _, ok := category.SetDescription("desc").(*Category); !ok {
 		t.Fatal("expected SetDescription to return *Category")
 	}
-	if category.Description() != "desc" {
-		t.Fatalf("expected Description getter to return %q, got %q", "desc", category.Description())
+	if category.GetDescription() != "desc" {
+		t.Fatalf("expected GetDescription getter to return %q, got %q", "desc", category.GetDescription())
 	}
 
 	if _, ok := category.SetMemo("memo").(*Category); !ok {
 		t.Fatal("expected SetMemo to return *Category")
 	}
-	if category.Memo() != "memo" {
-		t.Fatalf("expected Memo getter to return %q, got %q", "memo", category.Memo())
+	if category.GetMemo() != "memo" {
+		t.Fatalf("expected GetMemo getter to return %q, got %q", "memo", category.GetMemo())
 	}
 
 	if _, ok := category.SetParentID("parent").(*Category); !ok {
 		t.Fatal("expected SetParentID to return *Category")
 	}
-	if category.ParentID() != "parent" {
-		t.Fatalf("expected ParentID getter to return %q, got %q", "parent", category.ParentID())
+	if category.GetParentID() != "parent" {
+		t.Fatalf("expected GetParentID getter to return %q, got %q", "parent", category.GetParentID())
 	}
 
 	if _, ok := category.SetTitle("title").(*Category); !ok {
 		t.Fatal("expected SetTitle to return *Category")
 	}
-	if category.Title() != "title" {
-		t.Fatalf("expected Title getter to return %q, got %q", "title", category.Title())
+	if category.GetTitle() != "title" {
+		t.Fatalf("expected GetTitle getter to return %q, got %q", "title", category.GetTitle())
 	}
 
 	if _, ok := category.SetStatus(CATEGORY_STATUS_ACTIVE).(*Category); !ok {
 		t.Fatal("expected SetStatus to return *Category")
 	}
-	if category.Status() != CATEGORY_STATUS_ACTIVE {
-		t.Fatalf("expected Status getter to return %q, got %q", CATEGORY_STATUS_ACTIVE, category.Status())
+	if category.GetStatus() != CATEGORY_STATUS_ACTIVE {
+		t.Fatalf("expected GetStatus getter to return %q, got %q", CATEGORY_STATUS_ACTIVE, category.GetStatus())
 	}
 }
 
@@ -317,8 +317,8 @@ func TestCategorySetMetaConvenience(t *testing.T) {
 		t.Fatalf("unexpected error from SetMeta: %v", err)
 	}
 
-	if got := category.Meta("key"); got != "value" {
-		t.Fatalf("expected Meta to return %q, got %q", "value", got)
+	if got := category.GetMeta("key"); got != "value" {
+		t.Fatalf("expected GetMeta to return %q, got %q", "value", got)
 	}
 }
 
@@ -333,12 +333,12 @@ func TestCategoryMetaRemove(t *testing.T) {
 		t.Fatalf("unexpected error removing meta: %v", err)
 	}
 
-	if category.Meta("key1") != "" {
-		t.Fatalf("expected key1 to be removed, got %q", category.Meta("key1"))
+	if category.GetMeta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", category.GetMeta("key1"))
 	}
 
-	if category.Meta("key2") != "value2" {
-		t.Fatalf("expected key2 to still exist, got %q", category.Meta("key2"))
+	if category.GetMeta("key2") != "value2" {
+		t.Fatalf("expected key2 to still exist, got %q", category.GetMeta("key2"))
 	}
 }
 
@@ -353,8 +353,8 @@ func TestCategoryMetaRemoveNonExistent(t *testing.T) {
 		t.Fatalf("unexpected error removing non-existent meta: %v", err)
 	}
 
-	if category.Meta("key1") != "value1" {
-		t.Fatalf("expected key1 to still exist, got %q", category.Meta("key1"))
+	if category.GetMeta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", category.GetMeta("key1"))
 	}
 }
 
@@ -369,16 +369,16 @@ func TestCategoryMetasRemove(t *testing.T) {
 		t.Fatalf("unexpected error removing metas: %v", err)
 	}
 
-	if category.Meta("key1") != "" {
-		t.Fatalf("expected key1 to be removed, got %q", category.Meta("key1"))
+	if category.GetMeta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", category.GetMeta("key1"))
 	}
 
-	if category.Meta("key2") != "" {
-		t.Fatalf("expected key2 to be removed, got %q", category.Meta("key2"))
+	if category.GetMeta("key2") != "" {
+		t.Fatalf("expected key2 to be removed, got %q", category.GetMeta("key2"))
 	}
 
-	if category.Meta("key3") != "value3" {
-		t.Fatalf("expected key3 to still exist, got %q", category.Meta("key3"))
+	if category.GetMeta("key3") != "value3" {
+		t.Fatalf("expected key3 to still exist, got %q", category.GetMeta("key3"))
 	}
 }
 
@@ -393,8 +393,8 @@ func TestCategoryMetasRemoveEmptySlice(t *testing.T) {
 		t.Fatalf("unexpected error removing empty slice: %v", err)
 	}
 
-	if category.Meta("key1") != "value1" {
-		t.Fatalf("expected key1 to still exist, got %q", category.Meta("key1"))
+	if category.GetMeta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", category.GetMeta("key1"))
 	}
 }
 

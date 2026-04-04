@@ -44,12 +44,12 @@ func NewOrderLineItemFromExistingData(data map[string]string) OrderLineItemInter
 
 // == METHODS ==================================================================
 
-func (o *OrderLineItem) CreatedAt() string {
+func (o *OrderLineItem) GetCreatedAt() string {
 	return o.Get(COLUMN_CREATED_AT)
 }
 
-func (o *OrderLineItem) CreatedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(o.CreatedAt(), carbon.UTC)
+func (o *OrderLineItem) GetCreatedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(o.GetCreatedAt(), carbon.UTC)
 }
 
 func (o *OrderLineItem) SetCreatedAt(createdAt string) OrderLineItemInterface {
@@ -57,7 +57,7 @@ func (o *OrderLineItem) SetCreatedAt(createdAt string) OrderLineItemInterface {
 	return o
 }
 
-func (o *OrderLineItem) ID() string {
+func (o *OrderLineItem) GetID() string {
 	return o.Get(COLUMN_ID)
 }
 
@@ -66,7 +66,7 @@ func (o *OrderLineItem) SetID(id string) OrderLineItemInterface {
 	return o
 }
 
-func (o *OrderLineItem) Memo() string {
+func (o *OrderLineItem) GetMemo() string {
 	return o.Get(COLUMN_MEMO)
 }
 
@@ -75,7 +75,7 @@ func (o *OrderLineItem) SetMemo(memo string) OrderLineItemInterface {
 	return o
 }
 
-func (o *OrderLineItem) Metas() (map[string]string, error) {
+func (o *OrderLineItem) GetMetas() (map[string]string, error) {
 	metasStr := o.Get(COLUMN_METAS)
 
 	if metasStr == "" {
@@ -95,8 +95,8 @@ func (o *OrderLineItem) Metas() (map[string]string, error) {
 	return metasJson, nil
 }
 
-func (o *OrderLineItem) Meta(name string) string {
-	metas, err := o.Metas()
+func (o *OrderLineItem) GetMeta(name string) string {
+	metas, err := o.GetMetas()
 
 	if err != nil {
 		return ""
@@ -125,7 +125,7 @@ func (o *OrderLineItem) SetMetas(metas map[string]string) error {
 }
 
 func (o *OrderLineItem) MetasUpsert(metas map[string]string) error {
-	currentMetas, err := o.Metas()
+	currentMetas, err := o.GetMetas()
 
 	if err != nil {
 		return err
@@ -139,7 +139,7 @@ func (o *OrderLineItem) MetasUpsert(metas map[string]string) error {
 }
 
 func (o *OrderLineItem) MetaRemove(name string) error {
-	metas, err := o.Metas()
+	metas, err := o.GetMetas()
 	if err != nil {
 		return err
 	}
@@ -156,7 +156,7 @@ func (o *OrderLineItem) MetasRemove(names []string) error {
 	return nil
 }
 
-func (o *OrderLineItem) OrderID() string {
+func (o *OrderLineItem) GetOrderID() string {
 	return o.Get(COLUMN_ORDER_ID)
 }
 
@@ -165,7 +165,7 @@ func (o *OrderLineItem) SetOrderID(orderID string) OrderLineItemInterface {
 	return o
 }
 
-func (o *OrderLineItem) Price() string {
+func (o *OrderLineItem) GetPrice() string {
 	return o.Get(COLUMN_PRICE)
 }
 
@@ -174,8 +174,8 @@ func (o *OrderLineItem) SetPrice(price string) OrderLineItemInterface {
 	return o
 }
 
-func (o *OrderLineItem) PriceFloat() float64 {
-	price := o.Price()
+func (o *OrderLineItem) GetPriceFloat() float64 {
+	price := o.GetPrice()
 	priceFloat := cast.ToFloat64(price)
 	return priceFloat
 }
@@ -185,7 +185,7 @@ func (o *OrderLineItem) SetPriceFloat(price float64) OrderLineItemInterface {
 	return o
 }
 
-func (o *OrderLineItem) ProductID() string {
+func (o *OrderLineItem) GetProductID() string {
 	return o.Get(COLUMN_PRODUCT_ID)
 }
 
@@ -194,7 +194,7 @@ func (o *OrderLineItem) SetProductID(productID string) OrderLineItemInterface {
 	return o
 }
 
-func (o *OrderLineItem) Quantity() string {
+func (o *OrderLineItem) GetQuantity() string {
 	return o.Get(COLUMN_QUANTITY)
 }
 
@@ -203,8 +203,8 @@ func (o *OrderLineItem) SetQuantity(quantity string) OrderLineItemInterface {
 	return o
 }
 
-func (o *OrderLineItem) QuantityInt() int64 {
-	quantity := o.Quantity()
+func (o *OrderLineItem) GetQuantityInt() int64 {
+	quantity := o.GetQuantity()
 	quantityInt := cast.ToInt64(quantity)
 	return quantityInt
 }
@@ -214,12 +214,12 @@ func (o *OrderLineItem) SetQuantityInt(quantity int64) OrderLineItemInterface {
 	return o
 }
 
-func (o *OrderLineItem) SoftDeletedAt() string {
+func (o *OrderLineItem) GetSoftDeletedAt() string {
 	return o.Get(COLUMN_SOFT_DELETED_AT)
 }
 
-func (o *OrderLineItem) SoftDeletedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(o.SoftDeletedAt(), carbon.UTC)
+func (o *OrderLineItem) GetSoftDeletedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(o.GetSoftDeletedAt(), carbon.UTC)
 }
 
 func (o *OrderLineItem) SetSoftDeletedAt(deletedAt string) OrderLineItemInterface {
@@ -227,7 +227,7 @@ func (o *OrderLineItem) SetSoftDeletedAt(deletedAt string) OrderLineItemInterfac
 	return o
 }
 
-func (o *OrderLineItem) Status() string {
+func (o *OrderLineItem) GetStatus() string {
 	return o.Get(COLUMN_STATUS)
 }
 
@@ -236,7 +236,7 @@ func (o *OrderLineItem) SetStatus(status string) OrderLineItemInterface {
 	return o
 }
 
-func (o *OrderLineItem) Title() string {
+func (o *OrderLineItem) GetTitle() string {
 	return o.Get(COLUMN_TITLE)
 }
 
@@ -245,17 +245,54 @@ func (o *OrderLineItem) SetTitle(title string) OrderLineItemInterface {
 	return o
 }
 
-func (o *OrderLineItem) UpdatedAt() string {
+func (o *OrderLineItem) GetUpdatedAt() string {
 	return o.Get(COLUMN_UPDATED_AT)
 }
 
-func (o *OrderLineItem) UpdatedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(o.UpdatedAt(), carbon.UTC)
+func (o *OrderLineItem) GetUpdatedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(o.GetUpdatedAt(), carbon.UTC)
 }
 
 func (o *OrderLineItem) SetUpdatedAt(updatedAt string) OrderLineItemInterface {
 	o.Set(COLUMN_UPDATED_AT, updatedAt)
 	return o
+}
+
+// IsActive returns true if the order line item is in an active state
+func (o *OrderLineItem) IsActive() bool {
+	status := o.GetStatus()
+	return status == ORDER_STATUS_AWAITING_FULFILLMENT ||
+		status == ORDER_STATUS_AWAITING_PAYMENT ||
+		status == ORDER_STATUS_AWAITING_PICKUP ||
+		status == ORDER_STATUS_AWAITING_SHIPMENT ||
+		status == ORDER_STATUS_PENDING ||
+		status == ORDER_STATUS_PARTIALLY_SHIPPED ||
+		status == ORDER_STATUS_SHIPPED
+}
+
+// IsCancelled returns true if the order line item is cancelled
+func (o *OrderLineItem) IsCancelled() bool {
+	return o.GetStatus() == ORDER_STATUS_CANCELLED
+}
+
+// IsCompleted returns true if the order line item is completed
+func (o *OrderLineItem) IsCompleted() bool {
+	return o.GetStatus() == ORDER_STATUS_COMPLETED
+}
+
+// IsDraft returns true if the order line item is in draft/pending state
+func (o *OrderLineItem) IsDraft() bool {
+	return o.GetStatus() == ORDER_STATUS_PENDING
+}
+
+// HasQuantity returns true if the quantity is greater than 0
+func (o *OrderLineItem) HasQuantity() bool {
+	return o.GetQuantityInt() > 0
+}
+
+// IsFree returns true if the price is less than or equal to 0
+func (o *OrderLineItem) IsFree() bool {
+	return o.GetPriceFloat() <= 0
 }
 
 // type LineItem struct {

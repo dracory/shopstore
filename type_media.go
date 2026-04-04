@@ -2,6 +2,7 @@ package shopstore
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
@@ -43,56 +44,56 @@ func NewMediaFromExistingData(data map[string]string) MediaInterface {
 
 // == SETTESR AND GETTERS =====================================================
 
-func (o *Media) CreatedAt() string {
-	return o.Get(COLUMN_CREATED_AT)
+func (m *Media) GetCreatedAt() string {
+	return m.Get(COLUMN_CREATED_AT)
 }
 
-func (o *Media) CreatedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(o.CreatedAt(), carbon.UTC)
+func (m *Media) GetCreatedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(m.GetCreatedAt(), carbon.UTC)
 }
 
-func (o *Media) SetCreatedAt(createdAt string) MediaInterface {
-	o.Set(COLUMN_CREATED_AT, createdAt)
-	return o
+func (m *Media) SetCreatedAt(createdAt string) MediaInterface {
+	m.Set(COLUMN_CREATED_AT, createdAt)
+	return m
 }
 
-func (o *Media) Description() string {
-	return o.Get(COLUMN_DESCRIPTION)
+func (m *Media) GetDescription() string {
+	return m.Get(COLUMN_DESCRIPTION)
 }
 
-func (o *Media) SetDescription(description string) MediaInterface {
-	o.Set(COLUMN_DESCRIPTION, description)
-	return o
+func (m *Media) SetDescription(description string) MediaInterface {
+	m.Set(COLUMN_DESCRIPTION, description)
+	return m
 }
 
-func (o *Media) EntityID() string {
-	return o.Get(COLUMN_ENTITY_ID)
+func (m *Media) GetEntityID() string {
+	return m.Get(COLUMN_ENTITY_ID)
 }
 
-func (o *Media) SetEntityID(entityID string) MediaInterface {
-	o.Set(COLUMN_ENTITY_ID, entityID)
-	return o
+func (m *Media) SetEntityID(entityID string) MediaInterface {
+	m.Set(COLUMN_ENTITY_ID, entityID)
+	return m
 }
 
-func (o *Media) ID() string {
-	return o.Get(COLUMN_ID)
+func (m *Media) GetID() string {
+	return m.Get(COLUMN_ID)
 }
 
-func (o *Media) SetID(id string) MediaInterface {
-	o.Set(COLUMN_ID, id)
-	return o
+func (m *Media) SetID(id string) MediaInterface {
+	m.Set(COLUMN_ID, id)
+	return m
 }
 
-func (o *Media) Memo() string {
-	return o.Get(COLUMN_MEMO)
+func (m *Media) GetMemo() string {
+	return m.Get(COLUMN_MEMO)
 }
 
-func (o *Media) SetMemo(memo string) MediaInterface {
-	o.Set(COLUMN_MEMO, memo)
-	return o
+func (m *Media) SetMemo(memo string) MediaInterface {
+	m.Set(COLUMN_MEMO, memo)
+	return m
 }
 
-func (m *Media) Metas() (map[string]string, error) {
+func (m *Media) GetMetas() (map[string]string, error) {
 	metasStr := m.Get(COLUMN_METAS)
 
 	if metasStr == "" {
@@ -112,8 +113,8 @@ func (m *Media) Metas() (map[string]string, error) {
 	return metasJson, nil
 }
 
-func (m *Media) Meta(name string) string {
-	metas, err := m.Metas()
+func (m *Media) GetMeta(name string) string {
+	metas, err := m.GetMetas()
 
 	if err != nil {
 		return ""
@@ -142,7 +143,7 @@ func (m *Media) SetMetas(metas map[string]string) error {
 }
 
 func (m *Media) MetasUpsert(metas map[string]string) error {
-	currentMetas, err := m.Metas()
+	currentMetas, err := m.GetMetas()
 
 	if err != nil {
 		return err
@@ -156,7 +157,7 @@ func (m *Media) MetasUpsert(metas map[string]string) error {
 }
 
 func (m *Media) MetaRemove(name string) error {
-	metas, err := m.Metas()
+	metas, err := m.GetMetas()
 	if err != nil {
 		return err
 	}
@@ -173,73 +174,103 @@ func (m *Media) MetasRemove(names []string) error {
 	return nil
 }
 
-func (o *Media) Sequence() int {
-	return cast.ToInt(o.Get(COLUMN_SEQUENCE))
+func (m *Media) GetSequence() int {
+	return cast.ToInt(m.Get(COLUMN_SEQUENCE))
 }
 
-func (o *Media) SetSequence(sequence int) MediaInterface {
-	o.Set(COLUMN_SEQUENCE, cast.ToString(sequence))
-	return o
+func (m *Media) SetSequence(sequence int) MediaInterface {
+	m.Set(COLUMN_SEQUENCE, cast.ToString(sequence))
+	return m
 }
 
-func (o *Media) Status() string {
-	return o.Get(COLUMN_STATUS)
+func (m *Media) GetStatus() string {
+	return m.Get(COLUMN_STATUS)
 }
 
-func (o *Media) SetStatus(status string) MediaInterface {
-	o.Set(COLUMN_STATUS, status)
-	return o
+func (m *Media) SetStatus(status string) MediaInterface {
+	m.Set(COLUMN_STATUS, status)
+	return m
 }
 
-func (o *Media) SoftDeletedAt() string {
-	return o.Get(COLUMN_SOFT_DELETED_AT)
+func (m *Media) GetSoftDeletedAt() string {
+	return m.Get(COLUMN_SOFT_DELETED_AT)
 }
 
-func (o *Media) SoftDeletedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(o.SoftDeletedAt(), carbon.UTC)
+func (m *Media) GetSoftDeletedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(m.GetSoftDeletedAt(), carbon.UTC)
 }
 
-func (o *Media) SetSoftDeletedAt(softDeletedAt string) MediaInterface {
-	o.Set(COLUMN_SOFT_DELETED_AT, softDeletedAt)
-	return o
+func (m *Media) SetSoftDeletedAt(softDeletedAt string) MediaInterface {
+	m.Set(COLUMN_SOFT_DELETED_AT, softDeletedAt)
+	return m
 }
 
-func (o *Media) Title() string {
-	return o.Get(COLUMN_TITLE)
+func (m *Media) GetTitle() string {
+	return m.Get(COLUMN_TITLE)
 }
 
-func (o *Media) SetTitle(title string) MediaInterface {
-	o.Set(COLUMN_TITLE, title)
-	return o
+func (m *Media) SetTitle(title string) MediaInterface {
+	m.Set(COLUMN_TITLE, title)
+	return m
 }
 
-func (o *Media) Type() string {
-	return o.Get(COLUMN_MEDIA_TYPE)
+func (m *Media) GetType() string {
+	return m.Get(COLUMN_MEDIA_TYPE)
 }
 
-func (o *Media) SetType(type_ string) MediaInterface {
-	o.Set(COLUMN_MEDIA_TYPE, type_)
-	return o
+func (m *Media) SetType(type_ string) MediaInterface {
+	m.Set(COLUMN_MEDIA_TYPE, type_)
+	return m
 }
 
-func (o *Media) UpdatedAt() string {
-	return o.Get(COLUMN_UPDATED_AT)
+func (m *Media) GetUpdatedAt() string {
+	return m.Get(COLUMN_UPDATED_AT)
 }
 
-func (o *Media) UpdatedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(o.UpdatedAt(), carbon.UTC)
+func (m *Media) GetUpdatedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(m.GetUpdatedAt(), carbon.UTC)
 }
 
-func (o *Media) SetUpdatedAt(updatedAt string) MediaInterface {
-	o.Set(COLUMN_UPDATED_AT, updatedAt)
-	return o
+func (m *Media) SetUpdatedAt(updatedAt string) MediaInterface {
+	m.Set(COLUMN_UPDATED_AT, updatedAt)
+	return m
 }
 
-func (o *Media) URL() string {
-	return o.Get(COLUMN_MEDIA_URL)
+func (m *Media) GetURL() string {
+	return m.Get(COLUMN_MEDIA_URL)
 }
 
-func (o *Media) SetURL(url string) MediaInterface {
-	o.Set(COLUMN_MEDIA_URL, url)
-	return o
+func (m *Media) SetURL(url string) MediaInterface {
+	m.Set(COLUMN_MEDIA_URL, url)
+	return m
+}
+
+// IsActive returns true if the media status is active
+func (m *Media) IsActive() bool {
+	return m.GetStatus() == MEDIA_STATUS_ACTIVE
+}
+
+// IsDraft returns true if the media status is draft
+func (m *Media) IsDraft() bool {
+	return m.GetStatus() == MEDIA_STATUS_DRAFT
+}
+
+// IsInactive returns true if the media status is inactive
+func (m *Media) IsInactive() bool {
+	return m.GetStatus() == MEDIA_STATUS_INACTIVE
+}
+
+// IsSoftDeleted returns true if the media is soft deleted
+func (m *Media) IsSoftDeleted() bool {
+	return m.GetSoftDeletedAt() != sb.MAX_DATETIME
+}
+
+// IsImage returns true if the media type starts with "image/"
+func (m *Media) IsImage() bool {
+	return strings.HasPrefix(m.GetType(), "image/")
+}
+
+// IsVideo returns true if the media type starts with "video/"
+func (m *Media) IsVideo() bool {
+	return strings.HasPrefix(m.GetType(), "video/")
 }

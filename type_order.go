@@ -44,61 +44,61 @@ func NewOrderFromExistingData(data map[string]string) OrderInterface {
 // == METHODS ==================================================================
 
 func (order *Order) IsAwaitingFulfillment() bool {
-	return order.Status() == ORDER_STATUS_AWAITING_FULFILLMENT
+	return order.GetStatus() == ORDER_STATUS_AWAITING_FULFILLMENT
 }
 
 func (order *Order) IsAwaitingPayment() bool {
-	return order.Status() == ORDER_STATUS_AWAITING_PAYMENT
+	return order.GetStatus() == ORDER_STATUS_AWAITING_PAYMENT
 }
 
 func (order *Order) IsAwaitingPickup() bool {
-	return order.Status() == ORDER_STATUS_AWAITING_PICKUP
+	return order.GetStatus() == ORDER_STATUS_AWAITING_PICKUP
 }
 
 func (order *Order) IsAwaitingShipment() bool {
-	return order.Status() == ORDER_STATUS_AWAITING_SHIPMENT
+	return order.GetStatus() == ORDER_STATUS_AWAITING_SHIPMENT
 }
 
 func (order *Order) IsCancelled() bool {
-	return order.Status() == ORDER_STATUS_CANCELLED
+	return order.GetStatus() == ORDER_STATUS_CANCELLED
 }
 
 func (order *Order) IsCompleted() bool {
-	return order.Status() == ORDER_STATUS_COMPLETED
+	return order.GetStatus() == ORDER_STATUS_COMPLETED
 }
 
 func (order *Order) IsDeclined() bool {
-	return order.Status() == ORDER_STATUS_DECLINED
+	return order.GetStatus() == ORDER_STATUS_DECLINED
 }
 
 func (order *Order) IsDisputed() bool {
-	return order.Status() == ORDER_STATUS_DISPUTED
+	return order.GetStatus() == ORDER_STATUS_DISPUTED
 }
 
 func (order *Order) IsManualVerificationRequired() bool {
-	return order.Status() == ORDER_STATUS_MANUAL_VERIFICATION_REQUIRED
+	return order.GetStatus() == ORDER_STATUS_MANUAL_VERIFICATION_REQUIRED
 }
 
 func (order *Order) IsPending() bool {
-	return order.Status() == ORDER_STATUS_PENDING
+	return order.GetStatus() == ORDER_STATUS_PENDING
 }
 
 func (order *Order) IsRefunded() bool {
-	return order.Status() == ORDER_STATUS_REFUNDED
+	return order.GetStatus() == ORDER_STATUS_REFUNDED
 }
 
 func (order *Order) IsShipped() bool {
-	return order.Status() == ORDER_STATUS_SHIPPED
+	return order.GetStatus() == ORDER_STATUS_SHIPPED
 }
 
 // == GETTERS & SETTERS ========================================================
 
-func (order *Order) CreatedAt() string {
+func (order *Order) GetCreatedAt() string {
 	return order.Get(COLUMN_CREATED_AT)
 }
 
-func (order *Order) CreatedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(order.CreatedAt(), carbon.UTC)
+func (order *Order) GetCreatedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(order.GetCreatedAt(), carbon.UTC)
 }
 
 func (order *Order) SetCreatedAt(createdAt string) OrderInterface {
@@ -106,7 +106,7 @@ func (order *Order) SetCreatedAt(createdAt string) OrderInterface {
 	return order
 }
 
-func (order *Order) CustomerID() string {
+func (order *Order) GetCustomerID() string {
 	return order.Get(COLUMN_CUSTOMER_ID)
 }
 
@@ -115,7 +115,7 @@ func (order *Order) SetCustomerID(id string) OrderInterface {
 	return order
 }
 
-func (order *Order) ID() string {
+func (order *Order) GetID() string {
 	return order.Get(COLUMN_ID)
 }
 
@@ -124,7 +124,7 @@ func (order *Order) SetID(id string) OrderInterface {
 	return order
 }
 
-func (order *Order) Memo() string {
+func (order *Order) GetMemo() string {
 	return order.Get(COLUMN_MEMO)
 }
 
@@ -133,7 +133,25 @@ func (order *Order) SetMemo(memo string) OrderInterface {
 	return order
 }
 
-func (order *Order) Metas() (map[string]string, error) {
+func (order *Order) GetMeta(name string) string {
+	metas, err := order.GetMetas()
+
+	if err != nil {
+		return ""
+	}
+
+	if value, exists := metas[name]; exists {
+		return value
+	}
+
+	return ""
+}
+
+func (order *Order) SetMeta(name string, value string) error {
+	return order.MetasUpsert(map[string]string{name: value})
+}
+
+func (order *Order) GetMetas() (map[string]string, error) {
 	metasStr := order.Get(COLUMN_METAS)
 
 	if metasStr == "" {
@@ -153,24 +171,6 @@ func (order *Order) Metas() (map[string]string, error) {
 	return metasJson, nil
 }
 
-func (order *Order) Meta(name string) string {
-	metas, err := order.Metas()
-
-	if err != nil {
-		return ""
-	}
-
-	if value, exists := metas[name]; exists {
-		return value
-	}
-
-	return ""
-}
-
-func (order *Order) SetMeta(name string, value string) error {
-	return order.MetasUpsert(map[string]string{name: value})
-}
-
 // SetMetas stores metas as json string
 // Warning: it overwrites any existing metas
 func (order *Order) SetMetas(metas map[string]string) error {
@@ -183,7 +183,7 @@ func (order *Order) SetMetas(metas map[string]string) error {
 }
 
 func (order *Order) MetasUpsert(metas map[string]string) error {
-	currentMetas, err := order.Metas()
+	currentMetas, err := order.GetMetas()
 
 	if err != nil {
 		return err
@@ -197,7 +197,7 @@ func (order *Order) MetasUpsert(metas map[string]string) error {
 }
 
 func (order *Order) MetaRemove(name string) error {
-	metas, err := order.Metas()
+	metas, err := order.GetMetas()
 	if err != nil {
 		return err
 	}
@@ -214,7 +214,7 @@ func (order *Order) MetasRemove(names []string) error {
 	return nil
 }
 
-func (order *Order) Status() string {
+func (order *Order) GetStatus() string {
 	return order.Get(COLUMN_STATUS)
 }
 
@@ -223,7 +223,7 @@ func (order *Order) SetStatus(status string) OrderInterface {
 	return order
 }
 
-func (order *Order) Price() string {
+func (order *Order) GetPrice() string {
 	return order.Get(COLUMN_PRICE)
 }
 
@@ -232,7 +232,7 @@ func (order *Order) SetPrice(price string) OrderInterface {
 	return order
 }
 
-func (order *Order) PriceFloat() float64 {
+func (order *Order) GetPriceFloat() float64 {
 	price := cast.ToFloat64(order.Get(COLUMN_PRICE))
 	return price
 }
@@ -242,7 +242,7 @@ func (order *Order) SetPriceFloat(price float64) OrderInterface {
 	return order
 }
 
-func (order *Order) Quantity() string {
+func (order *Order) GetQuantity() string {
 	return order.Get(COLUMN_QUANTITY)
 }
 
@@ -251,8 +251,8 @@ func (order *Order) SetQuantity(quantity string) OrderInterface {
 	return order
 }
 
-func (order *Order) QuantityInt() int64 {
-	quantity := cast.ToInt64(order.Quantity())
+func (order *Order) GetQuantityInt() int64 {
+	quantity := cast.ToInt64(order.GetQuantity())
 	return quantity
 }
 
@@ -261,12 +261,12 @@ func (order *Order) SetQuantityInt(quantity int64) OrderInterface {
 	return order
 }
 
-func (order *Order) SoftDeletedAt() string {
+func (order *Order) GetSoftDeletedAt() string {
 	return order.Get(COLUMN_SOFT_DELETED_AT)
 }
 
-func (order *Order) SoftDeletedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(order.SoftDeletedAt(), carbon.UTC)
+func (order *Order) GetSoftDeletedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(order.GetSoftDeletedAt(), carbon.UTC)
 }
 
 func (order *Order) SetSoftDeletedAt(deletedAt string) OrderInterface {
@@ -274,12 +274,12 @@ func (order *Order) SetSoftDeletedAt(deletedAt string) OrderInterface {
 	return order
 }
 
-func (order *Order) UpdatedAt() string {
+func (order *Order) GetUpdatedAt() string {
 	return order.Get(COLUMN_UPDATED_AT)
 }
 
-func (order *Order) UpdatedAtCarbon() *carbon.Carbon {
-	return carbon.Parse(order.UpdatedAt(), carbon.UTC)
+func (order *Order) GetUpdatedAtCarbon() *carbon.Carbon {
+	return carbon.Parse(order.GetUpdatedAt(), carbon.UTC)
 }
 
 func (order *Order) SetUpdatedAt(updatedAt string) OrderInterface {

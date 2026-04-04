@@ -92,7 +92,7 @@ func (store *Store) OrderDelete(ctx context.Context, order OrderInterface) error
 		return errors.New("order is nil")
 	}
 
-	return store.OrderDeleteByID(ctx, order.ID())
+	return store.OrderDeleteByID(ctx, order.GetID())
 }
 
 func (store *Store) OrderDeleteByID(ctx context.Context, id string) error {
@@ -208,7 +208,7 @@ func (store *Store) OrderUpdate(ctx context.Context, order OrderInterface) error
 		Update(store.orderTableName).
 		Prepared(true).
 		Set(dataChanged).
-		Where(goqu.C("id").Eq(order.ID())).
+		Where(goqu.C("id").Eq(order.GetID())).
 		ToSQL()
 
 	if errSql != nil {
@@ -396,7 +396,7 @@ func (store *Store) OrderLineItemDeleteByID(ctx context.Context, id string) erro
 }
 
 func (store *Store) OrderLineItemDelete(ctx context.Context, orderLineItem OrderLineItemInterface) error {
-	return store.OrderLineItemDeleteByID(ctx, orderLineItem.ID())
+	return store.OrderLineItemDeleteByID(ctx, orderLineItem.GetID())
 }
 
 func (store *Store) OrderLineItemFindByID(ctx context.Context, id string) (OrderLineItemInterface, error) {
@@ -491,7 +491,7 @@ func (store *Store) OrderLineItemUpdate(ctx context.Context, orderLineItem Order
 		Update(store.orderLineItemTableName).
 		Prepared(true).
 		Set(dataChanged).
-		Where(goqu.C(COLUMN_ID).Eq(orderLineItem.ID())).
+		Where(goqu.C(COLUMN_ID).Eq(orderLineItem.GetID())).
 		ToSQL()
 
 	if errSql != nil {

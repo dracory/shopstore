@@ -13,43 +13,43 @@ func TestNewOrderDefaults(t *testing.T) {
 		t.Fatal("NewOrder returned nil")
 	}
 
-	if order.Status() != ORDER_STATUS_PENDING {
-		t.Fatalf("expected status %q, got %q", ORDER_STATUS_PENDING, order.Status())
+	if order.GetStatus() != ORDER_STATUS_PENDING {
+		t.Fatalf("expected status %q, got %q", ORDER_STATUS_PENDING, order.GetStatus())
 	}
 
-	if order.PriceFloat() != 0 {
-		t.Fatalf("expected default price 0, got %f", order.PriceFloat())
+	if order.GetPriceFloat() != 0 {
+		t.Fatalf("expected default price 0, got %f", order.GetPriceFloat())
 	}
 
-	if order.QuantityInt() != 1 {
-		t.Fatalf("expected default quantity 1, got %d", order.QuantityInt())
+	if order.GetQuantityInt() != 1 {
+		t.Fatalf("expected default quantity 1, got %d", order.GetQuantityInt())
 	}
 
-	if order.Memo() != "" {
-		t.Fatalf("expected empty memo, got %q", order.Memo())
+	if order.GetMemo() != "" {
+		t.Fatalf("expected empty memo, got %q", order.GetMemo())
 	}
 
-	if order.CustomerID() != "" {
-		t.Fatalf("expected empty customer id, got %q", order.CustomerID())
+	if order.GetCustomerID() != "" {
+		t.Fatalf("expected empty customer id, got %q", order.GetCustomerID())
 	}
 
-	if order.ID() == "" {
+	if order.GetID() == "" {
 		t.Fatal("expected generated ID to be non-empty")
 	}
 
-	if order.CreatedAt() == "" {
+	if order.GetCreatedAt() == "" {
 		t.Fatal("expected created at to be set")
 	}
 
-	if order.UpdatedAt() == "" {
+	if order.GetUpdatedAt() == "" {
 		t.Fatal("expected updated at to be set")
 	}
 
-	if order.SoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected soft deleted at %q, got %q", sb.MAX_DATETIME, order.SoftDeletedAt())
+	if order.GetSoftDeletedAt() != sb.MAX_DATETIME {
+		t.Fatalf("expected soft deleted at %q, got %q", sb.MAX_DATETIME, order.GetSoftDeletedAt())
 	}
 
-	metas, err := order.Metas()
+	metas, err := order.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -58,8 +58,8 @@ func TestNewOrderDefaults(t *testing.T) {
 		t.Fatalf("expected no metas by default, got %v", metas)
 	}
 
-	if order.Meta("missing") != "" {
-		t.Fatal("expected Meta for missing key to return empty string")
+	if order.GetMeta("missing") != "" {
+		t.Fatal("expected GetMeta for missing key to return empty string")
 	}
 }
 
@@ -120,25 +120,25 @@ func TestOrderCarbonHelpers(t *testing.T) {
 	if _, ok := order.SetCreatedAt(createdAt).(*Order); !ok {
 		t.Fatal("expected SetCreatedAt to return *Order")
 	}
-	if order.CreatedAt() != createdAt {
-		t.Fatalf("expected CreatedAt to be %q, got %q", createdAt, order.CreatedAt())
+	if order.GetCreatedAt() != createdAt {
+		t.Fatalf("expected CreatedAt to be %q, got %q", createdAt, order.GetCreatedAt())
 	}
-	if order.CreatedAtCarbon().ToDateTimeString(carbon.UTC) != createdAt {
-		t.Fatalf("expected CreatedAtCarbon to match input, got %q", order.CreatedAtCarbon().ToDateTimeString(carbon.UTC))
+	if order.GetCreatedAtCarbon().ToDateTimeString(carbon.UTC) != createdAt {
+		t.Fatalf("expected CreatedAtCarbon to match input, got %q", order.GetCreatedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := order.SetUpdatedAt(updatedAt).(*Order); !ok {
 		t.Fatal("expected SetUpdatedAt to return *Order")
 	}
-	if order.UpdatedAtCarbon().ToDateTimeString(carbon.UTC) != updatedAt {
-		t.Fatalf("expected UpdatedAtCarbon to match input, got %q", order.UpdatedAtCarbon().ToDateTimeString(carbon.UTC))
+	if order.GetUpdatedAtCarbon().ToDateTimeString(carbon.UTC) != updatedAt {
+		t.Fatalf("expected UpdatedAtCarbon to match input, got %q", order.GetUpdatedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := order.SetSoftDeletedAt(softDeletedAt).(*Order); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Order")
 	}
-	if order.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != softDeletedAt {
-		t.Fatalf("expected SoftDeletedAtCarbon to match input, got %q", order.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	if order.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != softDeletedAt {
+		t.Fatalf("expected SoftDeletedAtCarbon to match input, got %q", order.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 }
 
@@ -149,7 +149,7 @@ func TestOrderMetasRoundTrip(t *testing.T) {
 		t.Fatalf("unexpected error setting metas: %v", err)
 	}
 
-	metas, err := order.Metas()
+	metas, err := order.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -158,8 +158,8 @@ func TestOrderMetasRoundTrip(t *testing.T) {
 		t.Fatalf("expected meta to be %q, got %q", "beta", metas["alpha"])
 	}
 
-	if order.Meta("alpha") != "beta" {
-		t.Fatalf("expected Meta helper to return %q, got %q", "beta", order.Meta("alpha"))
+	if order.GetMeta("alpha") != "beta" {
+		t.Fatalf("expected GetMeta helper to return %q, got %q", "beta", order.GetMeta("alpha"))
 	}
 }
 
@@ -174,7 +174,7 @@ func TestOrderMetasUpsertMergesValues(t *testing.T) {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
-	metas, err := order.Metas()
+	metas, err := order.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -193,12 +193,12 @@ func TestOrderMetasInvalidJSON(t *testing.T) {
 		COLUMN_METAS: "{invalid",
 	})
 
-	if _, err := order.Metas(); err == nil {
+	if _, err := order.GetMetas(); err == nil {
 		t.Fatal("expected error when parsing invalid metas JSON")
 	}
 
-	if order.Meta("anything") != "" {
-		t.Fatalf("expected Meta to return empty string on invalid JSON")
+	if order.GetMeta("anything") != "" {
+		t.Fatalf("expected GetMeta to return empty string on invalid JSON")
 	}
 }
 
@@ -207,7 +207,7 @@ func TestOrderMetasHandlesNullJSON(t *testing.T) {
 		COLUMN_METAS: "null",
 	})
 
-	metas, err := order.Metas()
+	metas, err := order.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -220,8 +220,8 @@ func TestOrderMetasHandlesNullJSON(t *testing.T) {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
-	if got := order.Meta("alpha"); got != "beta" {
-		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	if got := order.GetMeta("alpha"); got != "beta" {
+		t.Fatalf("expected GetMeta helper to return %q, got %q", "beta", got)
 	}
 }
 
@@ -232,8 +232,8 @@ func TestOrderSetMetaConvenience(t *testing.T) {
 		t.Fatalf("unexpected error from SetMeta: %v", err)
 	}
 
-	if order.Meta("key") != "value" {
-		t.Fatalf("expected Meta to return %q, got %q", "value", order.Meta("key"))
+	if order.GetMeta("key") != "value" {
+		t.Fatalf("expected GetMeta to return %q, got %q", "value", order.GetMeta("key"))
 	}
 }
 
@@ -243,21 +243,21 @@ func TestOrderPriceAndQuantityHelpers(t *testing.T) {
 	if _, ok := order.SetQuantityInt(10).(*Order); !ok {
 		t.Fatal("expected SetQuantityInt to return *Order")
 	}
-	if order.QuantityInt() != 10 {
-		t.Fatalf("expected QuantityInt to be 10, got %d", order.QuantityInt())
+	if order.GetQuantityInt() != 10 {
+		t.Fatalf("expected QuantityInt to be 10, got %d", order.GetQuantityInt())
 	}
-	if order.Quantity() != "10" {
-		t.Fatalf("expected Quantity to be \"10\", got %q", order.Quantity())
+	if order.GetQuantity() != "10" {
+		t.Fatalf("expected Quantity to be \"10\", got %q", order.GetQuantity())
 	}
 
 	if _, ok := order.SetPriceFloat(49.95).(*Order); !ok {
 		t.Fatal("expected SetPriceFloat to return *Order")
 	}
-	if order.PriceFloat() != 49.95 {
-		t.Fatalf("expected PriceFloat to be 49.95, got %f", order.PriceFloat())
+	if order.GetPriceFloat() != 49.95 {
+		t.Fatalf("expected PriceFloat to be 49.95, got %f", order.GetPriceFloat())
 	}
-	if order.Price() != "49.95" {
-		t.Fatalf("expected Price to be \"49.95\", got %q", order.Price())
+	if order.GetPrice() != "49.95" {
+		t.Fatalf("expected Price to be \"49.95\", got %q", order.GetPrice())
 	}
 }
 
@@ -296,22 +296,22 @@ func TestOrderSetterChainingAndGetters(t *testing.T) {
 	if _, ok := order.SetCustomerID("cust").(*Order); !ok {
 		t.Fatal("expected SetCustomerID to return *Order")
 	}
-	if order.CustomerID() != "cust" {
-		t.Fatalf("expected CustomerID getter to return %q, got %q", "cust", order.CustomerID())
+	if order.GetCustomerID() != "cust" {
+		t.Fatalf("expected GetCustomerID getter to return %q, got %q", "cust", order.GetCustomerID())
 	}
 
 	if _, ok := order.SetMemo("memo").(*Order); !ok {
 		t.Fatal("expected SetMemo to return *Order")
 	}
-	if order.Memo() != "memo" {
-		t.Fatalf("expected Memo getter to return %q, got %q", "memo", order.Memo())
+	if order.GetMemo() != "memo" {
+		t.Fatalf("expected GetMemo getter to return %q, got %q", "memo", order.GetMemo())
 	}
 
 	if _, ok := order.SetStatus(ORDER_STATUS_REFUNDED).(*Order); !ok {
 		t.Fatal("expected SetStatus to return *Order")
 	}
-	if order.Status() != ORDER_STATUS_REFUNDED {
-		t.Fatalf("expected Status getter to return %q, got %q", ORDER_STATUS_REFUNDED, order.Status())
+	if order.GetStatus() != ORDER_STATUS_REFUNDED {
+		t.Fatalf("expected GetStatus getter to return %q, got %q", ORDER_STATUS_REFUNDED, order.GetStatus())
 	}
 }
 
@@ -321,21 +321,21 @@ func TestOrderIsSoftDeleted(t *testing.T) {
 	if _, ok := order.SetSoftDeletedAt(sb.MAX_DATETIME).(*Order); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Order")
 	}
-	if order.SoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected SoftDeletedAt to be %q, got %q", sb.MAX_DATETIME, order.SoftDeletedAt())
+	if order.GetSoftDeletedAt() != sb.MAX_DATETIME {
+		t.Fatalf("expected SoftDeletedAt to be %q, got %q", sb.MAX_DATETIME, order.GetSoftDeletedAt())
 	}
-	if order.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != sb.MAX_DATETIME {
-		t.Fatalf("expected SoftDeletedAtCarbon to be %q, got %q", sb.MAX_DATETIME, order.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	if order.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != sb.MAX_DATETIME {
+		t.Fatalf("expected SoftDeletedAtCarbon to be %q, got %q", sb.MAX_DATETIME, order.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := order.SetSoftDeletedAt("2024-01-01 00:00:00").(*Order); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Order")
 	}
-	if order.SoftDeletedAt() != "2024-01-01 00:00:00" {
-		t.Fatalf("expected SoftDeletedAt to be updated, got %q", order.SoftDeletedAt())
+	if order.GetSoftDeletedAt() != "2024-01-01 00:00:00" {
+		t.Fatalf("expected SoftDeletedAt to be updated, got %q", order.GetSoftDeletedAt())
 	}
-	if order.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != "2024-01-01 00:00:00" {
-		t.Fatalf("expected SoftDeletedAtCarbon to match updated value, got %q", order.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	if order.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != "2024-01-01 00:00:00" {
+		t.Fatalf("expected SoftDeletedAtCarbon to match updated value, got %q", order.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 }
 
@@ -350,12 +350,12 @@ func TestOrderMetaRemove(t *testing.T) {
 		t.Fatalf("unexpected error removing meta: %v", err)
 	}
 
-	if order.Meta("key1") != "" {
-		t.Fatalf("expected key1 to be removed, got %q", order.Meta("key1"))
+	if order.GetMeta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", order.GetMeta("key1"))
 	}
 
-	if order.Meta("key2") != "value2" {
-		t.Fatalf("expected key2 to still exist, got %q", order.Meta("key2"))
+	if order.GetMeta("key2") != "value2" {
+		t.Fatalf("expected key2 to still exist, got %q", order.GetMeta("key2"))
 	}
 }
 
@@ -370,8 +370,8 @@ func TestOrderMetaRemoveNonExistent(t *testing.T) {
 		t.Fatalf("unexpected error removing non-existent meta: %v", err)
 	}
 
-	if order.Meta("key1") != "value1" {
-		t.Fatalf("expected key1 to still exist, got %q", order.Meta("key1"))
+	if order.GetMeta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", order.GetMeta("key1"))
 	}
 }
 
@@ -386,16 +386,16 @@ func TestOrderMetasRemove(t *testing.T) {
 		t.Fatalf("unexpected error removing metas: %v", err)
 	}
 
-	if order.Meta("key1") != "" {
-		t.Fatalf("expected key1 to be removed, got %q", order.Meta("key1"))
+	if order.GetMeta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", order.GetMeta("key1"))
 	}
 
-	if order.Meta("key2") != "" {
-		t.Fatalf("expected key2 to be removed, got %q", order.Meta("key2"))
+	if order.GetMeta("key2") != "" {
+		t.Fatalf("expected key2 to be removed, got %q", order.GetMeta("key2"))
 	}
 
-	if order.Meta("key3") != "value3" {
-		t.Fatalf("expected key3 to still exist, got %q", order.Meta("key3"))
+	if order.GetMeta("key3") != "value3" {
+		t.Fatalf("expected key3 to still exist, got %q", order.GetMeta("key3"))
 	}
 }
 
@@ -410,8 +410,8 @@ func TestOrderMetasRemoveEmptySlice(t *testing.T) {
 		t.Fatalf("unexpected error removing empty slice: %v", err)
 	}
 
-	if order.Meta("key1") != "value1" {
-		t.Fatalf("expected key1 to still exist, got %q", order.Meta("key1"))
+	if order.GetMeta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", order.GetMeta("key1"))
 	}
 }
 

@@ -13,39 +13,39 @@ func TestNewMediaDefaults(t *testing.T) {
 		t.Fatal("NewMedia returned nil")
 	}
 
-	if media.Status() != MEDIA_STATUS_DRAFT {
-		t.Fatalf("expected status %q, got %q", MEDIA_STATUS_DRAFT, media.Status())
+	if media.GetStatus() != MEDIA_STATUS_DRAFT {
+		t.Fatalf("expected status %q, got %q", MEDIA_STATUS_DRAFT, media.GetStatus())
 	}
 
-	if media.Title() != "" {
-		t.Fatalf("expected empty title, got %q", media.Title())
+	if media.GetTitle() != "" {
+		t.Fatalf("expected empty title, got %q", media.GetTitle())
 	}
 
-	if media.Description() != "" {
-		t.Fatalf("expected empty description, got %q", media.Description())
+	if media.GetDescription() != "" {
+		t.Fatalf("expected empty description, got %q", media.GetDescription())
 	}
 
-	if media.Memo() != "" {
-		t.Fatalf("expected empty memo, got %q", media.Memo())
+	if media.GetMemo() != "" {
+		t.Fatalf("expected empty memo, got %q", media.GetMemo())
 	}
 
-	if media.ID() == "" {
+	if media.GetID() == "" {
 		t.Fatal("expected generated ID to be non-empty")
 	}
 
-	if media.CreatedAt() == "" {
+	if media.GetCreatedAt() == "" {
 		t.Fatal("expected created at to be set")
 	}
 
-	if media.UpdatedAt() == "" {
+	if media.GetUpdatedAt() == "" {
 		t.Fatal("expected updated at to be set")
 	}
 
-	if media.SoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected soft deleted at %q, got %q", sb.MAX_DATETIME, media.SoftDeletedAt())
+	if media.GetSoftDeletedAt() != sb.MAX_DATETIME {
+		t.Fatalf("expected soft deleted at %q, got %q", sb.MAX_DATETIME, media.GetSoftDeletedAt())
 	}
 
-	metas, err := media.Metas()
+	metas, err := media.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -54,8 +54,8 @@ func TestNewMediaDefaults(t *testing.T) {
 		t.Fatalf("expected no metas by default, got %v", metas)
 	}
 
-	if media.Meta("missing") != "" {
-		t.Fatal("expected Meta for missing key to return empty string")
+	if media.GetMeta("missing") != "" {
+		t.Fatal("expected GetMeta for missing key to return empty string")
 	}
 }
 
@@ -122,25 +122,25 @@ func TestMediaCarbonHelpers(t *testing.T) {
 	if _, ok := media.SetCreatedAt(createdAt).(*Media); !ok {
 		t.Fatal("expected SetCreatedAt to return *Media")
 	}
-	if media.CreatedAt() != createdAt {
-		t.Fatalf("expected CreatedAt to be %q, got %q", createdAt, media.CreatedAt())
+	if media.GetCreatedAt() != createdAt {
+		t.Fatalf("expected CreatedAt to be %q, got %q", createdAt, media.GetCreatedAt())
 	}
-	if media.CreatedAtCarbon().ToDateTimeString(carbon.UTC) != createdAt {
-		t.Fatalf("expected CreatedAtCarbon to match input, got %q", media.CreatedAtCarbon().ToDateTimeString(carbon.UTC))
+	if media.GetCreatedAtCarbon().ToDateTimeString(carbon.UTC) != createdAt {
+		t.Fatalf("expected CreatedAtCarbon to match input, got %q", media.GetCreatedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := media.SetUpdatedAt(updatedAt).(*Media); !ok {
 		t.Fatal("expected SetUpdatedAt to return *Media")
 	}
-	if media.UpdatedAtCarbon().ToDateTimeString(carbon.UTC) != updatedAt {
-		t.Fatalf("expected UpdatedAtCarbon to match input, got %q", media.UpdatedAtCarbon().ToDateTimeString(carbon.UTC))
+	if media.GetUpdatedAtCarbon().ToDateTimeString(carbon.UTC) != updatedAt {
+		t.Fatalf("expected UpdatedAtCarbon to match input, got %q", media.GetUpdatedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := media.SetSoftDeletedAt(softDeletedAt).(*Media); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Media")
 	}
-	if media.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != softDeletedAt {
-		t.Fatalf("expected SoftDeletedAtCarbon to match input, got %q", media.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	if media.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != softDeletedAt {
+		t.Fatalf("expected SoftDeletedAtCarbon to match input, got %q", media.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 }
 
@@ -151,7 +151,7 @@ func TestMediaMetasRoundTrip(t *testing.T) {
 		t.Fatalf("unexpected error setting metas: %v", err)
 	}
 
-	metas, err := media.Metas()
+	metas, err := media.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -160,8 +160,8 @@ func TestMediaMetasRoundTrip(t *testing.T) {
 		t.Fatalf("expected meta to be %q, got %q", "beta", metas["alpha"])
 	}
 
-	if media.Meta("alpha") != "beta" {
-		t.Fatalf("expected Meta helper to return %q, got %q", "beta", media.Meta("alpha"))
+	if media.GetMeta("alpha") != "beta" {
+		t.Fatalf("expected GetMeta helper to return %q, got %q", "beta", media.GetMeta("alpha"))
 	}
 }
 
@@ -176,7 +176,7 @@ func TestMediaUpsertMetasMergesValues(t *testing.T) {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
-	metas, err := media.Metas()
+	metas, err := media.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -195,12 +195,12 @@ func TestMediaMetasInvalidJSON(t *testing.T) {
 		COLUMN_METAS: "{invalid",
 	})
 
-	if _, err := media.Metas(); err == nil {
+	if _, err := media.GetMetas(); err == nil {
 		t.Fatal("expected error when parsing invalid metas JSON")
 	}
 
-	if media.Meta("anything") != "" {
-		t.Fatalf("expected Meta to return empty string on invalid JSON")
+	if media.GetMeta("anything") != "" {
+		t.Fatalf("expected GetMeta to return empty string on invalid JSON")
 	}
 }
 
@@ -209,7 +209,7 @@ func TestMediaMetasHandlesNullJSON(t *testing.T) {
 		COLUMN_METAS: "null",
 	})
 
-	metas, err := media.Metas()
+	metas, err := media.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -222,8 +222,8 @@ func TestMediaMetasHandlesNullJSON(t *testing.T) {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
-	if got := media.Meta("alpha"); got != "beta" {
-		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	if got := media.GetMeta("alpha"); got != "beta" {
+		t.Fatalf("expected GetMeta helper to return %q, got %q", "beta", got)
 	}
 }
 
@@ -234,8 +234,8 @@ func TestMediaSetMetaConvenience(t *testing.T) {
 		t.Fatalf("unexpected error from SetMeta: %v", err)
 	}
 
-	if media.Meta("key") != "value" {
-		t.Fatalf("expected Meta to return %q, got %q", "value", media.Meta("key"))
+	if media.GetMeta("key") != "value" {
+		t.Fatalf("expected GetMeta to return %q, got %q", "value", media.GetMeta("key"))
 	}
 }
 
@@ -245,57 +245,57 @@ func TestMediaSetterChainingAndGetters(t *testing.T) {
 	if _, ok := media.SetDescription("desc").(*Media); !ok {
 		t.Fatal("expected SetDescription to return *Media")
 	}
-	if media.Description() != "desc" {
-		t.Fatalf("expected Description getter to return %q, got %q", "desc", media.Description())
+	if media.GetDescription() != "desc" {
+		t.Fatalf("expected GetDescription getter to return %q, got %q", "desc", media.GetDescription())
 	}
 
 	if _, ok := media.SetMemo("memo").(*Media); !ok {
 		t.Fatal("expected SetMemo to return *Media")
 	}
-	if media.Memo() != "memo" {
-		t.Fatalf("expected Memo getter to return %q, got %q", "memo", media.Memo())
+	if media.GetMemo() != "memo" {
+		t.Fatalf("expected GetMemo getter to return %q, got %q", "memo", media.GetMemo())
 	}
 
 	if _, ok := media.SetStatus(MEDIA_STATUS_DRAFT).(*Media); !ok {
 		t.Fatal("expected SetStatus to return *Media")
 	}
-	if media.Status() != MEDIA_STATUS_DRAFT {
-		t.Fatalf("expected Status getter to return %q, got %q", MEDIA_STATUS_DRAFT, media.Status())
+	if media.GetStatus() != MEDIA_STATUS_DRAFT {
+		t.Fatalf("expected GetStatus getter to return %q, got %q", MEDIA_STATUS_DRAFT, media.GetStatus())
 	}
 
 	if _, ok := media.SetTitle("title").(*Media); !ok {
 		t.Fatal("expected SetTitle to return *Media")
 	}
-	if media.Title() != "title" {
-		t.Fatalf("expected Title getter to return %q, got %q", "title", media.Title())
+	if media.GetTitle() != "title" {
+		t.Fatalf("expected GetTitle getter to return %q, got %q", "title", media.GetTitle())
 	}
 
 	if _, ok := media.SetType("image/jpg").(*Media); !ok {
 		t.Fatal("expected SetType to return *Media")
 	}
-	if media.Type() != "image/jpg" {
-		t.Fatalf("expected Type getter to return %q, got %q", "image/jpg", media.Type())
+	if media.GetType() != "image/jpg" {
+		t.Fatalf("expected GetType getter to return %q, got %q", "image/jpg", media.GetType())
 	}
 
 	if _, ok := media.SetEntityID("entity").(*Media); !ok {
 		t.Fatal("expected SetEntityID to return *Media")
 	}
-	if media.EntityID() != "entity" {
-		t.Fatalf("expected EntityID getter to return %q, got %q", "entity", media.EntityID())
+	if media.GetEntityID() != "entity" {
+		t.Fatalf("expected GetEntityID getter to return %q, got %q", "entity", media.GetEntityID())
 	}
 
 	if _, ok := media.SetURL("https://example.com").(*Media); !ok {
 		t.Fatal("expected SetURL to return *Media")
 	}
-	if media.URL() != "https://example.com" {
-		t.Fatalf("expected URL getter to return %q, got %q", "https://example.com", media.URL())
+	if media.GetURL() != "https://example.com" {
+		t.Fatalf("expected GetURL getter to return %q, got %q", "https://example.com", media.GetURL())
 	}
 
 	if _, ok := media.SetSequence(7).(*Media); !ok {
 		t.Fatal("expected SetSequence to return *Media")
 	}
-	if media.Sequence() != 7 {
-		t.Fatalf("expected Sequence getter to return %d, got %d", 7, media.Sequence())
+	if media.GetSequence() != 7 {
+		t.Fatalf("expected GetSequence getter to return %d, got %d", 7, media.GetSequence())
 	}
 }
 
@@ -305,21 +305,21 @@ func TestMediaIsSoftDeleted(t *testing.T) {
 	if _, ok := media.SetSoftDeletedAt(sb.MAX_DATETIME).(*Media); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Media")
 	}
-	if media.SoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected SoftDeletedAt to be %q, got %q", sb.MAX_DATETIME, media.SoftDeletedAt())
+	if media.GetSoftDeletedAt() != sb.MAX_DATETIME {
+		t.Fatalf("expected SoftDeletedAt to be %q, got %q", sb.MAX_DATETIME, media.GetSoftDeletedAt())
 	}
-	if media.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != sb.MAX_DATETIME {
-		t.Fatalf("expected SoftDeletedAtCarbon to be %q, got %q", sb.MAX_DATETIME, media.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	if media.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != sb.MAX_DATETIME {
+		t.Fatalf("expected SoftDeletedAtCarbon to be %q, got %q", sb.MAX_DATETIME, media.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := media.SetSoftDeletedAt("2024-01-01 00:00:00").(*Media); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Media")
 	}
-	if media.SoftDeletedAt() != "2024-01-01 00:00:00" {
-		t.Fatalf("expected SoftDeletedAt to be updated, got %q", media.SoftDeletedAt())
+	if media.GetSoftDeletedAt() != "2024-01-01 00:00:00" {
+		t.Fatalf("expected SoftDeletedAt to be updated, got %q", media.GetSoftDeletedAt())
 	}
-	if media.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != "2024-01-01 00:00:00" {
-		t.Fatalf("expected SoftDeletedAtCarbon to match updated value, got %q", media.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	if media.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != "2024-01-01 00:00:00" {
+		t.Fatalf("expected SoftDeletedAtCarbon to match updated value, got %q", media.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 }
 
@@ -334,12 +334,12 @@ func TestMediaMetaRemove(t *testing.T) {
 		t.Fatalf("unexpected error removing meta: %v", err)
 	}
 
-	if media.Meta("key1") != "" {
-		t.Fatalf("expected key1 to be removed, got %q", media.Meta("key1"))
+	if media.GetMeta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", media.GetMeta("key1"))
 	}
 
-	if media.Meta("key2") != "value2" {
-		t.Fatalf("expected key2 to still exist, got %q", media.Meta("key2"))
+	if media.GetMeta("key2") != "value2" {
+		t.Fatalf("expected key2 to still exist, got %q", media.GetMeta("key2"))
 	}
 }
 
@@ -354,8 +354,8 @@ func TestMediaMetaRemoveNonExistent(t *testing.T) {
 		t.Fatalf("unexpected error removing non-existent meta: %v", err)
 	}
 
-	if media.Meta("key1") != "value1" {
-		t.Fatalf("expected key1 to still exist, got %q", media.Meta("key1"))
+	if media.GetMeta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", media.GetMeta("key1"))
 	}
 }
 
@@ -370,16 +370,16 @@ func TestMediaMetasRemove(t *testing.T) {
 		t.Fatalf("unexpected error removing metas: %v", err)
 	}
 
-	if media.Meta("key1") != "" {
-		t.Fatalf("expected key1 to be removed, got %q", media.Meta("key1"))
+	if media.GetMeta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", media.GetMeta("key1"))
 	}
 
-	if media.Meta("key2") != "" {
-		t.Fatalf("expected key2 to be removed, got %q", media.Meta("key2"))
+	if media.GetMeta("key2") != "" {
+		t.Fatalf("expected key2 to be removed, got %q", media.GetMeta("key2"))
 	}
 
-	if media.Meta("key3") != "value3" {
-		t.Fatalf("expected key3 to still exist, got %q", media.Meta("key3"))
+	if media.GetMeta("key3") != "value3" {
+		t.Fatalf("expected key3 to still exist, got %q", media.GetMeta("key3"))
 	}
 }
 
@@ -394,8 +394,8 @@ func TestMediaMetasRemoveEmptySlice(t *testing.T) {
 		t.Fatalf("unexpected error removing empty slice: %v", err)
 	}
 
-	if media.Meta("key1") != "value1" {
-		t.Fatalf("expected key1 to still exist, got %q", media.Meta("key1"))
+	if media.GetMeta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", media.GetMeta("key1"))
 	}
 }
 
