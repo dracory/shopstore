@@ -13,51 +13,51 @@ func TestNewProductDefaults(t *testing.T) {
 		t.Fatal("NewProduct returned nil")
 	}
 
-	if product.Status() != PRODUCT_STATUS_DRAFT {
-		t.Fatalf("expected status %q, got %q", PRODUCT_STATUS_DRAFT, product.Status())
+	if product.GetStatus() != PRODUCT_STATUS_DRAFT {
+		t.Fatalf("expected status %q, got %q", PRODUCT_STATUS_DRAFT, product.GetStatus())
 	}
 
-	if product.Title() != "" {
-		t.Fatalf("expected empty title, got %q", product.Title())
+	if product.GetTitle() != "" {
+		t.Fatalf("expected empty title, got %q", product.GetTitle())
 	}
 
-	if product.Description() != "" {
-		t.Fatalf("expected empty description, got %q", product.Description())
+	if product.GetDescription() != "" {
+		t.Fatalf("expected empty description, got %q", product.GetDescription())
 	}
 
-	if product.ShortDescription() != "" {
-		t.Fatalf("expected empty short description, got %q", product.ShortDescription())
+	if product.GetShortDescription() != "" {
+		t.Fatalf("expected empty short description, got %q", product.GetShortDescription())
 	}
 
-	if product.QuantityInt() != 0 {
-		t.Fatalf("expected default quantity 0, got %d", product.QuantityInt())
+	if product.GetQuantityInt() != 0 {
+		t.Fatalf("expected default quantity 0, got %d", product.GetQuantityInt())
 	}
 
-	if product.PriceFloat() != 0 {
-		t.Fatalf("expected default price 0, got %f", product.PriceFloat())
+	if product.GetPriceFloat() != 0 {
+		t.Fatalf("expected default price 0, got %f", product.GetPriceFloat())
 	}
 
-	if product.Memo() != "" {
-		t.Fatalf("expected empty memo, got %q", product.Memo())
+	if product.GetMemo() != "" {
+		t.Fatalf("expected empty memo, got %q", product.GetMemo())
 	}
 
-	if product.ID() == "" {
+	if product.GetID() == "" {
 		t.Fatal("expected generated ID to be non-empty")
 	}
 
-	if product.CreatedAt() == "" {
+	if product.GetCreatedAt() == "" {
 		t.Fatal("expected created at to be set")
 	}
 
-	if product.UpdatedAt() == "" {
+	if product.GetUpdatedAt() == "" {
 		t.Fatal("expected updated at to be set")
 	}
 
-	if product.SoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected soft deleted at %q, got %q", sb.MAX_DATETIME, product.SoftDeletedAt())
+	if product.GetSoftDeletedAt() != sb.MAX_DATETIME {
+		t.Fatalf("expected soft deleted at %q, got %q", sb.MAX_DATETIME, product.GetSoftDeletedAt())
 	}
 
-	metas, err := product.Metas()
+	metas, err := product.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -66,8 +66,8 @@ func TestNewProductDefaults(t *testing.T) {
 		t.Fatalf("expected no metas by default, got %v", metas)
 	}
 
-	if product.Meta("missing") != "" {
-		t.Fatal("expected Meta for missing key to return empty string")
+	if product.GetMeta("missing") != "" {
+		t.Fatal("expected GetMeta for missing key to return empty string")
 	}
 }
 
@@ -132,25 +132,25 @@ func TestProductCarbonHelpers(t *testing.T) {
 	if _, ok := product.SetCreatedAt(createdAt).(*Product); !ok {
 		t.Fatal("expected SetCreatedAt to return *Product")
 	}
-	if product.CreatedAt() != createdAt {
-		t.Fatalf("expected CreatedAt to be %q, got %q", createdAt, product.CreatedAt())
+	if product.GetCreatedAt() != createdAt {
+		t.Fatalf("expected CreatedAt to be %q, got %q", createdAt, product.GetCreatedAt())
 	}
-	if product.CreatedAtCarbon().ToDateTimeString(carbon.UTC) != createdAt {
-		t.Fatalf("expected CreatedAtCarbon to match input, got %q", product.CreatedAtCarbon().ToDateTimeString(carbon.UTC))
+	if product.GetCreatedAtCarbon().ToDateTimeString(carbon.UTC) != createdAt {
+		t.Fatalf("expected CreatedAtCarbon to match input, got %q", product.GetCreatedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := product.SetUpdatedAt(updatedAt).(*Product); !ok {
 		t.Fatal("expected SetUpdatedAt to return *Product")
 	}
-	if product.UpdatedAtCarbon().ToDateTimeString(carbon.UTC) != updatedAt {
-		t.Fatalf("expected UpdatedAtCarbon to match input, got %q", product.UpdatedAtCarbon().ToDateTimeString(carbon.UTC))
+	if product.GetUpdatedAtCarbon().ToDateTimeString(carbon.UTC) != updatedAt {
+		t.Fatalf("expected UpdatedAtCarbon to match input, got %q", product.GetUpdatedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := product.SetSoftDeletedAt(softDeletedAt).(*Product); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Product")
 	}
-	if product.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != softDeletedAt {
-		t.Fatalf("expected SoftDeletedAtCarbon to match input, got %q", product.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	if product.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != softDeletedAt {
+		t.Fatalf("expected SoftDeletedAtCarbon to match input, got %q", product.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 }
 
@@ -161,7 +161,7 @@ func TestProductMetasRoundTrip(t *testing.T) {
 		t.Fatalf("unexpected error setting metas: %v", err)
 	}
 
-	metas, err := product.Metas()
+	metas, err := product.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -170,8 +170,8 @@ func TestProductMetasRoundTrip(t *testing.T) {
 		t.Fatalf("expected meta to be %q, got %q", "beta", metas["alpha"])
 	}
 
-	if product.Meta("alpha") != "beta" {
-		t.Fatalf("expected Meta helper to return %q, got %q", "beta", product.Meta("alpha"))
+	if product.GetMeta("alpha") != "beta" {
+		t.Fatalf("expected GetMeta helper to return %q, got %q", "beta", product.GetMeta("alpha"))
 	}
 }
 
@@ -186,7 +186,7 @@ func TestProductMetasUpsertMergesValues(t *testing.T) {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
-	metas, err := product.Metas()
+	metas, err := product.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -205,7 +205,7 @@ func TestProductMetasHandlesNullJSON(t *testing.T) {
 		COLUMN_METAS: "null",
 	})
 
-	metas, err := product.Metas()
+	metas, err := product.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -218,8 +218,8 @@ func TestProductMetasHandlesNullJSON(t *testing.T) {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
-	if got := product.Meta("alpha"); got != "beta" {
-		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	if got := product.GetMeta("alpha"); got != "beta" {
+		t.Fatalf("expected GetMeta helper to return %q, got %q", "beta", got)
 	}
 }
 
@@ -228,12 +228,12 @@ func TestProductMetasInvalidJSON(t *testing.T) {
 		COLUMN_METAS: "{invalid",
 	})
 
-	if _, err := product.Metas(); err == nil {
+	if _, err := product.GetMetas(); err == nil {
 		t.Fatal("expected error when parsing invalid metas JSON")
 	}
 
-	if product.Meta("anything") != "" {
-		t.Fatalf("expected Meta to return empty string on invalid JSON")
+	if product.GetMeta("anything") != "" {
+		t.Fatalf("expected GetMeta to return empty string on invalid JSON")
 	}
 }
 
@@ -244,8 +244,8 @@ func TestProductSetMetaConvenience(t *testing.T) {
 		t.Fatalf("unexpected error from SetMeta: %v", err)
 	}
 
-	if product.Meta("key") != "value" {
-		t.Fatalf("expected Meta to return %q, got %q", "value", product.Meta("key"))
+	if product.GetMeta("key") != "value" {
+		t.Fatalf("expected GetMeta to return %q, got %q", "value", product.GetMeta("key"))
 	}
 }
 
@@ -255,21 +255,21 @@ func TestProductQuantityAndPriceHelpers(t *testing.T) {
 	if _, ok := product.SetQuantityInt(10).(*Product); !ok {
 		t.Fatal("expected SetQuantityInt to return *Product")
 	}
-	if product.QuantityInt() != 10 {
-		t.Fatalf("expected QuantityInt to be 10, got %d", product.QuantityInt())
+	if product.GetQuantityInt() != 10 {
+		t.Fatalf("expected QuantityInt to be 10, got %d", product.GetQuantityInt())
 	}
-	if product.Quantity() != "10" {
-		t.Fatalf("expected Quantity to be \"10\", got %q", product.Quantity())
+	if product.GetQuantity() != "10" {
+		t.Fatalf("expected Quantity to be \"10\", got %q", product.GetQuantity())
 	}
 
 	if _, ok := product.SetPriceFloat(49.95).(*Product); !ok {
 		t.Fatal("expected SetPriceFloat to return *Product")
 	}
-	if product.PriceFloat() != 49.95 {
-		t.Fatalf("expected PriceFloat to be 49.95, got %f", product.PriceFloat())
+	if product.GetPriceFloat() != 49.95 {
+		t.Fatalf("expected PriceFloat to be 49.95, got %f", product.GetPriceFloat())
 	}
-	if product.Price() != "49.95" {
-		t.Fatalf("expected Price to be \"49.95\", got %q", product.Price())
+	if product.GetPrice() != "49.95" {
+		t.Fatalf("expected Price to be \"49.95\", got %q", product.GetPrice())
 	}
 
 	if product.IsFree() {
@@ -338,12 +338,12 @@ func TestProductMetaRemove(t *testing.T) {
 		t.Fatalf("unexpected error removing meta: %v", err)
 	}
 
-	if product.Meta("key1") != "" {
-		t.Fatalf("expected key1 to be removed, got %q", product.Meta("key1"))
+	if product.GetMeta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", product.GetMeta("key1"))
 	}
 
-	if product.Meta("key2") != "value2" {
-		t.Fatalf("expected key2 to still exist, got %q", product.Meta("key2"))
+	if product.GetMeta("key2") != "value2" {
+		t.Fatalf("expected key2 to still exist, got %q", product.GetMeta("key2"))
 	}
 }
 
@@ -358,8 +358,8 @@ func TestProductMetaRemoveNonExistent(t *testing.T) {
 		t.Fatalf("unexpected error removing non-existent meta: %v", err)
 	}
 
-	if product.Meta("key1") != "value1" {
-		t.Fatalf("expected key1 to still exist, got %q", product.Meta("key1"))
+	if product.GetMeta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", product.GetMeta("key1"))
 	}
 }
 
@@ -374,16 +374,16 @@ func TestProductMetasRemove(t *testing.T) {
 		t.Fatalf("unexpected error removing metas: %v", err)
 	}
 
-	if product.Meta("key1") != "" {
-		t.Fatalf("expected key1 to be removed, got %q", product.Meta("key1"))
+	if product.GetMeta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", product.GetMeta("key1"))
 	}
 
-	if product.Meta("key2") != "" {
-		t.Fatalf("expected key2 to be removed, got %q", product.Meta("key2"))
+	if product.GetMeta("key2") != "" {
+		t.Fatalf("expected key2 to be removed, got %q", product.GetMeta("key2"))
 	}
 
-	if product.Meta("key3") != "value3" {
-		t.Fatalf("expected key3 to still exist, got %q", product.Meta("key3"))
+	if product.GetMeta("key3") != "value3" {
+		t.Fatalf("expected key3 to still exist, got %q", product.GetMeta("key3"))
 	}
 }
 
@@ -398,8 +398,8 @@ func TestProductMetasRemoveEmptySlice(t *testing.T) {
 		t.Fatalf("unexpected error removing empty slice: %v", err)
 	}
 
-	if product.Meta("key1") != "value1" {
-		t.Fatalf("expected key1 to still exist, got %q", product.Meta("key1"))
+	if product.GetMeta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", product.GetMeta("key1"))
 	}
 }
 

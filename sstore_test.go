@@ -263,12 +263,12 @@ func TestStoreCategorySoftDelete(t *testing.T) {
 		t.Fatal("unexpected empty list")
 	}
 
-	if list[0].ID() != category.ID() {
+	if list[0].GetID() != category.GetID() {
 		t.Fatal("unexpected category id")
 	}
 
-	if strings.Contains(list[0].SoftDeletedAt(), sb.MAX_DATETIME) {
-		t.Fatal("Category MUST be soft deleted, but found: ", list[0].SoftDeletedAt())
+	if strings.Contains(list[0].GetSoftDeletedAt(), sb.MAX_DATETIME) {
+		t.Fatal("Category MUST be soft deleted, but found: ", list[0].GetSoftDeletedAt())
 		return
 	}
 }
@@ -296,13 +296,13 @@ func TestStoreCategorySoftDeleteByID(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	err = store.CategorySoftDeleteByID(ctx, category.ID())
+	err = store.CategorySoftDeleteByID(ctx, category.GetID())
 
 	if err != nil {
 		t.Fatal("unexpected error:", err)
 	}
 
-	categoryFound, errFind := store.CategoryFindByID(ctx, category.ID())
+	categoryFound, errFind := store.CategoryFindByID(ctx, category.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -322,12 +322,12 @@ func TestStoreCategorySoftDeleteByID(t *testing.T) {
 		t.Fatal("unexpected empty list")
 	}
 
-	if list[0].ID() != category.ID() {
+	if list[0].GetID() != category.GetID() {
 		t.Fatal("unexpected category id")
 	}
 
-	if strings.Contains(list[0].SoftDeletedAt(), sb.MAX_DATETIME) {
-		t.Fatal("Category MUST be soft deleted, but found: ", list[0].SoftDeletedAt())
+	if strings.Contains(list[0].GetSoftDeletedAt(), sb.MAX_DATETIME) {
+		t.Fatal("Category MUST be soft deleted, but found: ", list[0].GetSoftDeletedAt())
 		return
 	}
 }
@@ -363,14 +363,14 @@ func TestStoreCategoryUpdate(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	categoryFound, errFind := store.CategoryFindByID(ctx, category.ID())
+	categoryFound, errFind := store.CategoryFindByID(ctx, category.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
 	}
 
-	if categoryFound.Title() != "CATEGORY_TITLE_UPDATED" {
-		t.Fatal("unexpected category title: ", categoryFound.Title())
+	if categoryFound.GetTitle() != "CATEGORY_TITLE_UPDATED" {
+		t.Fatal("unexpected category title: ", categoryFound.GetTitle())
 	}
 }
 
@@ -426,7 +426,7 @@ func TestStoreDiscountDelete(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	discountFound, errFind := store.DiscountFindByID(ctx, discount.ID())
+	discountFound, errFind := store.DiscountFindByID(ctx, discount.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -462,13 +462,13 @@ func TestStoreDiscountDeleteByID(t *testing.T) {
 		return
 	}
 
-	err = store.DiscountDeleteByID(ctx, discount.ID())
+	err = store.DiscountDeleteByID(ctx, discount.GetID())
 
 	if err != nil {
 		t.Fatal("unexpected error:", err)
 	}
 
-	discountFound, errFind := store.DiscountFindByID(ctx, discount.ID())
+	discountFound, errFind := store.DiscountFindByID(ctx, discount.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -509,7 +509,7 @@ func TestStoreDiscountFindByID(t *testing.T) {
 		return
 	}
 
-	discountFound, errFind := store.DiscountFindByID(ctx, discount.ID())
+	discountFound, errFind := store.DiscountFindByID(ctx, discount.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -521,43 +521,43 @@ func TestStoreDiscountFindByID(t *testing.T) {
 		return
 	}
 
-	if discountFound.Title() != "DISCOUNT_TITLE" {
-		t.Fatal("Exam title MUST BE 'DISCOUNT_TITLE', found: ", discountFound.Title())
+	if discountFound.GetTitle() != "DISCOUNT_TITLE" {
+		t.Fatal("Exam title MUST BE 'DISCOUNT_TITLE', found: ", discountFound.GetTitle())
 		return
 	}
 
-	if discountFound.Description() != "DISCOUNT_DESCRIPTION" {
-		t.Fatal("Exam description MUST BE 'DISCOUNT_DESCRIPTION', found: ", discountFound.Description())
+	if discountFound.GetDescription() != "DISCOUNT_DESCRIPTION" {
+		t.Fatal("Exam description MUST BE 'DISCOUNT_DESCRIPTION', found: ", discountFound.GetDescription())
 	}
 
-	if discountFound.Status() != DISCOUNT_STATUS_DRAFT {
-		t.Fatal("Exam status MUST BE 'draft', found: ", discountFound.Status())
+	if discountFound.GetStatus() != DISCOUNT_STATUS_DRAFT {
+		t.Fatal("Exam status MUST BE 'draft', found: ", discountFound.GetStatus())
 		return
 	}
 
-	if discountFound.Type() != DISCOUNT_TYPE_AMOUNT {
-		t.Fatal("Exam type MUST BE 'amount', found: ", discountFound.Type())
+	if discountFound.GetType() != DISCOUNT_TYPE_AMOUNT {
+		t.Fatal("Exam type MUST BE 'amount', found: ", discountFound.GetType())
 	}
 
-	if discountFound.Type() != DISCOUNT_TYPE_AMOUNT {
-		t.Fatal("Exam type MUST BE 'amount', found: ", discountFound.Type())
+	if discountFound.GetType() != DISCOUNT_TYPE_AMOUNT {
+		t.Fatal("Exam type MUST BE 'amount', found: ", discountFound.GetType())
 	}
 
-	if discountFound.Amount() != 19.9900 {
-		t.Fatal("Exam price MUST BE '19.9900', found: ", discountFound.Amount())
+	if discountFound.GetAmount() != 19.9900 {
+		t.Fatal("Exam price MUST BE '19.9900', found: ", discountFound.GetAmount())
 		return
 	}
 
-	if discountFound.StartsAt() != "2022-01-01 00:00:00 +0000 UTC" {
-		t.Fatal("Exam start date MUST BE '2022-01-01 00:00:00', found: ", discountFound.StartsAt())
+	if discountFound.GetStartsAt() != "2022-01-01 00:00:00 +0000 UTC" {
+		t.Fatal("Exam start date MUST BE '2022-01-01 00:00:00', found: ", discountFound.GetStartsAt())
 	}
 
-	if discountFound.EndsAt() != "2022-01-01 23:59:59 +0000 UTC" {
-		t.Fatal("Exam end date MUST BE '2022-01-01 23:59:59', found: ", discountFound.EndsAt())
+	if discountFound.GetEndsAt() != "2022-01-01 23:59:59 +0000 UTC" {
+		t.Fatal("Exam end date MUST BE '2022-01-01 23:59:59', found: ", discountFound.GetEndsAt())
 	}
 
-	if !strings.Contains(discountFound.SoftDeletedAt(), sb.MAX_DATETIME) {
-		t.Fatal("Exam MUST NOT be soft deleted", discountFound.SoftDeletedAt())
+	if !strings.Contains(discountFound.GetSoftDeletedAt(), sb.MAX_DATETIME) {
+		t.Fatal("Exam MUST NOT be soft deleted", discountFound.GetSoftDeletedAt())
 		return
 	}
 }
@@ -590,7 +590,7 @@ func TestStoreDiscountSoftDelete(t *testing.T) {
 		return
 	}
 
-	discountFound, errFind := store.DiscountFindByID(ctx, discount.ID())
+	discountFound, errFind := store.DiscountFindByID(ctx, discount.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -603,7 +603,7 @@ func TestStoreDiscountSoftDelete(t *testing.T) {
 	}
 
 	discountList, errList := store.DiscountList(ctx, NewDiscountQuery().
-		SetID(discount.ID()).
+		SetID(discount.GetID()).
 		SetSoftDeletedIncluded(true))
 
 	if errList != nil {
@@ -652,7 +652,7 @@ func TestStoreDiscountUpdate(t *testing.T) {
 		return
 	}
 
-	discountFound, errFind := store.DiscountFindByID(ctx, discount.ID())
+	discountFound, errFind := store.DiscountFindByID(ctx, discount.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -662,8 +662,8 @@ func TestStoreDiscountUpdate(t *testing.T) {
 		t.Fatal("Discount MUST NOT be nil")
 	}
 
-	if discountFound.Title() != "DISCOUNT_TITLE_UPDATED" {
-		t.Fatal("Discount title MUST BE 'DISCOUNT_TITLE_UPDATED', found: ", discountFound.Title())
+	if discountFound.GetTitle() != "DISCOUNT_TITLE_UPDATED" {
+		t.Fatal("Discount title MUST BE 'DISCOUNT_TITLE_UPDATED', found: ", discountFound.GetTitle())
 	}
 }
 
@@ -727,7 +727,7 @@ func TestStoreMediaDelete(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	categoryFound, errFind := store.MediaFindByID(ctx, media.ID())
+	categoryFound, errFind := store.MediaFindByID(ctx, media.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -765,13 +765,13 @@ func TestStoreMediaDeleteByID(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	err = store.MediaDeleteByID(ctx, media.ID())
+	err = store.MediaDeleteByID(ctx, media.GetID())
 
 	if err != nil {
 		t.Fatal("unexpected error:", err)
 	}
 
-	mediaFound, errFind := store.MediaFindByID(ctx, media.ID())
+	mediaFound, errFind := store.MediaFindByID(ctx, media.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -809,7 +809,7 @@ func TestStoreMediaFindByID(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	mediaFound, errFind := store.MediaFindByID(ctx, media.ID())
+	mediaFound, errFind := store.MediaFindByID(ctx, media.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -819,24 +819,24 @@ func TestStoreMediaFindByID(t *testing.T) {
 		t.Fatal("unexpected nil media")
 	}
 
-	if mediaFound.ID() != media.ID() {
+	if mediaFound.GetID() != media.GetID() {
 		t.Fatal("unexpected media id")
 	}
 
-	if mediaFound.Title() != media.Title() {
+	if mediaFound.GetTitle() != media.GetTitle() {
 		t.Fatal("unexpected media title")
 	}
 
-	if mediaFound.Status() != media.Status() {
+	if mediaFound.GetStatus() != media.GetStatus() {
 		t.Fatal("unexpected category status")
 	}
 
-	if mediaFound.EntityID() != media.EntityID() {
+	if mediaFound.GetEntityID() != media.GetEntityID() {
 		t.Fatal("unexpected category parent id")
 	}
 
-	if !strings.Contains(mediaFound.SoftDeletedAt(), sb.MAX_DATETIME) {
-		t.Fatal("Exam MUST NOT be soft deleted", mediaFound.SoftDeletedAt())
+	if !strings.Contains(mediaFound.GetSoftDeletedAt(), sb.MAX_DATETIME) {
+		t.Fatal("Exam MUST NOT be soft deleted", mediaFound.GetSoftDeletedAt())
 		return
 	}
 }
@@ -874,7 +874,7 @@ func TestStoreMediaSoftDelete(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	mediaFound, errFind := store.MediaFindByID(ctx, media.ID())
+	mediaFound, errFind := store.MediaFindByID(ctx, media.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -894,12 +894,12 @@ func TestStoreMediaSoftDelete(t *testing.T) {
 		t.Fatal("unexpected empty list")
 	}
 
-	if list[0].ID() != media.ID() {
+	if list[0].GetID() != media.GetID() {
 		t.Fatal("unexpected media id")
 	}
 
-	if strings.Contains(list[0].SoftDeletedAt(), sb.MAX_DATETIME) {
-		t.Fatal("Media MUST be soft deleted, but found: ", list[0].SoftDeletedAt())
+	if strings.Contains(list[0].GetSoftDeletedAt(), sb.MAX_DATETIME) {
+		t.Fatal("Media MUST be soft deleted, but found: ", list[0].GetSoftDeletedAt())
 		return
 	}
 }
@@ -931,13 +931,13 @@ func TestStoreMediaSoftDeleteByID(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	err = store.MediaSoftDeleteByID(ctx, media.ID())
+	err = store.MediaSoftDeleteByID(ctx, media.GetID())
 
 	if err != nil {
 		t.Fatal("unexpected error:", err)
 	}
 
-	mediaFound, errFind := store.MediaFindByID(ctx, media.ID())
+	mediaFound, errFind := store.MediaFindByID(ctx, media.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -957,12 +957,12 @@ func TestStoreMediaSoftDeleteByID(t *testing.T) {
 		t.Fatal("unexpected empty list")
 	}
 
-	if list[0].ID() != media.ID() {
+	if list[0].GetID() != media.GetID() {
 		t.Fatal("unexpected media id")
 	}
 
-	if strings.Contains(list[0].SoftDeletedAt(), sb.MAX_DATETIME) {
-		t.Fatal("Media MUST be soft deleted, but found: ", list[0].SoftDeletedAt())
+	if strings.Contains(list[0].GetSoftDeletedAt(), sb.MAX_DATETIME) {
+		t.Fatal("Media MUST be soft deleted, but found: ", list[0].GetSoftDeletedAt())
 		return
 	}
 }
@@ -1002,13 +1002,13 @@ func TestStoreMediaUpdate(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	mediaFound, errFind := store.MediaFindByID(ctx, media.ID())
+	mediaFound, errFind := store.MediaFindByID(ctx, media.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
 	}
 
-	if mediaFound.Title() != "MEDIA_TITLE_UPDATED" {
-		t.Fatal("unexpected media title: ", mediaFound.Title())
+	if mediaFound.GetTitle() != "MEDIA_TITLE_UPDATED" {
+		t.Fatal("unexpected media title: ", mediaFound.GetTitle())
 	}
 }
