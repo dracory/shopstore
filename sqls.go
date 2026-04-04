@@ -3,9 +3,9 @@ package shopstore
 import "github.com/dracory/sb"
 
 // sqlCategoryTableCreate returns a SQL string for creating the category table
-func (st *Store) sqlCategoryTableCreate() (string, error) {
-	sql, err := sb.NewBuilder(st.dbDriverName).
-		Table(st.categoryTableName).
+func (store *Store) sqlCategoryTableCreate() (string, error) {
+	sql, err := sb.NewBuilder(store.dbDriverName).
+		Table(store.categoryTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
 			Type:       sb.COLUMN_TYPE_STRING,
@@ -57,9 +57,9 @@ func (st *Store) sqlCategoryTableCreate() (string, error) {
 }
 
 // sqlDiscountTableCreate returns a SQL string for creating the discount table
-func (st *Store) sqlDiscountTableCreate() (string, error) {
-	sql, err := sb.NewBuilder(st.dbDriverName).
-		Table(st.discountTableName).
+func (store *Store) sqlDiscountTableCreate() (string, error) {
+	sql, err := sb.NewBuilder(store.dbDriverName).
+		Table(store.discountTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
 			Type:       sb.COLUMN_TYPE_STRING,
@@ -130,7 +130,7 @@ func (st *Store) sqlDiscountTableCreate() (string, error) {
 }
 
 func (store *Store) sqlMediaTableCreate() (string, error) {
-	sql, err := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
+	sql, err := sb.NewBuilder(store.dbDriverName).
 		Table(store.mediaTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
@@ -197,7 +197,7 @@ func (store *Store) sqlMediaTableCreate() (string, error) {
 }
 
 func (store *Store) sqlOrderLineItemTableCreate() (string, error) {
-	sql, err := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
+	sql, err := sb.NewBuilder(store.dbDriverName).
 		Table(store.orderLineItemTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
@@ -262,7 +262,7 @@ func (store *Store) sqlOrderLineItemTableCreate() (string, error) {
 }
 
 func (store *Store) sqlOrderTableCreate() (string, error) {
-	sql, err := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
+	sql, err := sb.NewBuilder(store.dbDriverName).
 		Table(store.orderTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
@@ -317,7 +317,7 @@ func (store *Store) sqlOrderTableCreate() (string, error) {
 }
 
 func (store *Store) sqlProductTableCreate() (string, error) {
-	sql, err := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
+	sql, err := sb.NewBuilder(store.dbDriverName).
 		Table(store.productTableName).
 		Column(sb.Column{
 			Name:       COLUMN_ID,
