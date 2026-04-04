@@ -35,7 +35,7 @@ func NewOrder() OrderInterface {
 	return o
 }
 
-func NewOrderFromExistingData(data map[string]string) *Order {
+func NewOrderFromExistingData(data map[string]string) OrderInterface {
 	o := &Order{}
 	o.Hydrate(data)
 	return o

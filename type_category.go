@@ -34,7 +34,7 @@ func NewCategory() CategoryInterface {
 	return o
 }
 
-func NewCategoryFromExistingData(data map[string]string) *Category {
+func NewCategoryFromExistingData(data map[string]string) CategoryInterface {
 	o := &Category{}
 	o.Hydrate(data)
 	return o
@@ -70,15 +70,6 @@ func (category *Category) CreatedAtCarbon() *carbon.Carbon {
 
 func (category *Category) SetCreatedAt(createdAt string) CategoryInterface {
 	category.Set(COLUMN_CREATED_AT, createdAt)
-	return category
-}
-
-func (category *Category) CustomerID() string {
-	return category.Get(COLUMN_CUSTOMER_ID)
-}
-
-func (category *Category) SetCustomerID(id string) CategoryInterface {
-	category.Set(COLUMN_CUSTOMER_ID, id)
 	return category
 }
 

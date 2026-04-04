@@ -22,7 +22,7 @@ var _ MediaInterface = (*Media)(nil)
 func NewMedia() MediaInterface {
 	o := (&Media{}).
 		SetID(GenerateShortID()).
-		SetStatus(CATEGORY_STATUS_DRAFT).
+		SetStatus(MEDIA_STATUS_DRAFT).
 		SetTitle("").       // By default empty, root category
 		SetDescription(""). // By default empty
 		SetMemo("").        // By default empty
@@ -35,7 +35,7 @@ func NewMedia() MediaInterface {
 	return o
 }
 
-func NewMediaFromExistingData(data map[string]string) *Media {
+func NewMediaFromExistingData(data map[string]string) MediaInterface {
 	o := &Media{}
 	o.Hydrate(data)
 	return o
@@ -92,8 +92,8 @@ func (o *Media) SetMemo(memo string) MediaInterface {
 	return o
 }
 
-func (order *Media) Metas() (map[string]string, error) {
-	metasStr := order.Get(COLUMN_METAS)
+func (m *Media) Metas() (map[string]string, error) {
+	metasStr := m.Get(COLUMN_METAS)
 
 	if metasStr == "" {
 		metasStr = "{}"
@@ -112,8 +112,8 @@ func (order *Media) Metas() (map[string]string, error) {
 	return metasJson, nil
 }
 
-func (order *Media) Meta(name string) string {
-	metas, err := order.Metas()
+func (m *Media) Meta(name string) string {
+	metas, err := m.Metas()
 
 	if err != nil {
 		return ""
@@ -126,23 +126,23 @@ func (order *Media) Meta(name string) string {
 	return ""
 }
 
-func (order *Media) SetMeta(name string, value string) error {
-	return order.UpsertMetas(map[string]string{name: value})
+func (m *Media) SetMeta(name string, value string) error {
+	return m.UpsertMetas(map[string]string{name: value})
 }
 
 // SetMetas stores metas as json string
 // Warning: it overwrites any existing metas
-func (order *Media) SetMetas(metas map[string]string) error {
+func (m *Media) SetMetas(metas map[string]string) error {
 	mapString, err := json.Marshal(metas)
 	if err != nil {
 		return err
 	}
-	order.Set(COLUMN_METAS, string(mapString))
+	m.Set(COLUMN_METAS, string(mapString))
 	return nil
 }
 
-func (order *Media) UpsertMetas(metas map[string]string) error {
-	currentMetas, err := order.Metas()
+func (m *Media) UpsertMetas(metas map[string]string) error {
+	currentMetas, err := m.Metas()
 
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func (order *Media) UpsertMetas(metas map[string]string) error {
 		currentMetas[k] = v
 	}
 
-	return order.SetMetas(currentMetas)
+	return m.SetMetas(currentMetas)
 }
 
 func (o *Media) Sequence() int {
