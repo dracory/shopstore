@@ -431,3 +431,96 @@ func TestOrderLineItemMetasRemoveErrorPropagation(t *testing.T) {
 		t.Fatal("expected error when removing metas with invalid JSON")
 	}
 }
+
+func TestOrderLineItemStatusPredicates(t *testing.T) {
+	item := &OrderLineItem{}
+
+	// Test IsActive with various active states
+	activeStatuses := []string{
+		ORDER_STATUS_AWAITING_FULFILLMENT,
+		ORDER_STATUS_AWAITING_PAYMENT,
+		ORDER_STATUS_AWAITING_PICKUP,
+		ORDER_STATUS_AWAITING_SHIPMENT,
+		ORDER_STATUS_PENDING,
+		ORDER_STATUS_PARTIALLY_SHIPPED,
+		ORDER_STATUS_SHIPPED,
+	}
+
+	for _, status := range activeStatuses {
+		item.SetStatus(status)
+		if !item.IsActive() {
+			t.Fatalf("expected order line item with status %q to be active", status)
+		}
+		if item.IsCancelled() {
+			t.Fatalf("expected order line item with status %q not to be cancelled", status)
+		}
+		if item.IsCompleted() {
+			t.Fatalf("expected order line item with status %q not to be completed", status)
+		}
+	}
+
+	// Test cancelled status
+	item.SetStatus(ORDER_STATUS_CANCELLED)
+	if !item.IsCancelled() {
+		t.Fatal("expected order line item to be cancelled")
+	}
+	if item.IsActive() {
+		t.Fatal("expected cancelled order line item not to be active")
+	}
+
+	// Test completed status
+	item.SetStatus(ORDER_STATUS_COMPLETED)
+	if !item.IsCompleted() {
+		t.Fatal("expected order line item to be completed")
+	}
+	if item.IsActive() {
+		t.Fatal("expected completed order line item not to be active")
+	}
+
+	// Test draft/pending status
+	item.SetStatus(ORDER_STATUS_PENDING)
+	if !item.IsDraft() {
+		t.Fatal("expected order line item with pending status to be draft")
+	}
+	if !item.IsActive() {
+		t.Fatal("expected order line item with pending status to be active")
+	}
+}
+
+func TestOrderLineItemHasQuantity(t *testing.T) {
+	item := &OrderLineItem{}
+
+	// Default quantity is 0
+	if item.HasQuantity() {
+		t.Fatal("expected order line item with quantity 0 not to have quantity")
+	}
+
+	item.SetQuantityInt(1)
+	if !item.HasQuantity() {
+		t.Fatal("expected order line item with quantity 1 to have quantity")
+	}
+
+	item.SetQuantityInt(100)
+	if !item.HasQuantity() {
+		t.Fatal("expected order line item with quantity 100 to have quantity")
+	}
+}
+
+func TestOrderLineItemIsFree(t *testing.T) {
+	item := &OrderLineItem{}
+
+	// Default price is 0
+	if !item.IsFree() {
+		t.Fatal("expected order line item with price 0 to be free")
+	}
+
+	item.SetPriceFloat(0.01)
+	if item.IsFree() {
+		t.Fatal("expected order line item with price 0.01 not to be free")
+	}
+
+	item.SetPriceFloat(-10)
+	if !item.IsFree() {
+		t.Fatal("expected order line item with negative price to be free")
+	}
+}

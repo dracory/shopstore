@@ -393,3 +393,117 @@ func TestDiscountSetterChainingAndGetters(t *testing.T) {
 		t.Fatalf("expected GetEndsAt getter to return %q, got %q", end, discount.GetEndsAt())
 	}
 }
+
+func TestDiscountStatusPredicates(t *testing.T) {
+	discount := &Discount{}
+
+	if _, ok := discount.SetStatus(DISCOUNT_STATUS_ACTIVE).(*Discount); !ok {
+		t.Fatal("expected SetStatus to return *Discount")
+	}
+
+	if !discount.IsActive() {
+		t.Fatal("expected discount to be active")
+	}
+
+	if discount.IsDraft() {
+		t.Fatal("expected discount not to be draft when active")
+	}
+
+	if discount.IsInactive() {
+		t.Fatal("expected discount not to be inactive when active")
+	}
+
+	if _, ok := discount.SetStatus(DISCOUNT_STATUS_DRAFT).(*Discount); !ok {
+		t.Fatal("expected SetStatus to return *Discount")
+	}
+
+	if !discount.IsDraft() {
+		t.Fatal("expected discount to be draft")
+	}
+
+	if _, ok := discount.SetStatus(DISCOUNT_STATUS_INACTIVE).(*Discount); !ok {
+		t.Fatal("expected SetStatus to return *Discount")
+	}
+
+	if !discount.IsInactive() {
+		t.Fatal("expected discount to be inactive")
+	}
+}
+
+func TestDiscountTemporalPredicates(t *testing.T) {
+	discount := &Discount{}
+
+	// No dates set - should not be started or ended
+	if discount.IsStarted() {
+		t.Fatal("expected discount with no start date not to be started")
+	}
+
+	if discount.IsEnded() {
+		t.Fatal("expected discount with no end date not to be ended")
+	}
+
+	// Set start date in past
+	past := carbon.Now(carbon.UTC).SubDay().ToDateTimeString(carbon.UTC)
+	discount.SetStartsAt(past)
+
+	if !discount.IsStarted() {
+		t.Fatal("expected discount with past start date to be started")
+	}
+
+	// Set start date in future
+	future := carbon.Now(carbon.UTC).AddDay().ToDateTimeString(carbon.UTC)
+	discount.SetStartsAt(future)
+
+	if discount.IsStarted() {
+		t.Fatal("expected discount with future start date not to be started")
+	}
+
+	// Set end date in past
+	discount.SetEndsAt(past)
+
+	if !discount.IsEnded() {
+		t.Fatal("expected discount with past end date to be ended")
+	}
+
+	// IsExpired should be alias for IsEnded
+	if !discount.IsExpired() {
+		t.Fatal("expected IsExpired to match IsEnded")
+	}
+
+	// Set end date in future
+	discount.SetEndsAt(future)
+
+	if discount.IsEnded() {
+		t.Fatal("expected discount with future end date not to be ended")
+	}
+}
+
+func TestDiscountIsValidNow(t *testing.T) {
+	now := carbon.Now(carbon.UTC)
+	past := now.SubDay().ToDateTimeString(carbon.UTC)
+	future := now.AddDay().ToDateTimeString(carbon.UTC)
+
+	// Not active
+	d := NewDiscount().SetStatus(DISCOUNT_STATUS_DRAFT)
+	if d.IsValidNow() {
+		t.Fatal("expected non-active discount to not be valid")
+	}
+
+	// Active but not started
+	d.SetStatus(DISCOUNT_STATUS_ACTIVE).SetStartsAt(future).SetEndsAt(future)
+	if d.IsValidNow() {
+		t.Fatal("expected future discount to not be valid")
+	}
+
+	// Active, started, not ended
+	d.SetStartsAt(past).SetEndsAt(future)
+	if !d.IsValidNow() {
+		t.Fatal("expected valid discount to be valid now")
+	}
+
+	// Active, started, but ended
+	d.SetEndsAt(past)
+	if d.IsValidNow() {
+		t.Fatal("expected ended discount to not be valid")
+	}
+}

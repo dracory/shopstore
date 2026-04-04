@@ -333,20 +333,28 @@ func (d *Discount) IsInactive() bool {
 
 // IsStarted returns true if the discount has started (starts_at <= now)
 func (d *Discount) IsStarted() bool {
-	startsAt := d.GetStartsAtCarbon()
-	if startsAt == nil {
+	startsAt := d.GetStartsAt()
+	if startsAt == sb.NULL_DATETIME || startsAt == "" {
 		return false
 	}
-	return !startsAt.IsFuture()
+	startsAtCarbon := d.GetStartsAtCarbon()
+	if startsAtCarbon == nil {
+		return false
+	}
+	return !startsAtCarbon.IsFuture()
 }
 
 // IsEnded returns true if the discount has ended (ends_at <= now)
 func (d *Discount) IsEnded() bool {
-	endsAt := d.GetEndsAtCarbon()
-	if endsAt == nil {
+	endsAt := d.GetEndsAt()
+	if endsAt == sb.NULL_DATETIME || endsAt == "" {
 		return false
 	}
-	return endsAt.IsPast()
+	endsAtCarbon := d.GetEndsAtCarbon()
+	if endsAtCarbon == nil {
+		return false
+	}
+	return endsAtCarbon.IsPast()
 }
 
 // IsExpired is an alias for IsEnded

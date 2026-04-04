@@ -422,3 +422,68 @@ func TestProductMetasRemoveErrorPropagation(t *testing.T) {
 		t.Fatal("expected error when removing metas with invalid JSON")
 	}
 }
+
+func TestProductHasStock(t *testing.T) {
+	product := &Product{}
+
+	// Default quantity is 0
+	if product.HasStock() {
+		t.Fatal("expected product with quantity 0 not to have stock")
+	}
+
+	if !product.IsOutOfStock() {
+		t.Fatal("expected product with quantity 0 to be out of stock")
+	}
+
+	product.SetQuantityInt(1)
+	if !product.HasStock() {
+		t.Fatal("expected product with quantity 1 to have stock")
+	}
+
+	if product.IsOutOfStock() {
+		t.Fatal("expected product with quantity 1 not to be out of stock")
+	}
+
+	product.SetQuantityInt(100)
+	if !product.HasStock() {
+		t.Fatal("expected product with quantity 100 to have stock")
+	}
+}
+
+func TestProductIsOutOfStock(t *testing.T) {
+	product := &Product{}
+
+	// Default quantity is 0
+	if !product.IsOutOfStock() {
+		t.Fatal("expected product with quantity 0 to be out of stock")
+	}
+
+	product.SetQuantityInt(-5)
+	if !product.IsOutOfStock() {
+		t.Fatal("expected product with negative quantity to be out of stock")
+	}
+
+	product.SetQuantityInt(10)
+	if product.IsOutOfStock() {
+		t.Fatal("expected product with positive quantity not to be out of stock")
+	}
+}
+
+func TestProductIsPaid(t *testing.T) {
+	product := &Product{}
+
+	// Default price is 0 (free)
+	if product.IsPaid() {
+		t.Fatal("expected product with price 0 not to be paid")
+	}
+
+	product.SetPriceFloat(0.01)
+	if !product.IsPaid() {
+		t.Fatal("expected product with price 0.01 to be paid")
+	}
+
+	product.SetPriceFloat(99.99)
+	if !product.IsPaid() {
+		t.Fatal("expected product with price 99.99 to be paid")
+	}
+}

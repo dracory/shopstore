@@ -417,3 +417,44 @@ func TestCategoryMetasRemoveErrorPropagation(t *testing.T) {
 		t.Fatal("expected error when removing metas with invalid JSON")
 	}
 }
+
+func TestCategoryIsRoot(t *testing.T) {
+	category := &Category{}
+
+	if _, ok := category.SetParentID("").(*Category); !ok {
+		t.Fatal("expected SetParentID to return *Category")
+	}
+
+	if !category.IsRoot() {
+		t.Fatal("expected category with empty parent ID to be root")
+	}
+
+	if category.IsChild() {
+		t.Fatal("expected category with empty parent ID not to be child")
+	}
+
+	if _, ok := category.SetParentID("parent-123").(*Category); !ok {
+		t.Fatal("expected SetParentID to return *Category")
+	}
+
+	if category.IsRoot() {
+		t.Fatal("expected category with non-empty parent ID not to be root")
+	}
+
+	if !category.IsChild() {
+		t.Fatal("expected category with non-empty parent ID to be child")
+	}
+}
+
+func TestCategoryIsChild(t *testing.T) {
+	category := NewCategory()
+
+	// New category should be root by default (empty parent_id)
+	if !category.IsRoot() {
+		t.Fatal("expected new category to be root by default")
+	}
+
+	if category.IsChild() {
+		t.Fatal("expected new category not to be child by default")
+	}
+}

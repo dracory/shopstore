@@ -299,27 +299,119 @@ func TestMediaSetterChainingAndGetters(t *testing.T) {
 	}
 }
 
+func TestMediaStatusPredicates(t *testing.T) {
+	media := &Media{}
+
+	if _, ok := media.SetStatus(MEDIA_STATUS_ACTIVE).(*Media); !ok {
+		t.Fatal("expected SetStatus to return *Media")
+	}
+
+	if !media.IsActive() {
+		t.Fatal("expected media to be active")
+	}
+
+	if media.IsDraft() {
+		t.Fatal("expected media not to be draft when active")
+	}
+
+	if media.IsInactive() {
+		t.Fatal("expected media not to be inactive when active")
+	}
+
+	if _, ok := media.SetStatus(MEDIA_STATUS_DRAFT).(*Media); !ok {
+		t.Fatal("expected SetStatus to return *Media")
+	}
+
+	if !media.IsDraft() {
+		t.Fatal("expected media to be draft")
+	}
+
+	if _, ok := media.SetStatus(MEDIA_STATUS_INACTIVE).(*Media); !ok {
+		t.Fatal("expected SetStatus to return *Media")
+	}
+
+	if !media.IsInactive() {
+		t.Fatal("expected media to be inactive")
+	}
+}
+
 func TestMediaIsSoftDeleted(t *testing.T) {
 	media := &Media{}
 
 	if _, ok := media.SetSoftDeletedAt(sb.MAX_DATETIME).(*Media); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Media")
 	}
-	if media.GetSoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected SoftDeletedAt to be %q, got %q", sb.MAX_DATETIME, media.GetSoftDeletedAt())
-	}
-	if media.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != sb.MAX_DATETIME {
-		t.Fatalf("expected SoftDeletedAtCarbon to be %q, got %q", sb.MAX_DATETIME, media.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+
+	if media.IsSoftDeleted() {
+		t.Fatal("expected media not to be soft deleted when timestamp is MAX_DATETIME")
 	}
 
 	if _, ok := media.SetSoftDeletedAt("2024-01-01 00:00:00").(*Media); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Media")
 	}
-	if media.GetSoftDeletedAt() != "2024-01-01 00:00:00" {
-		t.Fatalf("expected SoftDeletedAt to be updated, got %q", media.GetSoftDeletedAt())
+
+	if !media.IsSoftDeleted() {
+		t.Fatal("expected media to be soft deleted when timestamp differs from MAX_DATETIME")
 	}
-	if media.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != "2024-01-01 00:00:00" {
-		t.Fatalf("expected SoftDeletedAtCarbon to match updated value, got %q", media.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+}
+
+func TestMediaIsImage(t *testing.T) {
+	media := &Media{}
+
+	// Test image/jpeg
+	media.SetType("image/jpeg")
+	if !media.IsImage() {
+		t.Fatal("expected media with type image/jpeg to be an image")
+	}
+	if media.IsVideo() {
+		t.Fatal("expected media with type image/jpeg not to be a video")
+	}
+
+	// Test image/png
+	media.SetType("image/png")
+	if !media.IsImage() {
+		t.Fatal("expected media with type image/png to be an image")
+	}
+
+	// Test non-image types
+	media.SetType("video/mp4")
+	if media.IsImage() {
+		t.Fatal("expected media with type video/mp4 not to be an image")
+	}
+
+	media.SetType("application/pdf")
+	if media.IsImage() {
+		t.Fatal("expected media with type application/pdf not to be an image")
+	}
+}
+
+func TestMediaIsVideo(t *testing.T) {
+	media := &Media{}
+
+	// Test video/mp4
+	media.SetType("video/mp4")
+	if !media.IsVideo() {
+		t.Fatal("expected media with type video/mp4 to be a video")
+	}
+	if media.IsImage() {
+		t.Fatal("expected media with type video/mp4 not to be an image")
+	}
+
+	// Test video/avi
+	media.SetType("video/avi")
+	if !media.IsVideo() {
+		t.Fatal("expected media with type video/avi to be a video")
+	}
+
+	// Test non-video types
+	media.SetType("image/jpeg")
+	if media.IsVideo() {
+		t.Fatal("expected media with type image/jpeg not to be a video")
+	}
+
+	media.SetType("application/pdf")
+	if media.IsVideo() {
+		t.Fatal("expected media with type application/pdf not to be a video")
 	}
 }
 
