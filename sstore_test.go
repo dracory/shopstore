@@ -112,7 +112,7 @@ func TestStoreCategoryDelete(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	categoryFound, errFind := store.CategoryFindByID(ctx, category.ID())
+	categoryFound, errFind := store.CategoryFindByID(ctx, category.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -142,13 +142,13 @@ func TestStoreCategoryDeleteByID(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	err = store.CategoryDeleteByID(ctx, category.ID())
+	err = store.CategoryDeleteByID(ctx, category.GetID())
 
 	if err != nil {
 		t.Fatal("unexpected error:", err)
 	}
 
-	categoryFound, errFind := store.CategoryFindByID(ctx, category.ID())
+	categoryFound, errFind := store.CategoryFindByID(ctx, category.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -182,7 +182,7 @@ func TestStoreCategoryFindByID(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	categoryFound, errFind := store.CategoryFindByID(ctx, category.ID())
+	categoryFound, errFind := store.CategoryFindByID(ctx, category.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -192,24 +192,24 @@ func TestStoreCategoryFindByID(t *testing.T) {
 		t.Fatal("unexpected nil category")
 	}
 
-	if categoryFound.ID() != category.ID() {
+	if categoryFound.GetID() != category.GetID() {
 		t.Fatal("unexpected category id")
 	}
 
-	if categoryFound.Title() != category.Title() {
+	if categoryFound.GetTitle() != category.GetTitle() {
 		t.Fatal("unexpected category title")
 	}
 
-	if categoryFound.Status() != category.Status() {
+	if categoryFound.GetStatus() != category.GetStatus() {
 		t.Fatal("unexpected category status")
 	}
 
-	if categoryFound.ParentID() != category.ParentID() {
+	if categoryFound.GetParentID() != category.GetParentID() {
 		t.Fatal("unexpected category parent id")
 	}
 
-	if !strings.Contains(categoryFound.SoftDeletedAt(), sb.MAX_DATETIME) {
-		t.Fatal("Exam MUST NOT be soft deleted", categoryFound.SoftDeletedAt())
+	if !strings.Contains(categoryFound.GetSoftDeletedAt(), sb.MAX_DATETIME) {
+		t.Fatal("Exam MUST NOT be soft deleted", categoryFound.GetSoftDeletedAt())
 		return
 	}
 }
@@ -243,7 +243,7 @@ func TestStoreCategorySoftDelete(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	categoryFound, errFind := store.CategoryFindByID(ctx, category.ID())
+	categoryFound, errFind := store.CategoryFindByID(ctx, category.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
