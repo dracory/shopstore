@@ -127,7 +127,7 @@ func (m *Media) Meta(name string) string {
 }
 
 func (m *Media) SetMeta(name string, value string) error {
-	return m.UpsertMetas(map[string]string{name: value})
+	return m.MetasUpsert(map[string]string{name: value})
 }
 
 // SetMetas stores metas as json string
@@ -141,7 +141,7 @@ func (m *Media) SetMetas(metas map[string]string) error {
 	return nil
 }
 
-func (m *Media) UpsertMetas(metas map[string]string) error {
+func (m *Media) MetasUpsert(metas map[string]string) error {
 	currentMetas, err := m.Metas()
 
 	if err != nil {
@@ -153,6 +153,24 @@ func (m *Media) UpsertMetas(metas map[string]string) error {
 	}
 
 	return m.SetMetas(currentMetas)
+}
+
+func (m *Media) MetaRemove(name string) error {
+	metas, err := m.Metas()
+	if err != nil {
+		return err
+	}
+	delete(metas, name)
+	return m.SetMetas(metas)
+}
+
+func (m *Media) MetasRemove(names []string) error {
+	for _, name := range names {
+		if err := m.MetaRemove(name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (o *Media) Sequence() int {

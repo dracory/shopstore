@@ -135,7 +135,7 @@ func (category *Category) Meta(name string) string {
 }
 
 func (category *Category) SetMeta(name string, value string) error {
-	return category.UpsertMetas(map[string]string{name: value})
+	return category.MetasUpsert(map[string]string{name: value})
 }
 
 // SetMetas stores metas as json string
@@ -149,7 +149,7 @@ func (category *Category) SetMetas(metas map[string]string) error {
 	return nil
 }
 
-func (category *Category) UpsertMetas(metas map[string]string) error {
+func (category *Category) MetasUpsert(metas map[string]string) error {
 	currentMetas, err := category.Metas()
 
 	if err != nil {
@@ -161,6 +161,24 @@ func (category *Category) UpsertMetas(metas map[string]string) error {
 	}
 
 	return category.SetMetas(currentMetas)
+}
+
+func (category *Category) MetaRemove(name string) error {
+	metas, err := category.Metas()
+	if err != nil {
+		return err
+	}
+	delete(metas, name)
+	return category.SetMetas(metas)
+}
+
+func (category *Category) MetasRemove(names []string) error {
+	for _, name := range names {
+		if err := category.MetaRemove(name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (category *Category) ParentID() string {

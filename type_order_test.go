@@ -170,7 +170,7 @@ func TestOrderMetasUpsertMergesValues(t *testing.T) {
 		t.Fatalf("unexpected error setting initial metas: %v", err)
 	}
 
-	if err := order.UpsertMetas(map[string]string{"alpha": "updated", "gamma": "delta"}); err != nil {
+	if err := order.MetasUpsert(map[string]string{"alpha": "updated", "gamma": "delta"}); err != nil {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
@@ -216,7 +216,7 @@ func TestOrderMetasHandlesNullJSON(t *testing.T) {
 		t.Fatalf("expected empty metas map for null JSON, got %v", metas)
 	}
 
-	if err := order.UpsertMetas(map[string]string{"alpha": "beta"}); err != nil {
+	if err := order.MetasUpsert(map[string]string{"alpha": "beta"}); err != nil {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
@@ -336,5 +336,101 @@ func TestOrderIsSoftDeleted(t *testing.T) {
 	}
 	if order.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != "2024-01-01 00:00:00" {
 		t.Fatalf("expected SoftDeletedAtCarbon to match updated value, got %q", order.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	}
+}
+
+func TestOrderMetaRemove(t *testing.T) {
+	order := &Order{}
+
+	if err := order.SetMetas(map[string]string{"key1": "value1", "key2": "value2"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := order.MetaRemove("key1"); err != nil {
+		t.Fatalf("unexpected error removing meta: %v", err)
+	}
+
+	if order.Meta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", order.Meta("key1"))
+	}
+
+	if order.Meta("key2") != "value2" {
+		t.Fatalf("expected key2 to still exist, got %q", order.Meta("key2"))
+	}
+}
+
+func TestOrderMetaRemoveNonExistent(t *testing.T) {
+	order := &Order{}
+
+	if err := order.SetMetas(map[string]string{"key1": "value1"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := order.MetaRemove("nonexistent"); err != nil {
+		t.Fatalf("unexpected error removing non-existent meta: %v", err)
+	}
+
+	if order.Meta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", order.Meta("key1"))
+	}
+}
+
+func TestOrderMetasRemove(t *testing.T) {
+	order := &Order{}
+
+	if err := order.SetMetas(map[string]string{"key1": "value1", "key2": "value2", "key3": "value3"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := order.MetasRemove([]string{"key1", "key2"}); err != nil {
+		t.Fatalf("unexpected error removing metas: %v", err)
+	}
+
+	if order.Meta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", order.Meta("key1"))
+	}
+
+	if order.Meta("key2") != "" {
+		t.Fatalf("expected key2 to be removed, got %q", order.Meta("key2"))
+	}
+
+	if order.Meta("key3") != "value3" {
+		t.Fatalf("expected key3 to still exist, got %q", order.Meta("key3"))
+	}
+}
+
+func TestOrderMetasRemoveEmptySlice(t *testing.T) {
+	order := &Order{}
+
+	if err := order.SetMetas(map[string]string{"key1": "value1"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := order.MetasRemove([]string{}); err != nil {
+		t.Fatalf("unexpected error removing empty slice: %v", err)
+	}
+
+	if order.Meta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", order.Meta("key1"))
+	}
+}
+
+func TestOrderMetaRemoveErrorPropagation(t *testing.T) {
+	order := NewOrderFromExistingData(map[string]string{
+		COLUMN_METAS: "{invalid",
+	})
+
+	if err := order.MetaRemove("key"); err == nil {
+		t.Fatal("expected error when removing meta with invalid JSON")
+	}
+}
+
+func TestOrderMetasRemoveErrorPropagation(t *testing.T) {
+	order := NewOrderFromExistingData(map[string]string{
+		COLUMN_METAS: "{invalid",
+	})
+
+	if err := order.MetasRemove([]string{"key"}); err == nil {
+		t.Fatal("expected error when removing metas with invalid JSON")
 	}
 }

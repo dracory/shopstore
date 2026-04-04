@@ -32,7 +32,9 @@ type CategoryInterface interface {
 	Meta(name string) string
 	SetMeta(name string, value string) error
 	SetMetas(metas map[string]string) error
-	UpsertMetas(metas map[string]string) error
+	MetasUpsert(metas map[string]string) error
+	MetaRemove(name string) error
+	MetasRemove(names []string) error
 
 	ParentID() string
 	SetParentID(parentID string) CategoryInterface
@@ -140,7 +142,9 @@ type MediaInterface interface {
 	Meta(name string) string
 	SetMeta(name string, value string) error
 	SetMetas(metas map[string]string) error
-	UpsertMetas(metas map[string]string) error
+	MetasUpsert(metas map[string]string) error
+	MetaRemove(name string) error
+	MetasRemove(names []string) error
 
 	Sequence() int
 	SetSequence(sequence int) MediaInterface
@@ -204,7 +208,9 @@ type OrderInterface interface {
 	SetMeta(name string, value string) error
 	Metas() (map[string]string, error)
 	SetMetas(metas map[string]string) error
-	UpsertMetas(metas map[string]string) error
+	MetasUpsert(metas map[string]string) error
+	MetaRemove(name string) error
+	MetasRemove(names []string) error
 
 	Price() string
 	SetPrice(price string) OrderInterface
@@ -247,7 +253,9 @@ type OrderLineItemInterface interface {
 	SetMetas(metas map[string]string) error
 	Meta(name string) string
 	SetMeta(name string, value string) error
-	UpsertMetas(metas map[string]string) error
+	MetasUpsert(metas map[string]string) error
+	MetaRemove(name string) error
+	MetasRemove(names []string) error
 
 	OrderID() string
 	SetOrderID(orderID string) OrderLineItemInterface
@@ -316,7 +324,9 @@ type ProductInterface interface {
 
 	Metas() (map[string]string, error)
 	SetMetas(metas map[string]string) error
-	UpsertMetas(metas map[string]string) error
+	MetasUpsert(metas map[string]string) error
+	MetaRemove(name string) error
+	MetasRemove(names []string) error
 
 	Price() string
 	SetPrice(price string) ProductInterface

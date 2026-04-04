@@ -168,7 +168,7 @@ func (order *Order) Meta(name string) string {
 }
 
 func (order *Order) SetMeta(name string, value string) error {
-	return order.UpsertMetas(map[string]string{name: value})
+	return order.MetasUpsert(map[string]string{name: value})
 }
 
 // SetMetas stores metas as json string
@@ -182,7 +182,7 @@ func (order *Order) SetMetas(metas map[string]string) error {
 	return nil
 }
 
-func (order *Order) UpsertMetas(metas map[string]string) error {
+func (order *Order) MetasUpsert(metas map[string]string) error {
 	currentMetas, err := order.Metas()
 
 	if err != nil {
@@ -194,6 +194,24 @@ func (order *Order) UpsertMetas(metas map[string]string) error {
 	}
 
 	return order.SetMetas(currentMetas)
+}
+
+func (order *Order) MetaRemove(name string) error {
+	metas, err := order.Metas()
+	if err != nil {
+		return err
+	}
+	delete(metas, name)
+	return order.SetMetas(metas)
+}
+
+func (order *Order) MetasRemove(names []string) error {
+	for _, name := range names {
+		if err := order.MetaRemove(name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (order *Order) Status() string {

@@ -147,7 +147,7 @@ func (product *Product) Meta(name string) string {
 }
 
 func (product *Product) SetMeta(name string, value string) error {
-	return product.UpsertMetas(map[string]string{name: value})
+	return product.MetasUpsert(map[string]string{name: value})
 }
 
 // SetMetas stores metas as json string
@@ -161,7 +161,7 @@ func (product *Product) SetMetas(metas map[string]string) error {
 	return nil
 }
 
-func (product *Product) UpsertMetas(metas map[string]string) error {
+func (product *Product) MetasUpsert(metas map[string]string) error {
 	currentMetas, err := product.Metas()
 
 	if err != nil {
@@ -173,6 +173,24 @@ func (product *Product) UpsertMetas(metas map[string]string) error {
 	}
 
 	return product.SetMetas(currentMetas)
+}
+
+func (product *Product) MetaRemove(name string) error {
+	metas, err := product.Metas()
+	if err != nil {
+		return err
+	}
+	delete(metas, name)
+	return product.SetMetas(metas)
+}
+
+func (product *Product) MetasRemove(names []string) error {
+	for _, name := range names {
+		if err := product.MetaRemove(name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (product *Product) Price() string {

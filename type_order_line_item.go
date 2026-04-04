@@ -110,7 +110,7 @@ func (o *OrderLineItem) Meta(name string) string {
 }
 
 func (o *OrderLineItem) SetMeta(name string, value string) error {
-	return o.UpsertMetas(map[string]string{name: value})
+	return o.MetasUpsert(map[string]string{name: value})
 }
 
 // SetMetas stores metas as json string
@@ -124,7 +124,7 @@ func (o *OrderLineItem) SetMetas(metas map[string]string) error {
 	return nil
 }
 
-func (o *OrderLineItem) UpsertMetas(metas map[string]string) error {
+func (o *OrderLineItem) MetasUpsert(metas map[string]string) error {
 	currentMetas, err := o.Metas()
 
 	if err != nil {
@@ -136,6 +136,24 @@ func (o *OrderLineItem) UpsertMetas(metas map[string]string) error {
 	}
 
 	return o.SetMetas(currentMetas)
+}
+
+func (o *OrderLineItem) MetaRemove(name string) error {
+	metas, err := o.Metas()
+	if err != nil {
+		return err
+	}
+	delete(metas, name)
+	return o.SetMetas(metas)
+}
+
+func (o *OrderLineItem) MetasRemove(names []string) error {
+	for _, name := range names {
+		if err := o.MetaRemove(name); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (o *OrderLineItem) OrderID() string {

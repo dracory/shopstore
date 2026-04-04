@@ -182,7 +182,7 @@ func TestProductMetasUpsertMergesValues(t *testing.T) {
 		t.Fatalf("unexpected error setting initial metas: %v", err)
 	}
 
-	if err := product.UpsertMetas(map[string]string{"alpha": "updated", "gamma": "delta"}); err != nil {
+	if err := product.MetasUpsert(map[string]string{"alpha": "updated", "gamma": "delta"}); err != nil {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
@@ -214,7 +214,7 @@ func TestProductMetasHandlesNullJSON(t *testing.T) {
 		t.Fatalf("expected empty metas map for null JSON, got %v", metas)
 	}
 
-	if err := product.UpsertMetas(map[string]string{"alpha": "beta"}); err != nil {
+	if err := product.MetasUpsert(map[string]string{"alpha": "beta"}); err != nil {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
@@ -324,5 +324,101 @@ func TestProductSlug(t *testing.T) {
 
 	if slug := product.Slug(); slug != "hello-world" {
 		t.Fatalf("expected slug to be %q, got %q", "hello-world", slug)
+	}
+}
+
+func TestProductMetaRemove(t *testing.T) {
+	product := &Product{}
+
+	if err := product.SetMetas(map[string]string{"key1": "value1", "key2": "value2"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := product.MetaRemove("key1"); err != nil {
+		t.Fatalf("unexpected error removing meta: %v", err)
+	}
+
+	if product.Meta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", product.Meta("key1"))
+	}
+
+	if product.Meta("key2") != "value2" {
+		t.Fatalf("expected key2 to still exist, got %q", product.Meta("key2"))
+	}
+}
+
+func TestProductMetaRemoveNonExistent(t *testing.T) {
+	product := &Product{}
+
+	if err := product.SetMetas(map[string]string{"key1": "value1"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := product.MetaRemove("nonexistent"); err != nil {
+		t.Fatalf("unexpected error removing non-existent meta: %v", err)
+	}
+
+	if product.Meta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", product.Meta("key1"))
+	}
+}
+
+func TestProductMetasRemove(t *testing.T) {
+	product := &Product{}
+
+	if err := product.SetMetas(map[string]string{"key1": "value1", "key2": "value2", "key3": "value3"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := product.MetasRemove([]string{"key1", "key2"}); err != nil {
+		t.Fatalf("unexpected error removing metas: %v", err)
+	}
+
+	if product.Meta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", product.Meta("key1"))
+	}
+
+	if product.Meta("key2") != "" {
+		t.Fatalf("expected key2 to be removed, got %q", product.Meta("key2"))
+	}
+
+	if product.Meta("key3") != "value3" {
+		t.Fatalf("expected key3 to still exist, got %q", product.Meta("key3"))
+	}
+}
+
+func TestProductMetasRemoveEmptySlice(t *testing.T) {
+	product := &Product{}
+
+	if err := product.SetMetas(map[string]string{"key1": "value1"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := product.MetasRemove([]string{}); err != nil {
+		t.Fatalf("unexpected error removing empty slice: %v", err)
+	}
+
+	if product.Meta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", product.Meta("key1"))
+	}
+}
+
+func TestProductMetaRemoveErrorPropagation(t *testing.T) {
+	product := NewProductFromExistingData(map[string]string{
+		COLUMN_METAS: "{invalid",
+	})
+
+	if err := product.MetaRemove("key"); err == nil {
+		t.Fatal("expected error when removing meta with invalid JSON")
+	}
+}
+
+func TestProductMetasRemoveErrorPropagation(t *testing.T) {
+	product := NewProductFromExistingData(map[string]string{
+		COLUMN_METAS: "{invalid",
+	})
+
+	if err := product.MetasRemove([]string{"key"}); err == nil {
+		t.Fatal("expected error when removing metas with invalid JSON")
 	}
 }

@@ -87,7 +87,7 @@ func TestCategoryUpsertMetasMergesValues(t *testing.T) {
 		t.Fatalf("unexpected error setting initial metas: %v", err)
 	}
 
-	if err := category.UpsertMetas(map[string]string{"alpha": "updated", "gamma": "delta"}); err != nil {
+	if err := category.MetasUpsert(map[string]string{"alpha": "updated", "gamma": "delta"}); err != nil {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
@@ -133,7 +133,7 @@ func TestCategoryMetasHandlesNullJSON(t *testing.T) {
 		t.Fatalf("expected empty metas map for null JSON, got %v", metas)
 	}
 
-	if err := category.UpsertMetas(map[string]string{"alpha": "beta"}); err != nil {
+	if err := category.MetasUpsert(map[string]string{"alpha": "beta"}); err != nil {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
@@ -319,5 +319,101 @@ func TestCategorySetMetaConvenience(t *testing.T) {
 
 	if got := category.Meta("key"); got != "value" {
 		t.Fatalf("expected Meta to return %q, got %q", "value", got)
+	}
+}
+
+func TestCategoryMetaRemove(t *testing.T) {
+	category := &Category{}
+
+	if err := category.SetMetas(map[string]string{"key1": "value1", "key2": "value2"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := category.MetaRemove("key1"); err != nil {
+		t.Fatalf("unexpected error removing meta: %v", err)
+	}
+
+	if category.Meta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", category.Meta("key1"))
+	}
+
+	if category.Meta("key2") != "value2" {
+		t.Fatalf("expected key2 to still exist, got %q", category.Meta("key2"))
+	}
+}
+
+func TestCategoryMetaRemoveNonExistent(t *testing.T) {
+	category := &Category{}
+
+	if err := category.SetMetas(map[string]string{"key1": "value1"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := category.MetaRemove("nonexistent"); err != nil {
+		t.Fatalf("unexpected error removing non-existent meta: %v", err)
+	}
+
+	if category.Meta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", category.Meta("key1"))
+	}
+}
+
+func TestCategoryMetasRemove(t *testing.T) {
+	category := &Category{}
+
+	if err := category.SetMetas(map[string]string{"key1": "value1", "key2": "value2", "key3": "value3"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := category.MetasRemove([]string{"key1", "key2"}); err != nil {
+		t.Fatalf("unexpected error removing metas: %v", err)
+	}
+
+	if category.Meta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", category.Meta("key1"))
+	}
+
+	if category.Meta("key2") != "" {
+		t.Fatalf("expected key2 to be removed, got %q", category.Meta("key2"))
+	}
+
+	if category.Meta("key3") != "value3" {
+		t.Fatalf("expected key3 to still exist, got %q", category.Meta("key3"))
+	}
+}
+
+func TestCategoryMetasRemoveEmptySlice(t *testing.T) {
+	category := &Category{}
+
+	if err := category.SetMetas(map[string]string{"key1": "value1"}); err != nil {
+		t.Fatalf("unexpected error setting metas: %v", err)
+	}
+
+	if err := category.MetasRemove([]string{}); err != nil {
+		t.Fatalf("unexpected error removing empty slice: %v", err)
+	}
+
+	if category.Meta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", category.Meta("key1"))
+	}
+}
+
+func TestCategoryMetaRemoveErrorPropagation(t *testing.T) {
+	category := NewCategoryFromExistingData(map[string]string{
+		COLUMN_METAS: "{invalid",
+	})
+
+	if err := category.MetaRemove("key"); err == nil {
+		t.Fatal("expected error when removing meta with invalid JSON")
+	}
+}
+
+func TestCategoryMetasRemoveErrorPropagation(t *testing.T) {
+	category := NewCategoryFromExistingData(map[string]string{
+		COLUMN_METAS: "{invalid",
+	})
+
+	if err := category.MetasRemove([]string{"key"}); err == nil {
+		t.Fatal("expected error when removing metas with invalid JSON")
 	}
 }
