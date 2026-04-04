@@ -180,7 +180,7 @@ type MediaInterface interface {
 	SetTitle(title string) MediaInterface
 
 	GetType() string
-	SetType(type_ string) MediaInterface
+	SetType(mediaType string) MediaInterface
 
 	GetURL() string
 	SetURL(url string) MediaInterface

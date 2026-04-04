@@ -24,6 +24,14 @@ type DiscountQueryInterface interface {
 	Code() string
 	SetCode(code string) DiscountQueryInterface
 
+	HasEndsAtGte() bool
+	EndsAtGte() string
+	SetEndsAtGte(endsAtGte string) DiscountQueryInterface
+
+	HasEndsAtLte() bool
+	EndsAtLte() string
+	SetEndsAtLte(endsAtLte string) DiscountQueryInterface
+
 	HasID() bool
 	ID() string
 	SetID(id string) DiscountQueryInterface
@@ -52,6 +60,14 @@ type DiscountQueryInterface interface {
 	SoftDeletedIncluded() bool
 	SetSoftDeletedIncluded(softDeletedIncluded bool) DiscountQueryInterface
 
+	HasStartsAtGte() bool
+	StartsAtGte() string
+	SetStartsAtGte(startsAtGte string) DiscountQueryInterface
+
+	HasStartsAtLte() bool
+	StartsAtLte() string
+	SetStartsAtLte(startsAtLte string) DiscountQueryInterface
+
 	HasStatus() bool
 	Status() string
 	SetStatus(status string) DiscountQueryInterface
@@ -59,6 +75,10 @@ type DiscountQueryInterface interface {
 	HasStatusIn() bool
 	StatusIn() []string
 	SetStatusIn(statusIn []string) DiscountQueryInterface
+
+	HasType() bool
+	Type() string
+	SetType(discountType string) DiscountQueryInterface
 
 	hasProperty(name string) bool
 }
@@ -117,6 +137,26 @@ func (c *discountQueryImplementation) Validate() error {
 
 	if c.HasStatusIn() && len(c.StatusIn()) == 0 {
 		return errors.New("discount query. status_in cannot be empty")
+	}
+
+	if c.HasEndsAtGte() && c.EndsAtGte() == "" {
+		return errors.New("discount query. ends_at_gte cannot be empty")
+	}
+
+	if c.HasEndsAtLte() && c.EndsAtLte() == "" {
+		return errors.New("discount query. ends_at_lte cannot be empty")
+	}
+
+	if c.HasStartsAtGte() && c.StartsAtGte() == "" {
+		return errors.New("discount query. starts_at_gte cannot be empty")
+	}
+
+	if c.HasStartsAtLte() && c.StartsAtLte() == "" {
+		return errors.New("discount query. starts_at_lte cannot be empty")
+	}
+
+	if c.HasType() && c.Type() == "" {
+		return errors.New("discount query. type cannot be empty")
 	}
 
 	return nil
@@ -366,6 +406,96 @@ func (c *discountQueryImplementation) StatusIn() []string {
 
 func (c *discountQueryImplementation) SetStatusIn(statusIn []string) DiscountQueryInterface {
 	c.properties["status_in"] = statusIn
+
+	return c
+}
+
+func (c *discountQueryImplementation) HasEndsAtGte() bool {
+	return c.hasProperty("ends_at_gte")
+}
+
+func (c *discountQueryImplementation) EndsAtGte() string {
+	if !c.HasEndsAtGte() {
+		return ""
+	}
+
+	return c.properties["ends_at_gte"].(string)
+}
+
+func (c *discountQueryImplementation) SetEndsAtGte(endsAtGte string) DiscountQueryInterface {
+	c.properties["ends_at_gte"] = endsAtGte
+
+	return c
+}
+
+func (c *discountQueryImplementation) HasEndsAtLte() bool {
+	return c.hasProperty("ends_at_lte")
+}
+
+func (c *discountQueryImplementation) EndsAtLte() string {
+	if !c.HasEndsAtLte() {
+		return ""
+	}
+
+	return c.properties["ends_at_lte"].(string)
+}
+
+func (c *discountQueryImplementation) SetEndsAtLte(endsAtLte string) DiscountQueryInterface {
+	c.properties["ends_at_lte"] = endsAtLte
+
+	return c
+}
+
+func (c *discountQueryImplementation) HasStartsAtGte() bool {
+	return c.hasProperty("starts_at_gte")
+}
+
+func (c *discountQueryImplementation) StartsAtGte() string {
+	if !c.HasStartsAtGte() {
+		return ""
+	}
+
+	return c.properties["starts_at_gte"].(string)
+}
+
+func (c *discountQueryImplementation) SetStartsAtGte(startsAtGte string) DiscountQueryInterface {
+	c.properties["starts_at_gte"] = startsAtGte
+
+	return c
+}
+
+func (c *discountQueryImplementation) HasStartsAtLte() bool {
+	return c.hasProperty("starts_at_lte")
+}
+
+func (c *discountQueryImplementation) StartsAtLte() string {
+	if !c.HasStartsAtLte() {
+		return ""
+	}
+
+	return c.properties["starts_at_lte"].(string)
+}
+
+func (c *discountQueryImplementation) SetStartsAtLte(startsAtLte string) DiscountQueryInterface {
+	c.properties["starts_at_lte"] = startsAtLte
+
+	return c
+}
+
+func (c *discountQueryImplementation) HasType() bool {
+	return c.hasProperty("type")
+}
+
+func (c *discountQueryImplementation) Type() string {
+	if !c.HasType() {
+		return ""
+	}
+
+	return c.properties["type"].(string)
+}
+
+func (c *discountQueryImplementation) SetType(discountType string) DiscountQueryInterface {
+	c.properties["type"] = discountType
 
 	return c
 }

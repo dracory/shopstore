@@ -294,6 +294,26 @@ func (store *Store) discountQuery(options DiscountQueryInterface) (selectDataset
 		q = q.Where(goqu.C(COLUMN_CREATED_AT).Lte(options.CreatedAtLte()))
 	}
 
+	if options.HasStartsAtGte() && options.HasStartsAtLte() {
+		q = q.Where(goqu.C(COLUMN_STARTS_AT).Between(exp.NewRangeVal(options.StartsAtGte(), options.StartsAtLte())))
+	} else if options.HasStartsAtGte() {
+		q = q.Where(goqu.C(COLUMN_STARTS_AT).Gte(options.StartsAtGte()))
+	} else if options.HasStartsAtLte() {
+		q = q.Where(goqu.C(COLUMN_STARTS_AT).Lte(options.StartsAtLte()))
+	}
+
+	if options.HasEndsAtGte() && options.HasEndsAtLte() {
+		q = q.Where(goqu.C(COLUMN_ENDS_AT).Between(exp.NewRangeVal(options.EndsAtGte(), options.EndsAtLte())))
+	} else if options.HasEndsAtGte() {
+		q = q.Where(goqu.C(COLUMN_ENDS_AT).Gte(options.EndsAtGte()))
+	} else if options.HasEndsAtLte() {
+		q = q.Where(goqu.C(COLUMN_ENDS_AT).Lte(options.EndsAtLte()))
+	}
+
+	if options.HasType() {
+		q = q.Where(goqu.C(COLUMN_TYPE).Eq(options.Type()))
+	}
+
 	if !options.IsCountOnly() {
 		if options.HasLimit() {
 			q = q.Limit(cast.ToUint(options.Limit()))
