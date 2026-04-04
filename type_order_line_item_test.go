@@ -13,51 +13,51 @@ func TestNewOrderLineItemDefaults(t *testing.T) {
 		t.Fatal("NewOrderLineItem returned nil")
 	}
 
-	if item.Status() != ORDER_STATUS_PENDING {
-		t.Fatalf("expected status %q, got %q", ORDER_STATUS_PENDING, item.Status())
+	if item.GetStatus() != ORDER_STATUS_PENDING {
+		t.Fatalf("expected status %q, got %q", ORDER_STATUS_PENDING, item.GetStatus())
 	}
 
-	if item.Title() != "" {
-		t.Fatalf("expected empty title, got %q", item.Title())
+	if item.GetTitle() != "" {
+		t.Fatalf("expected empty title, got %q", item.GetTitle())
 	}
 
-	if item.Memo() != "" {
-		t.Fatalf("expected empty memo, got %q", item.Memo())
+	if item.GetMemo() != "" {
+		t.Fatalf("expected empty memo, got %q", item.GetMemo())
 	}
 
-	if item.PriceFloat() != 0 {
-		t.Fatalf("expected default price 0, got %f", item.PriceFloat())
+	if item.GetPriceFloat() != 0 {
+		t.Fatalf("expected default price 0, got %f", item.GetPriceFloat())
 	}
 
-	if item.QuantityInt() != 1 {
-		t.Fatalf("expected default quantity 1, got %d", item.QuantityInt())
+	if item.GetQuantityInt() != 1 {
+		t.Fatalf("expected default quantity 1, got %d", item.GetQuantityInt())
 	}
 
-	if item.OrderID() != "" {
-		t.Fatalf("expected empty order id, got %q", item.OrderID())
+	if item.GetOrderID() != "" {
+		t.Fatalf("expected empty order id, got %q", item.GetOrderID())
 	}
 
-	if item.ProductID() != "" {
-		t.Fatalf("expected empty product id, got %q", item.ProductID())
+	if item.GetProductID() != "" {
+		t.Fatalf("expected empty product id, got %q", item.GetProductID())
 	}
 
-	if item.ID() == "" {
+	if item.GetID() == "" {
 		t.Fatal("expected generated ID to be non-empty")
 	}
 
-	if item.CreatedAt() == "" {
+	if item.GetCreatedAt() == "" {
 		t.Fatal("expected created at to be set")
 	}
 
-	if item.UpdatedAt() == "" {
+	if item.GetUpdatedAt() == "" {
 		t.Fatal("expected updated at to be set")
 	}
 
-	if item.SoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected soft deleted at %q, got %q", sb.MAX_DATETIME, item.SoftDeletedAt())
+	if item.GetSoftDeletedAt() != sb.MAX_DATETIME {
+		t.Fatalf("expected soft deleted at %q, got %q", sb.MAX_DATETIME, item.GetSoftDeletedAt())
 	}
 
-	metas, err := item.Metas()
+	metas, err := item.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -66,8 +66,8 @@ func TestNewOrderLineItemDefaults(t *testing.T) {
 		t.Fatalf("expected no metas by default, got %v", metas)
 	}
 
-	if item.Meta("missing") != "" {
-		t.Fatal("expected Meta for missing key to return empty string")
+	if item.GetMeta("missing") != "" {
+		t.Fatal("expected GetMeta for missing key to return empty string")
 	}
 }
 
@@ -132,25 +132,25 @@ func TestOrderLineItemCarbonHelpers(t *testing.T) {
 	if _, ok := item.SetCreatedAt(createdAt).(*OrderLineItem); !ok {
 		t.Fatal("expected SetCreatedAt to return *OrderLineItem")
 	}
-	if item.CreatedAt() != createdAt {
-		t.Fatalf("expected CreatedAt to be %q, got %q", createdAt, item.CreatedAt())
+	if item.GetCreatedAt() != createdAt {
+		t.Fatalf("expected CreatedAt to be %q, got %q", createdAt, item.GetCreatedAt())
 	}
-	if item.CreatedAtCarbon().ToDateTimeString(carbon.UTC) != createdAt {
-		t.Fatalf("expected CreatedAtCarbon to match input, got %q", item.CreatedAtCarbon().ToDateTimeString(carbon.UTC))
+	if item.GetCreatedAtCarbon().ToDateTimeString(carbon.UTC) != createdAt {
+		t.Fatalf("expected CreatedAtCarbon to match input, got %q", item.GetCreatedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := item.SetUpdatedAt(updatedAt).(*OrderLineItem); !ok {
 		t.Fatal("expected SetUpdatedAt to return *OrderLineItem")
 	}
-	if item.UpdatedAtCarbon().ToDateTimeString(carbon.UTC) != updatedAt {
-		t.Fatalf("expected UpdatedAtCarbon to match input, got %q", item.UpdatedAtCarbon().ToDateTimeString(carbon.UTC))
+	if item.GetUpdatedAtCarbon().ToDateTimeString(carbon.UTC) != updatedAt {
+		t.Fatalf("expected UpdatedAtCarbon to match input, got %q", item.GetUpdatedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := item.SetSoftDeletedAt(softDeletedAt).(*OrderLineItem); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *OrderLineItem")
 	}
-	if item.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != softDeletedAt {
-		t.Fatalf("expected SoftDeletedAtCarbon to match input, got %q", item.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	if item.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != softDeletedAt {
+		t.Fatalf("expected SoftDeletedAtCarbon to match input, got %q", item.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 }
 
@@ -161,7 +161,7 @@ func TestOrderLineItemMetasRoundTrip(t *testing.T) {
 		t.Fatalf("unexpected error setting metas: %v", err)
 	}
 
-	metas, err := item.Metas()
+	metas, err := item.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -170,8 +170,8 @@ func TestOrderLineItemMetasRoundTrip(t *testing.T) {
 		t.Fatalf("expected meta to be %q, got %q", "beta", metas["alpha"])
 	}
 
-	if item.Meta("alpha") != "beta" {
-		t.Fatalf("expected Meta helper to return %q, got %q", "beta", item.Meta("alpha"))
+	if item.GetMeta("alpha") != "beta" {
+		t.Fatalf("expected GetMeta helper to return %q, got %q", "beta", item.GetMeta("alpha"))
 	}
 }
 
@@ -186,7 +186,7 @@ func TestOrderLineItemMetasUpsertMergesValues(t *testing.T) {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
-	metas, err := item.Metas()
+	metas, err := item.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -205,12 +205,12 @@ func TestOrderLineItemMetasInvalidJSON(t *testing.T) {
 		COLUMN_METAS: "{invalid",
 	})
 
-	if _, err := item.Metas(); err == nil {
+	if _, err := item.GetMetas(); err == nil {
 		t.Fatal("expected error when parsing invalid metas JSON")
 	}
 
-	if item.Meta("anything") != "" {
-		t.Fatalf("expected Meta to return empty string on invalid JSON")
+	if item.GetMeta("anything") != "" {
+		t.Fatalf("expected GetMeta to return empty string on invalid JSON")
 	}
 }
 
@@ -219,7 +219,7 @@ func TestOrderLineItemMetasHandlesNullJSON(t *testing.T) {
 		COLUMN_METAS: "null",
 	})
 
-	metas, err := item.Metas()
+	metas, err := item.GetMetas()
 	if err != nil {
 		t.Fatalf("unexpected error retrieving metas: %v", err)
 	}
@@ -232,8 +232,8 @@ func TestOrderLineItemMetasHandlesNullJSON(t *testing.T) {
 		t.Fatalf("unexpected error upserting metas: %v", err)
 	}
 
-	if got := item.Meta("alpha"); got != "beta" {
-		t.Fatalf("expected Meta helper to return %q, got %q", "beta", got)
+	if got := item.GetMeta("alpha"); got != "beta" {
+		t.Fatalf("expected GetMeta helper to return %q, got %q", "beta", got)
 	}
 }
 
@@ -244,8 +244,8 @@ func TestOrderLineItemSetMetaConvenience(t *testing.T) {
 		t.Fatalf("unexpected error from SetMeta: %v", err)
 	}
 
-	if item.Meta("key") != "value" {
-		t.Fatalf("expected Meta to return %q, got %q", "value", item.Meta("key"))
+	if item.GetMeta("key") != "value" {
+		t.Fatalf("expected GetMeta to return %q, got %q", "value", item.GetMeta("key"))
 	}
 }
 
@@ -255,21 +255,21 @@ func TestOrderLineItemPriceAndQuantityHelpers(t *testing.T) {
 	if _, ok := item.SetQuantityInt(10).(*OrderLineItem); !ok {
 		t.Fatal("expected SetQuantityInt to return *OrderLineItem")
 	}
-	if item.QuantityInt() != 10 {
-		t.Fatalf("expected QuantityInt to be 10, got %d", item.QuantityInt())
+	if item.GetQuantityInt() != 10 {
+		t.Fatalf("expected QuantityInt to be 10, got %d", item.GetQuantityInt())
 	}
-	if item.Quantity() != "10" {
-		t.Fatalf("expected Quantity to be \"10\", got %q", item.Quantity())
+	if item.GetQuantity() != "10" {
+		t.Fatalf("expected Quantity to be \"10\", got %q", item.GetQuantity())
 	}
 
 	if _, ok := item.SetPriceFloat(49.95).(*OrderLineItem); !ok {
 		t.Fatal("expected SetPriceFloat to return *OrderLineItem")
 	}
-	if item.PriceFloat() != 49.95 {
-		t.Fatalf("expected PriceFloat to be 49.95, got %f", item.PriceFloat())
+	if item.GetPriceFloat() != 49.95 {
+		t.Fatalf("expected PriceFloat to be 49.95, got %f", item.GetPriceFloat())
 	}
-	if item.Price() != "49.95" {
-		t.Fatalf("expected Price to be \"49.95\", got %q", item.Price())
+	if item.GetPrice() != "49.95" {
+		t.Fatalf("expected Price to be \"49.95\", got %q", item.GetPrice())
 	}
 }
 
@@ -279,36 +279,36 @@ func TestOrderLineItemSetterChainingAndGetters(t *testing.T) {
 	if _, ok := item.SetMemo("memo").(*OrderLineItem); !ok {
 		t.Fatal("expected SetMemo to return *OrderLineItem")
 	}
-	if item.Memo() != "memo" {
-		t.Fatalf("expected Memo getter to return %q, got %q", "memo", item.Memo())
+	if item.GetMemo() != "memo" {
+		t.Fatalf("expected GetMemo getter to return %q, got %q", "memo", item.GetMemo())
 	}
 
 	if _, ok := item.SetOrderID("ORDER1").(*OrderLineItem); !ok {
 		t.Fatal("expected SetOrderID to return *OrderLineItem")
 	}
-	if item.OrderID() != "ORDER1" {
-		t.Fatalf("expected OrderID getter to return %q, got %q", "ORDER1", item.OrderID())
+	if item.GetOrderID() != "ORDER1" {
+		t.Fatalf("expected GetOrderID getter to return %q, got %q", "ORDER1", item.GetOrderID())
 	}
 
 	if _, ok := item.SetProductID("PRODUCT1").(*OrderLineItem); !ok {
 		t.Fatal("expected SetProductID to return *OrderLineItem")
 	}
-	if item.ProductID() != "PRODUCT1" {
-		t.Fatalf("expected ProductID getter to return %q, got %q", "PRODUCT1", item.ProductID())
+	if item.GetProductID() != "PRODUCT1" {
+		t.Fatalf("expected GetProductID getter to return %q, got %q", "PRODUCT1", item.GetProductID())
 	}
 
 	if _, ok := item.SetStatus(ORDER_STATUS_PARTIALLY_SHIPPED).(*OrderLineItem); !ok {
 		t.Fatal("expected SetStatus to return *OrderLineItem")
 	}
-	if item.Status() != ORDER_STATUS_PARTIALLY_SHIPPED {
-		t.Fatalf("expected Status getter to return %q, got %q", ORDER_STATUS_PARTIALLY_SHIPPED, item.Status())
+	if item.GetStatus() != ORDER_STATUS_PARTIALLY_SHIPPED {
+		t.Fatalf("expected GetStatus getter to return %q, got %q", ORDER_STATUS_PARTIALLY_SHIPPED, item.GetStatus())
 	}
 
 	if _, ok := item.SetTitle("title").(*OrderLineItem); !ok {
 		t.Fatal("expected SetTitle to return *OrderLineItem")
 	}
-	if item.Title() != "title" {
-		t.Fatalf("expected Title getter to return %q, got %q", "title", item.Title())
+	if item.GetTitle() != "title" {
+		t.Fatalf("expected GetTitle getter to return %q, got %q", "title", item.GetTitle())
 	}
 }
 
@@ -318,21 +318,21 @@ func TestOrderLineItemIsSoftDeleted(t *testing.T) {
 	if _, ok := item.SetSoftDeletedAt(sb.MAX_DATETIME).(*OrderLineItem); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *OrderLineItem")
 	}
-	if item.SoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected SoftDeletedAt to be %q, got %q", sb.MAX_DATETIME, item.SoftDeletedAt())
+	if item.GetSoftDeletedAt() != sb.MAX_DATETIME {
+		t.Fatalf("expected SoftDeletedAt to be %q, got %q", sb.MAX_DATETIME, item.GetSoftDeletedAt())
 	}
-	if item.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != sb.MAX_DATETIME {
-		t.Fatalf("expected SoftDeletedAtCarbon to be %q, got %q", sb.MAX_DATETIME, item.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	if item.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != sb.MAX_DATETIME {
+		t.Fatalf("expected SoftDeletedAtCarbon to be %q, got %q", sb.MAX_DATETIME, item.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := item.SetSoftDeletedAt("2024-01-01 00:00:00").(*OrderLineItem); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *OrderLineItem")
 	}
-	if item.SoftDeletedAt() != "2024-01-01 00:00:00" {
-		t.Fatalf("expected SoftDeletedAt to be updated, got %q", item.SoftDeletedAt())
+	if item.GetSoftDeletedAt() != "2024-01-01 00:00:00" {
+		t.Fatalf("expected SoftDeletedAt to be updated, got %q", item.GetSoftDeletedAt())
 	}
-	if item.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != "2024-01-01 00:00:00" {
-		t.Fatalf("expected SoftDeletedAtCarbon to match updated value, got %q", item.SoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	if item.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != "2024-01-01 00:00:00" {
+		t.Fatalf("expected SoftDeletedAtCarbon to match updated value, got %q", item.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 }
 
@@ -347,12 +347,12 @@ func TestOrderLineItemMetaRemove(t *testing.T) {
 		t.Fatalf("unexpected error removing meta: %v", err)
 	}
 
-	if item.Meta("key1") != "" {
-		t.Fatalf("expected key1 to be removed, got %q", item.Meta("key1"))
+	if item.GetMeta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", item.GetMeta("key1"))
 	}
 
-	if item.Meta("key2") != "value2" {
-		t.Fatalf("expected key2 to still exist, got %q", item.Meta("key2"))
+	if item.GetMeta("key2") != "value2" {
+		t.Fatalf("expected key2 to still exist, got %q", item.GetMeta("key2"))
 	}
 }
 
@@ -367,8 +367,8 @@ func TestOrderLineItemMetaRemoveNonExistent(t *testing.T) {
 		t.Fatalf("unexpected error removing non-existent meta: %v", err)
 	}
 
-	if item.Meta("key1") != "value1" {
-		t.Fatalf("expected key1 to still exist, got %q", item.Meta("key1"))
+	if item.GetMeta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", item.GetMeta("key1"))
 	}
 }
 
@@ -383,16 +383,16 @@ func TestOrderLineItemMetasRemove(t *testing.T) {
 		t.Fatalf("unexpected error removing metas: %v", err)
 	}
 
-	if item.Meta("key1") != "" {
-		t.Fatalf("expected key1 to be removed, got %q", item.Meta("key1"))
+	if item.GetMeta("key1") != "" {
+		t.Fatalf("expected key1 to be removed, got %q", item.GetMeta("key1"))
 	}
 
-	if item.Meta("key2") != "" {
-		t.Fatalf("expected key2 to be removed, got %q", item.Meta("key2"))
+	if item.GetMeta("key2") != "" {
+		t.Fatalf("expected key2 to be removed, got %q", item.GetMeta("key2"))
 	}
 
-	if item.Meta("key3") != "value3" {
-		t.Fatalf("expected key3 to still exist, got %q", item.Meta("key3"))
+	if item.GetMeta("key3") != "value3" {
+		t.Fatalf("expected key3 to still exist, got %q", item.GetMeta("key3"))
 	}
 }
 
@@ -407,8 +407,8 @@ func TestOrderLineItemMetasRemoveEmptySlice(t *testing.T) {
 		t.Fatalf("unexpected error removing empty slice: %v", err)
 	}
 
-	if item.Meta("key1") != "value1" {
-		t.Fatalf("expected key1 to still exist, got %q", item.Meta("key1"))
+	if item.GetMeta("key1") != "value1" {
+		t.Fatalf("expected key1 to still exist, got %q", item.GetMeta("key1"))
 	}
 }
 

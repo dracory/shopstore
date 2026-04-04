@@ -73,7 +73,7 @@ func TestStoreProductFindByID(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	productFound, errFind := store.ProductFindByID(ctx, product.ID())
+	productFound, errFind := store.ProductFindByID(ctx, product.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -83,36 +83,36 @@ func TestStoreProductFindByID(t *testing.T) {
 		t.Fatal("Product MUST NOT be nil")
 	}
 
-	if productFound.Title() != "Ruler" {
-		t.Fatal("Product title MUST BE 'Ruler', found: ", productFound.Title())
+	if productFound.GetTitle() != "Ruler" {
+		t.Fatal("Product title MUST BE 'Ruler', found: ", productFound.GetTitle())
 	}
 
-	if productFound.Status() != PRODUCT_STATUS_DRAFT {
-		t.Fatal("Product status MUST BE 'draft', found: ", productFound.Status())
+	if productFound.GetStatus() != PRODUCT_STATUS_DRAFT {
+		t.Fatal("Product status MUST BE 'draft', found: ", productFound.GetStatus())
 	}
 
-	if productFound.Quantity() != "1" {
-		t.Fatal("Product quantity MUST BE '1', found: ", productFound.Quantity())
+	if productFound.GetQuantity() != "1" {
+		t.Fatal("Product quantity MUST BE '1', found: ", productFound.GetQuantity())
 	}
 
-	if productFound.Price() != "19.99" {
-		t.Fatal("Product price MUST BE '19.99', found: ", productFound.Price())
+	if productFound.GetPrice() != "19.99" {
+		t.Fatal("Product price MUST BE '19.99', found: ", productFound.GetPrice())
 	}
 
-	if productFound.Memo() != "test ruler" {
-		t.Fatal("Product memo MUST BE 'test ruler', found: ", productFound.Memo())
+	if productFound.GetMemo() != "test ruler" {
+		t.Fatal("Product memo MUST BE 'test ruler', found: ", productFound.GetMemo())
 	}
 
-	if productFound.Meta("color") != "green" {
-		t.Fatal("Product color meta MUST BE 'green', found: ", productFound.Meta("color"))
+	if productFound.GetMeta("color") != "green" {
+		t.Fatal("Product color meta MUST BE 'green', found: ", productFound.GetMeta("color"))
 	}
 
-	if productFound.Meta("size") != "xxl" {
-		t.Fatal("Product size meta MUST BE 'xxl', found: ", productFound.Meta("xxl"))
+	if productFound.GetMeta("size") != "xxl" {
+		t.Fatal("Product size meta MUST BE 'xxl', found: ", productFound.GetMeta("xxl"))
 	}
 
-	if !strings.Contains(productFound.SoftDeletedAt(), sb.MAX_DATETIME) {
-		t.Fatal("Product MUST NOT be soft deleted", productFound.SoftDeletedAt())
+	if !strings.Contains(productFound.GetSoftDeletedAt(), sb.MAX_DATETIME) {
+		t.Fatal("Product MUST NOT be soft deleted", productFound.GetSoftDeletedAt())
 	}
 }
 
@@ -140,7 +140,7 @@ func TestStoreProductSoftDelete(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	if product.SoftDeletedAt() != sb.MAX_DATETIME {
+	if product.GetSoftDeletedAt() != sb.MAX_DATETIME {
 		t.Fatal("Product MUST NOT be soft deleted")
 	}
 
@@ -150,7 +150,7 @@ func TestStoreProductSoftDelete(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	productFound, errFind := store.ProductFindByID(ctx, product.ID())
+	productFound, errFind := store.ProductFindByID(ctx, product.GetID())
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
@@ -161,7 +161,7 @@ func TestStoreProductSoftDelete(t *testing.T) {
 	}
 
 	productFindWithDeleted, errFind := store.ProductList(ctx, NewProductQuery().
-		SetID(product.ID()).
+		SetID(product.GetID()).
 		SetLimit(1).
 		SetSoftDeletedIncluded(true))
 
@@ -174,8 +174,7 @@ func TestStoreProductSoftDelete(t *testing.T) {
 		return
 	}
 
-	if strings.Contains(productFindWithDeleted[0].SoftDeletedAt(), sb.NULL_DATETIME) {
-		t.Fatal("Product MUST be soft deleted", productFindWithDeleted[0].SoftDeletedAt())
+	if strings.Contains(productFindWithDeleted[0].GetSoftDeletedAt(), sb.NULL_DATETIME) {
+		t.Fatal("Product MUST be soft deleted", productFindWithDeleted[0].GetSoftDeletedAt())
 	}
-
 }
