@@ -170,6 +170,8 @@ Best balance of simplicity and functionality:
 ```sql
 -- Add to shop_product table
 ALTER TABLE shop_product ADD COLUMN parent_id VARCHAR(255) DEFAULT '';
+ALTER TABLE shop_product ADD COLUMN variant_dimensions JSON DEFAULT NULL;
+
 CREATE INDEX idx_product_parent ON shop_product(parent_id);
 
 -- Optional: enforce that only leaf products can be purchased
@@ -252,25 +254,96 @@ const COLUMN_PARENT_ID = "parent_id"
 const PRODUCT_STATUS_PARENT = "parent" // Display only, not purchasable
 ```
 
-### Variant Dimensions via Metas
+### Variant Dimensions via JSON Column
 
-To enforce consistency across variants, store the dimension schema (e.g., ["color", "size"]) in the parent's metas:
+To enforce consistency across variants and support the options matrix, store dimension definitions in a dedicated JSON column:
 
-```go
-// Define which metas each variant must have
-parent.SetMeta("variant_dimensions", `["color","size"]`)
-
-// Or structured with validation rules
-parent.SetMeta("variant_dimensions", `[
-    {"name": "color", "required": true},
-    {"name": "size", "required": true}
-]`)
+**Database Schema:**
+```sql
+-- Add variant_dimensions column (stores dimension schema for parents)
+ALTER TABLE shop_product ADD COLUMN variant_dimensions JSON DEFAULT NULL;
 ```
 
-**Why metas:**
-- No new database column needed
-- Uses existing infrastructure
-- Flexible structure (can extend later)
+**Entity Changes:**
+
+```go
+// type_product.go
+
+// SetVariantDimensions defines which attributes variants must have
+// Example: ["color", "size"] or [{"name":"color","required":true}]
+func (p *Product) SetVariantDimensions(dims interface{}) error {
+    if p.GetParentID() != "" {
+        return errors.New("cannot set dimensions on a variant")
+    }
+    jsonBytes, err := json.Marshal(dims)
+    if err != nil {
+        return err
+    }
+    p.Set(COLUMN_VARIANT_DIMENSIONS, string(jsonBytes))
+    return nil
+}
+
+// GetVariantDimensions returns the dimension schema
+func (p *Product) GetVariantDimensions() ([]VariantDimension, error) {
+    dimJSON := p.Get(COLUMN_VARIANT_DIMENSIONS)
+    if dimJSON == "" || dimJSON == "null" {
+        return []VariantDimension{}, nil
+    }
+    var dims []VariantDimension
+    err := json.Unmarshal([]byte(dimJSON), &dims)
+    return dims, err
+}
+
+// GetVariantDimensionNames returns just the dimension names
+func (p *Product) GetVariantDimensionNames() ([]string, error) {
+    dimJSON := p.Get(COLUMN_VARIANT_DIMENSIONS)
+    if dimJSON == "" || dimJSON == "null" {
+        return []string{}, nil
+    }
+    
+    // Try simple string array first
+    var simple []string
+    if err := json.Unmarshal([]byte(dimJSON), &simple); err == nil {
+        return simple, nil
+    }
+    
+    // Try structured format
+    var structured []VariantDimension
+    if err := json.Unmarshal([]byte(dimJSON), &structured); err != nil {
+        return nil, err
+    }
+    
+    names := make([]string, len(structured))
+    for i, d := range structured {
+        names[i] = d.Name
+    }
+    return names, nil
+}
+
+// HasVariantDimensions returns true if dimensions are defined
+func (p *Product) HasVariantDimensions() bool {
+    dimJSON := p.Get(COLUMN_VARIANT_DIMENSIONS)
+    return dimJSON != "" && dimJSON != "null"
+}
+
+// VariantDimension represents a single dimension configuration
+type VariantDimension struct {
+    Name     string   `json:"name"`      // "color", "size"
+    Required bool     `json:"required"`  // must variant have this?
+    Options  []string `json:"options,omitempty"` // allowed values (optional)
+}
+```
+
+**Constants:**
+```go
+const COLUMN_VARIANT_DIMENSIONS = "variant_dimensions"
+```
+
+**Why separate column:**
+- Clean separation from user-defined metas
+- No risk of overwrite by `SetMetas()`
+- Can extend matrix data structure later
+- Queryable: `WHERE variant_dimensions IS NOT NULL` finds all parents with defined schemas
 
 **Validation in Store:**
 
@@ -283,14 +356,12 @@ func (s *Store) ProductCreate(ctx context.Context, product ProductInterface) err
             return err
         }
         
-        dimJSON := parent.GetMeta("variant_dimensions")
-        if dimJSON != "" {
-            var dims []string
-            json.Unmarshal([]byte(dimJSON), &dims)
+        if parent.HasVariantDimensions() {
+            dimNames, _ := parent.GetVariantDimensionNames()
+            variantMetas, _ := product.GetMetas()
             
             // Ensure variant has all required dimension metas
-            variantMetas, _ := product.GetMetas()
-            for _, dim := range dims {
+            for _, dim := range dimNames {
                 if _, ok := variantMetas[dim]; !ok {
                     return fmt.Errorf("variant missing required dimension meta: %s", dim)
                 }
@@ -302,48 +373,23 @@ func (s *Store) ProductCreate(ctx context.Context, product ProductInterface) err
 }
 ```
 
-**Helper Methods:**
-
-```go
-// On Product entity
-
-// SetVariantDimensions defines which metas variants must have
-func (p *Product) SetVariantDimensions(dims []string) error {
-    if p.GetParentID() != "" {
-        return errors.New("cannot set dimensions on a variant")
-    }
-    jsonBytes, _ := json.Marshal(dims)
-    return p.SetMeta("variant_dimensions", string(jsonBytes))
-}
-
-// GetVariantDimensions returns required dimension names
-func (p *Product) GetVariantDimensions() ([]string, error) {
-    dimJSON := p.GetMeta("variant_dimensions")
-    if dimJSON == "" {
-        return []string{}, nil
-    }
-    var dims []string
-    err := json.Unmarshal([]byte(dimJSON), &dims)
-    return dims, err
-}
-
-// HasVariantDimensions returns true if parent has dimensions defined
-func (p *Product) HasVariantDimensions() bool {
-    return p.GetMeta("variant_dimensions") != ""
-}
-```
-
 **Usage Flow:**
 
 ```go
-// 1. Create parent with dimension schema
+// 1. Create parent with dimension schema (simple array)
 parent := NewProduct().
     SetTitle("Nike Air Max").
     SetStatus(PRODUCT_STATUS_PARENT)
 parent.SetVariantDimensions([]string{"color", "size"})
 store.ProductCreate(ctx, parent)
 
-// 2. Create variant - validated against schema
+// 2. Or with structured dimensions (validation rules)
+parent.SetVariantDimensions([]shopstore.VariantDimension{
+    {Name: "color", Required: true, Options: []string{"red", "blue", "black"}},
+    {Name: "size", Required: true, Options: []string{"8", "9", "10", "11"}},
+})
+
+// 3. Create variant - validated against schema
 variant := NewProduct().
     SetParentID(parent.GetID()).
     SetMeta("color", "red").  // Required
@@ -351,11 +397,50 @@ variant := NewProduct().
     SetMeta("material", "leather")  // Optional, not in schema
 store.ProductCreate(ctx, variant) // Succeeds
 
-// 3. Invalid variant - missing required dimension
+// 4. Invalid variant - missing required dimension
 badVariant := NewProduct().
     SetParentID(parent.GetID()).
     SetMeta("color", "blue")  // Missing "size"!
 store.ProductCreate(ctx, badVariant) // Fails: variant missing required dimension meta: size
+```
+
+**Matrix Generation Helper:**
+
+```go
+// Auto-generate all variant combinations from dimensions
+func (p *Product) GenerateVariants(store StoreInterface, ctx context.Context) ([]ProductInterface, error) {
+    if !p.HasVariantDimensions() {
+        return nil, errors.New("parent has no dimensions defined")
+    }
+    
+    dims, err := p.GetVariantDimensions()
+    if err != nil {
+        return nil, err
+    }
+    
+    // Generate cartesian product of all option combinations
+    combinations := cartesianProduct(dims)
+    
+    variants := make([]ProductInterface, len(combinations))
+    for i, combo := range combinations {
+        variant := NewProduct().
+            SetParentID(p.GetID()).
+            SetTitle(p.GetTitle())
+        
+        // Set metas for each dimension
+        for dimName, value := range combo {
+            variant.SetMeta(dimName, value)
+        }
+        
+        // Generate SKU from combination
+        sku := generateVariantSKU(p.GetID(), combo)
+        variant.SetSKU(sku)
+        
+        variants[i] = variant
+    }
+    
+    return variants, nil
+}
 ```
 
 ## Helper Methods
