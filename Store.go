@@ -9,6 +9,11 @@ import (
 	"github.com/dracory/database"
 )
 
+type migration struct {
+	sql    string
+	params []interface{}
+}
+
 var _ StoreInterface = (*Store)(nil) // verify it extends the interface
 
 type Store struct {
@@ -61,6 +66,16 @@ func (store *Store) AutoMigrate() error {
 			log.Println(err)
 			return err
 		}
+	}
+
+	err := migration_001_product_table_add_parent_id(store)
+	if err != nil {
+		return err
+	}
+
+	err = migration_002_product_table_add_variant_dimensions(store)
+	if err != nil {
+		return err
 	}
 
 	return nil

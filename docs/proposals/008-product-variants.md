@@ -169,7 +169,7 @@ Best balance of simplicity and functionality:
 
 ```sql
 -- Add to shop_product table
-ALTER TABLE shop_product ADD COLUMN parent_id VARCHAR(255) DEFAULT '';
+ALTER TABLE shop_product ADD COLUMN parent_id VARCHAR(255) DEFAULT '0';
 ALTER TABLE shop_product ADD COLUMN variant_dimensions JSON DEFAULT NULL;
 
 CREATE INDEX idx_product_parent ON shop_product(parent_id);
@@ -177,6 +177,73 @@ CREATE INDEX idx_product_parent ON shop_product(parent_id);
 -- Optional: enforce that only leaf products can be purchased
 -- (parent products should not appear in cart)
 ```
+
+### AutoMigration
+
+Using the `sb` (sqlbuilder) library, add migration logic to `AutoMigrate()` to check and add the new columns:
+
+```go
+// In store.go - add to AutoMigrate()
+func (store *Store) AutoMigrate() error {
+    // ... existing table creation ...
+    
+    // Add variant columns if they don't exist
+    if err := store.sqlProductAddVariantColumns(); err != nil {
+        return err
+    }
+    
+    return nil
+}
+
+// sqlProductAddVariantColumns checks and adds parent_id and variant_dimensions columns
+func (store *Store) sqlProductAddVariantColumns() error {
+    sql, err := sb.NewBuilder(store.dbDriverName).
+        Table(store.productTableName).
+        Column(sb.Column{
+            Name:    COLUMN_PARENT_ID,
+            Type:    sb.COLUMN_TYPE_STRING,
+            Length:  40,
+            Default: "0",  // 0 = no parent
+        }).
+        AddColumnIfNotExists()
+    
+    if err != nil {
+        return err
+    }
+    
+    _, err = store.db.Exec(sql)
+    if err != nil {
+        // Column may already exist, log but don't fail
+        store.logSql("add column", sql)
+    }
+    
+    // Add variant_dimensions JSON column
+    sql, err = sb.NewBuilder(store.dbDriverName).
+        Table(store.productTableName).
+        Column(sb.Column{
+            Name:     COLUMN_VARIANT_DIMENSIONS,
+            Type:     sb.COLUMN_TYPE_TEXT, // JSON stored as TEXT
+            Nullable: true,
+        }).
+        AddColumnIfNotExists()
+    
+    if err != nil {
+        return err
+    }
+    
+    _, err = store.db.Exec(sql)
+    if err != nil {
+        store.logSql("add column", sql)
+    }
+    
+    return nil
+}
+```
+
+**Notes:**
+- `AddColumnIfNotExists()` generates `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` (or driver-specific equivalent)
+- `Default: "0"` ensures existing products have no parent (root products)
+- Columns are nullable/optional - not all products need variants
 
 ### Entity Changes
 

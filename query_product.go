@@ -60,6 +60,10 @@ type ProductQueryInterface interface {
 	TitleLike() string
 	SetTitleLike(titleLike string) ProductQueryInterface
 
+	HasParentID() bool
+	ParentID() string
+	SetParentID(parentID string) ProductQueryInterface
+
 	hasProperty(name string) bool
 }
 
@@ -366,6 +370,24 @@ func (c *productQueryImplementation) TitleLike() string {
 
 func (c *productQueryImplementation) SetTitleLike(titleLike string) ProductQueryInterface {
 	c.properties["title_like"] = titleLike
+
+	return c
+}
+
+func (c *productQueryImplementation) HasParentID() bool {
+	return c.hasProperty("parent_id")
+}
+
+func (c *productQueryImplementation) ParentID() string {
+	if !c.HasParentID() {
+		return ""
+	}
+
+	return c.properties["parent_id"].(string)
+}
+
+func (c *productQueryImplementation) SetParentID(parentID string) ProductQueryInterface {
+	c.properties["parent_id"] = parentID
 
 	return c
 }

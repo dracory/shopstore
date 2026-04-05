@@ -328,6 +328,12 @@ type OrderLineItemInterface interface {
 	IsFree() bool
 }
 
+type VariantDimension struct {
+	Name     string   `json:"name"`              // "color", "size"
+	Required bool     `json:"required"`          // must variant have this?
+	Options  []string `json:"options,omitempty"` // allowed values (optional)
+}
+
 type ProductInterface interface {
 	Data() map[string]string
 	DataChanged() map[string]string
@@ -337,8 +343,10 @@ type ProductInterface interface {
 	IsActive() bool
 	IsDisabled() bool
 	IsDraft() bool
+	IsParent() bool
 	IsSoftDeleted() bool
 	IsFree() bool
+	IsVariant() bool
 	Slug() string
 
 	// Stock predicates
@@ -372,6 +380,9 @@ type ProductInterface interface {
 	MetaRemove(name string) error
 	MetasRemove(names []string) error
 
+	GetParentID() string
+	SetParentID(parentID string) ProductInterface
+
 	GetPrice() string
 	SetPrice(price string) ProductInterface
 	GetPriceFloat() float64
@@ -398,6 +409,13 @@ type ProductInterface interface {
 	GetUpdatedAt() string
 	GetUpdatedAtCarbon() *carbon.Carbon
 	SetUpdatedAt(updatedAt string) ProductInterface
+
+	GetVariantDimensions() ([]VariantDimension, error)
+	SetVariantDimensions(dims interface{}) error
+	GetVariantDimensionNames() ([]string, error)
+	HasVariantDimensions() bool
+	SetVariantMatrixSchema(schema string) ProductInterface
+	SetVariantMatrixValues(values string) ProductInterface
 }
 
 type StoreInterface interface {
@@ -472,4 +490,9 @@ type StoreInterface interface {
 	ProductSoftDelete(ctx context.Context, product ProductInterface) error
 	ProductSoftDeleteByID(ctx context.Context, productID string) error
 	ProductUpdate(ctx context.Context, product ProductInterface) error
+
+	// Variant operations
+	ProductVariantList(ctx context.Context, parentID string) ([]ProductInterface, error)
+	ProductIsParent(ctx context.Context, productID string) (bool, error)
+	ProductGetParent(ctx context.Context, productID string) (ProductInterface, error)
 }

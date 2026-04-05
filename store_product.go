@@ -262,6 +262,10 @@ func (store *Store) productQuery(options ProductQueryInterface) (selectDataset *
 		q = q.Where(goqu.C(COLUMN_STATUS).In(options.StatusIn()))
 	}
 
+	if options.HasParentID() {
+		q = q.Where(goqu.C(COLUMN_PARENT_ID).Eq(options.ParentID()))
+	}
+
 	if options.HasCreatedAtGte() && options.HasCreatedAtLte() {
 		q = q.Where(goqu.C(COLUMN_CREATED_AT).Between(exp.NewRangeVal(options.CreatedAtGte(), options.CreatedAtLte())))
 	} else if options.HasCreatedAtGte() {
@@ -304,4 +308,53 @@ func (store *Store) productQuery(options ProductQueryInterface) (selectDataset *
 		Gt(carbon.Now(carbon.UTC).ToDateTimeString())
 
 	return q.Where(softDeleted), columns, nil
+}
+
+// ProductVariantList returns all variants for a given parent product ID
+func (store *Store) ProductVariantList(ctx context.Context, parentID string) ([]ProductInterface, error) {
+	if parentID == "" {
+		return []ProductInterface{}, errors.New("parent ID is empty")
+	}
+
+	return store.ProductList(ctx, NewProductQuery().SetParentID(parentID))
+}
+
+// ProductIsParent returns true if the product has variants (has variant dimensions defined)
+func (store *Store) ProductIsParent(ctx context.Context, productID string) (bool, error) {
+	if productID == "" {
+		return false, errors.New("product ID is empty")
+	}
+
+	product, err := store.ProductFindByID(ctx, productID)
+	if err != nil {
+		return false, err
+	}
+
+	if product == nil {
+		return false, nil
+	}
+
+	return product.HasVariantDimensions(), nil
+}
+
+// ProductGetParent returns the parent product of a variant
+func (store *Store) ProductGetParent(ctx context.Context, productID string) (ProductInterface, error) {
+	if productID == "" {
+		return nil, errors.New("product ID is empty")
+	}
+
+	product, err := store.ProductFindByID(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+
+	if product == nil {
+		return nil, nil
+	}
+
+	if !product.IsVariant() {
+		return nil, errors.New("product is not a variant")
+	}
+
+	return store.ProductFindByID(ctx, product.GetParentID())
 }

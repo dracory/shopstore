@@ -11,18 +11,20 @@ Shop Store is a Go package that provides a database-backed store for common comm
 1. [Features](#features)
 2. [Installation](#installation)
 3. [Quick start](#quick-start)
-4. [Domain entities](#domain-entities)
-5. [Query builders](#query-builders)
-6. [Metadata & soft deletion](#metadata--soft-deletion)
-7. [Debugging & observability](#debugging--observability)
-8. [Testing](#testing)
-9. [Development](#development)
-10. [License](#license)
+4. [Product variants](#product-variants)
+5. [Domain entities](#domain-entities)
+6. [Query builders](#query-builders)
+7. [Metadata & soft deletion](#metadata--soft-deletion)
+8. [Debugging & observability](#debugging--observability)
+9. [Testing](#testing)
+10. [Development](#development)
+11. [License](#license)
 
 ## Features
 
 - **Composable store** – instantiate a `Store` with your own table names, database connection, and migration settings.
 - **Rich domain objects** – `Category`, `Discount`, `Media`, `Order`, `OrderLineItem`, and `Product` types expose defaults, helpers, predicates, and getter/setter chains.
+- **Product variants** – support for both simple products and parent/child product variants (e.g., size/color combinations).
 - **Change tracking** – entities track dirty fields and ensure updates persist only modified values.
 - **Metadata support** – uniform `metas` JSON helpers (`SetMetas`, `UpsertMetas`, `Meta`) across all entities.
 - **Soft deletion** – soft-delete helpers hide records unless explicitly requested.
@@ -111,13 +113,93 @@ if err := store.OrderCreate(ctx, order); err != nil {
 }
 ```
 
+### Product variants
+
+The store supports both **simple products** (single SKU) and **product variants** (parent/child matrix for size, color, etc.).
+
+**Simple product** (no variants):
+```go
+product := shopstore.NewProduct().
+    SetTitle("Cascade T-Shirt").
+    SetDescription("Premium cotton tee").
+    SetSKU("TS-CAS-001").
+    SetQuantityInt(25).
+    SetPriceFloat(19.99)
+
+if err := store.ProductCreate(ctx, product); err != nil {
+    panic(err)
+}
+```
+
+**Parent product with variants** (matrix for size/color):
+```go
+// 1. Create parent (display-only, defines variant dimensions)
+parent := shopstore.NewProduct().
+    SetTitle("Nike Air Max").
+    SetStatus(shopstore.PRODUCT_STATUS_PARENT)
+
+// Define variant dimensions (schema)
+_ = parent.SetVariantDimensions([]shopstore.VariantDimension{
+    {Name: "color", Required: true, Options: []string{"red", "blue", "black"}},
+    {Name: "size", Required: true, Options: []string{"8", "9", "10", "11"}},
+})
+
+if err := store.ProductCreate(ctx, parent); err != nil {
+    panic(err)
+}
+
+// 2. Create variant (specific color/size combination)
+variant := shopstore.NewProduct().
+    SetTitle("Nike Air Max").
+    SetParentID(parent.GetID()).  // Links to parent
+    SetSKU("NAM-RED-9").
+    SetPriceFloat(129.99).
+    SetQuantityInt(15).
+    SetStatus(shopstore.PRODUCT_STATUS_ACTIVE)
+
+// Store variant's dimension values
+_ = variant.SetVariantMatrixValues(`{"color": "red", "size": "9"}`)
+
+if err := store.ProductCreate(ctx, variant); err != nil {
+    panic(err)
+}
+
+// 3. List all variants for a parent
+variants, err := store.ProductVariantList(ctx, parent.GetID())
+if err != nil {
+    panic(err)
+}
+
+for _, v := range variants {
+    println(v.GetID(), v.GetSKU(), v.GetPriceFloat())
+}
+```
+
+**Querying products:**
+```go
+// Get only parent products (no parent_id)
+parents, err := store.ProductList(ctx, shopstore.NewProductQuery().
+    SetParentID("0").
+    SetStatus(shopstore.PRODUCT_STATUS_PARENT))
+
+// Get variants of a specific parent
+variants, err := store.ProductList(ctx, shopstore.NewProductQuery().
+    SetParentID(parentID))
+
+// Check if product is a parent
+isParent, err := store.ProductIsParent(ctx, productID)
+
+// Get parent of a variant
+parent, err := store.ProductGetParent(ctx, variantID)
+```
+
 ## Domain entities
 
 Each entity embeds `dataobject.DataObject`, enabling fluent setters and change tracking. Key helpers include:
 
 | Entity | Highlights |
 | --- | --- |
-| `Product` | `IsActive`, `IsDraft`, slug generation, price/quantity helpers. |
+| `Product` | `IsActive`, `IsDraft`, slug generation, price/quantity helpers, **parent/child variants support**. |
 | `Order` | Rich status predicates (awaiting shipment, refunded, etc.). |
 | `OrderLineItem` | Links products to orders, maintains quantity and price helpers. |
 | `Discount` | Code generator, amount/percent handling, start/end scheduling. |

@@ -2,6 +2,7 @@ package shopstore
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
@@ -31,12 +32,15 @@ func NewProduct() ProductInterface {
 		SetShortDescription("").
 		SetQuantityInt(0). // By default 0
 		SetPriceFloat(0).  // Free. By default
+		SetParentID("").   // No parent by default (not a variant)
 		SetMemo("").
 		SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetSoftDeletedAt(sb.MAX_DATETIME)
 
 	_ = o.SetMetas(map[string]string{})
+	_ = o.SetVariantMatrixSchema("{}")
+	_ = o.SetVariantMatrixValues("{}")
 
 	return o
 }
@@ -65,8 +69,83 @@ func (product *Product) IsSoftDeleted() bool {
 	return product.GetSoftDeletedAtCarbon().Compare("<", carbon.Now(carbon.UTC))
 }
 
-func (product *Product) IsFree() bool {
-	return product.GetPriceFloat() <= 0
+func (product *Product) IsVariant() bool {
+	return product.GetParentID() != ""
+}
+
+func (product *Product) IsParent() bool {
+	return product.HasVariantDimensions()
+}
+
+func (product *Product) GetParentID() string {
+	return product.Get(COLUMN_PARENT_ID)
+}
+
+func (product *Product) SetParentID(parentID string) ProductInterface {
+	product.Set(COLUMN_PARENT_ID, parentID)
+	return product
+}
+
+func (product *Product) SetVariantMatrixSchema(schema string) ProductInterface {
+	product.Set(COLUMN_VARIANT_MATRIX_SCHEMA, schema)
+	return product
+}
+
+func (product *Product) SetVariantMatrixValues(values string) ProductInterface {
+	product.Set(COLUMN_VARIANT_MATRIX_VALUES, values)
+	return product
+}
+
+func (product *Product) GetVariantDimensions() ([]VariantDimension, error) {
+	dimJSON := product.Get(COLUMN_VARIANT_MATRIX_SCHEMA)
+	if dimJSON == "" || dimJSON == "null" {
+		return []VariantDimension{}, nil
+	}
+	var dims []VariantDimension
+	err := json.Unmarshal([]byte(dimJSON), &dims)
+	return dims, err
+}
+
+func (product *Product) SetVariantDimensions(dims interface{}) error {
+	if product.GetParentID() != "" {
+		return errors.New("cannot set dimensions on a variant")
+	}
+	jsonBytes, err := json.Marshal(dims)
+	if err != nil {
+		return err
+	}
+	product.Set(COLUMN_VARIANT_MATRIX_SCHEMA, string(jsonBytes))
+	return nil
+}
+
+func (product *Product) GetVariantDimensionNames() ([]string, error) {
+	dimJSON := product.Get(COLUMN_VARIANT_MATRIX_SCHEMA)
+	if dimJSON == "" || dimJSON == "null" {
+		return []string{}, nil
+	}
+
+	// Try simple string array first
+	var simple []string
+	if err := json.Unmarshal([]byte(dimJSON), &simple); err == nil {
+		return simple, nil
+	}
+
+	// Try structured format
+	var structured []VariantDimension
+	if err := json.Unmarshal([]byte(dimJSON), &structured); err != nil {
+		return nil, err
+	}
+
+	names := make([]string, len(structured))
+	for i, d := range structured {
+		names[i] = d.Name
+	}
+	return names, nil
+}
+
+func (product *Product) HasVariantDimensions() bool {
+	dimJSON := product.Get(COLUMN_VARIANT_MATRIX_SCHEMA)
+	return dimJSON != "" && dimJSON != "null"
 }
 
 // HasStock returns true if the product quantity is greater than 0
@@ -82,6 +161,11 @@ func (product *Product) IsOutOfStock() bool {
 // IsPaid returns true if the product price is greater than 0
 func (product *Product) IsPaid() bool {
 	return product.GetPriceFloat() > 0
+}
+
+// IsFree returns true if the product price is less than or equal to 0
+func (product *Product) IsFree() bool {
+	return product.GetPriceFloat() <= 0
 }
 
 func (product *Product) Slug() string {
