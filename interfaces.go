@@ -8,6 +8,9 @@ import (
 	"github.com/dromara/carbon/v2"
 )
 
+// CategoryInterface defines the contract for category entities in the shop store.
+// Categories support hierarchical structures (parent-child relationships),
+// soft deletion, metadata storage, and status management.
 type CategoryInterface interface {
 	Data() map[string]string
 	DataChanged() map[string]string
@@ -64,6 +67,9 @@ type CategoryInterface interface {
 	IsChild() bool
 }
 
+// DiscountInterface defines the contract for discount/promotion entities.
+// Discounts support temporal validity (start/end dates), amount-based discounts,
+// soft deletion, metadata storage, and status management.
 type DiscountInterface interface {
 	Data() map[string]string
 	DataChanged() map[string]string
@@ -135,6 +141,9 @@ type DiscountInterface interface {
 	IsValidNow() bool
 }
 
+// MediaInterface defines the contract for media entities (images, videos, etc).
+// Media files are associated with entities via EntityID, support sequencing for ordering,
+// soft deletion, metadata storage, and type classification.
 type MediaInterface interface {
 	Data() map[string]string
 	DataChanged() map[string]string
@@ -200,6 +209,9 @@ type MediaInterface interface {
 	IsVideo() bool
 }
 
+// OrderInterface defines the contract for order entities.
+// Orders track customer purchases with status workflow, pricing, quantity management,
+// soft deletion, and metadata storage. Supports various order states from pending to completed.
 type OrderInterface interface {
 	// Inherited from DataObject
 	Data() map[string]string
@@ -264,6 +276,9 @@ type OrderInterface interface {
 	SetUpdatedAt(updatedAt string) OrderInterface
 }
 
+// OrderLineItemInterface defines the contract for order line item entities.
+// Line items represent individual products within an order with their own
+// pricing, quantity, and status tracking. Supports soft deletion and metadata storage.
 type OrderLineItemInterface interface {
 	Data() map[string]string
 	DataChanged() map[string]string
@@ -328,12 +343,18 @@ type OrderLineItemInterface interface {
 	IsFree() bool
 }
 
-type VariantDimension struct {
+// VariantMatrixSchema defines a single dimension for product variants.
+// Used to define variant attributes like color, size, material, etc.
+// Supports optional predefined options and required/optional flags.
+type VariantMatrixSchema struct {
 	Name     string   `json:"name"`              // "color", "size"
 	Required bool     `json:"required"`          // must variant have this?
 	Options  []string `json:"options,omitempty"` // allowed values (optional)
 }
 
+// ProductInterface defines the contract for product entities.
+// Products support parent-child relationships (variants), pricing, stock management,
+// variant matrix configuration, soft deletion, metadata storage, and status management.
 type ProductInterface interface {
 	Data() map[string]string
 	DataChanged() map[string]string
@@ -410,14 +431,17 @@ type ProductInterface interface {
 	GetUpdatedAtCarbon() *carbon.Carbon
 	SetUpdatedAt(updatedAt string) ProductInterface
 
-	GetVariantDimensions() ([]VariantDimension, error)
-	SetVariantDimensions(dims interface{}) error
-	GetVariantDimensionNames() ([]string, error)
-	HasVariantDimensions() bool
-	SetVariantMatrixSchema(schema string) ProductInterface
-	SetVariantMatrixValues(values string) ProductInterface
+	GetVariantMatrixSchema() (VariantMatrixSchema, error)
+	SetVariantMatrixSchema(schema VariantMatrixSchema) error
+	HasVariantMatrixSchema() bool
+
+	GetVariantMatrixValues() (map[string]string, error)
+	SetVariantMatrixValues(values map[string]string) error
 }
 
+// StoreInterface defines the contract for the shop store database operations.
+// Provides CRUD operations, soft deletion, counting, listing with pagination,
+// and variant management for all entity types (categories, discounts, media, orders, products).
 type StoreInterface interface {
 	AutoMigrate() error
 	DB() *sql.DB

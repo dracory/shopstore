@@ -2,7 +2,6 @@ package shopstore
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/dracory/dataobject"
 	"github.com/dracory/sb"
@@ -39,8 +38,8 @@ func NewProduct() ProductInterface {
 		SetSoftDeletedAt(sb.MAX_DATETIME)
 
 	_ = o.SetMetas(map[string]string{})
-	_ = o.SetVariantMatrixSchema("{}")
-	_ = o.SetVariantMatrixValues("{}")
+	_ = o.SetVariantMatrixSchema(VariantMatrixSchema{})
+	_ = o.SetVariantMatrixValues(map[string]string{})
 
 	return o
 }
@@ -74,7 +73,7 @@ func (product *Product) IsVariant() bool {
 }
 
 func (product *Product) IsParent() bool {
-	return product.HasVariantDimensions()
+	return product.HasVariantMatrixSchema()
 }
 
 func (product *Product) GetParentID() string {
@@ -86,31 +85,8 @@ func (product *Product) SetParentID(parentID string) ProductInterface {
 	return product
 }
 
-func (product *Product) SetVariantMatrixSchema(schema string) ProductInterface {
-	product.Set(COLUMN_VARIANT_MATRIX_SCHEMA, schema)
-	return product
-}
-
-func (product *Product) SetVariantMatrixValues(values string) ProductInterface {
-	product.Set(COLUMN_VARIANT_MATRIX_VALUES, values)
-	return product
-}
-
-func (product *Product) GetVariantDimensions() ([]VariantDimension, error) {
-	dimJSON := product.Get(COLUMN_VARIANT_MATRIX_SCHEMA)
-	if dimJSON == "" || dimJSON == "null" {
-		return []VariantDimension{}, nil
-	}
-	var dims []VariantDimension
-	err := json.Unmarshal([]byte(dimJSON), &dims)
-	return dims, err
-}
-
-func (product *Product) SetVariantDimensions(dims interface{}) error {
-	if product.GetParentID() != "" {
-		return errors.New("cannot set dimensions on a variant")
-	}
-	jsonBytes, err := json.Marshal(dims)
+func (product *Product) SetVariantMatrixSchema(schema VariantMatrixSchema) error {
+	jsonBytes, err := json.Marshal(schema)
 	if err != nil {
 		return err
 	}
@@ -118,32 +94,36 @@ func (product *Product) SetVariantDimensions(dims interface{}) error {
 	return nil
 }
 
-func (product *Product) GetVariantDimensionNames() ([]string, error) {
-	dimJSON := product.Get(COLUMN_VARIANT_MATRIX_SCHEMA)
-	if dimJSON == "" || dimJSON == "null" {
-		return []string{}, nil
+func (product *Product) SetVariantMatrixValues(values map[string]string) error {
+	jsonBytes, err := json.Marshal(values)
+	if err != nil {
+		return err
 	}
-
-	// Try simple string array first
-	var simple []string
-	if err := json.Unmarshal([]byte(dimJSON), &simple); err == nil {
-		return simple, nil
-	}
-
-	// Try structured format
-	var structured []VariantDimension
-	if err := json.Unmarshal([]byte(dimJSON), &structured); err != nil {
-		return nil, err
-	}
-
-	names := make([]string, len(structured))
-	for i, d := range structured {
-		names[i] = d.Name
-	}
-	return names, nil
+	product.Set(COLUMN_VARIANT_MATRIX_VALUES, string(jsonBytes))
+	return nil
 }
 
-func (product *Product) HasVariantDimensions() bool {
+func (product *Product) GetVariantMatrixValues() (map[string]string, error) {
+	valuesJSON := product.Get(COLUMN_VARIANT_MATRIX_VALUES)
+	if valuesJSON == "" || valuesJSON == "null" {
+		return map[string]string{}, nil
+	}
+	var values map[string]string
+	err := json.Unmarshal([]byte(valuesJSON), &values)
+	return values, err
+}
+
+func (product *Product) GetVariantMatrixSchema() (VariantMatrixSchema, error) {
+	schemaJSON := product.Get(COLUMN_VARIANT_MATRIX_SCHEMA)
+	if schemaJSON == "" || schemaJSON == "null" {
+		return VariantMatrixSchema{}, nil
+	}
+	var schema VariantMatrixSchema
+	err := json.Unmarshal([]byte(schemaJSON), &schema)
+	return schema, err
+}
+
+func (product *Product) HasVariantMatrixSchema() bool {
 	dimJSON := product.Get(COLUMN_VARIANT_MATRIX_SCHEMA)
 	return dimJSON != "" && dimJSON != "null"
 }

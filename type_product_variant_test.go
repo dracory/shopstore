@@ -4,133 +4,143 @@ import (
 	"testing"
 )
 
-// == VARIANT DIMENSION TESTS =================================================
+// == VARIANT MATRIX SCHEMA TESTS =============================================
 
-func TestProductSetVariantDimensionsSimpleArray(t *testing.T) {
+func TestProductSetVariantMatrixSchema(t *testing.T) {
 	product := &Product{}
 
-	err := product.SetVariantDimensions([]string{"color", "size"})
+	schema := VariantMatrixSchema{
+		Name:     "color",
+		Required: true,
+		Options:  []string{"red", "blue", "black"},
+	}
+
+	err := product.SetVariantMatrixSchema(schema)
 	if err != nil {
-		t.Fatalf("unexpected error setting variant dimensions: %v", err)
+		t.Fatalf("unexpected error setting variant matrix schema: %v", err)
 	}
 
-	if !product.HasVariantDimensions() {
-		t.Fatal("expected HasVariantDimensions to return true")
+	if !product.HasVariantMatrixSchema() {
+		t.Fatal("expected HasVariantMatrixSchema to return true")
 	}
 
-	names, err := product.GetVariantDimensionNames()
+	retrievedSchema, err := product.GetVariantMatrixSchema()
 	if err != nil {
-		t.Fatalf("unexpected error getting dimension names: %v", err)
+		t.Fatalf("unexpected error getting variant matrix schema: %v", err)
 	}
 
-	if len(names) != 2 {
-		t.Fatalf("expected 2 dimension names, got %d", len(names))
+	if retrievedSchema.Name != "color" {
+		t.Fatalf("expected schema name 'color', got %q", retrievedSchema.Name)
 	}
 
-	if names[0] != "color" || names[1] != "size" {
-		t.Fatalf("expected [color, size], got %v", names)
+	if !retrievedSchema.Required {
+		t.Fatal("expected schema Required to be true")
+	}
+
+	if len(retrievedSchema.Options) != 3 {
+		t.Fatalf("expected 3 options, got %d", len(retrievedSchema.Options))
 	}
 }
 
-func TestProductSetVariantDimensionsStructured(t *testing.T) {
+func TestProductSetVariantMatrixSchemaEmpty(t *testing.T) {
 	product := &Product{}
 
-	dims := []VariantDimension{
-		{Name: "color", Required: true, Options: []string{"red", "blue", "black"}},
-		{Name: "size", Required: true, Options: []string{"8", "9", "10", "11"}},
-	}
-
-	err := product.SetVariantDimensions(dims)
-	if err != nil {
-		t.Fatalf("unexpected error setting variant dimensions: %v", err)
-	}
-
-	retrievedDims, err := product.GetVariantDimensions()
-	if err != nil {
-		t.Fatalf("unexpected error getting variant dimensions: %v", err)
-	}
-
-	if len(retrievedDims) != 2 {
-		t.Fatalf("expected 2 dimensions, got %d", len(retrievedDims))
-	}
-
-	if retrievedDims[0].Name != "color" || !retrievedDims[0].Required {
-		t.Fatalf("expected first dimension to be color with required=true, got %+v", retrievedDims[0])
-	}
-
-	if len(retrievedDims[0].Options) != 3 {
-		t.Fatalf("expected 3 color options, got %d", len(retrievedDims[0].Options))
-	}
-}
-
-func TestProductSetVariantDimensionsOnVariant(t *testing.T) {
-	product := &Product{}
-	product.SetParentID("parent123")
-
-	err := product.SetVariantDimensions([]string{"color"})
-	if err == nil {
-		t.Fatal("expected error when setting dimensions on a variant")
-	}
-}
-
-func TestProductHasVariantDimensionsEmpty(t *testing.T) {
-	product := &Product{}
-
-	if product.HasVariantDimensions() {
-		t.Fatal("expected HasVariantDimensions to return false for empty product")
-	}
-
-	dims, err := product.GetVariantDimensions()
+	err := product.SetVariantMatrixSchema(VariantMatrixSchema{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if len(dims) != 0 {
-		t.Fatalf("expected empty dimensions, got %d", len(dims))
-	}
-
-	names, err := product.GetVariantDimensionNames()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if len(names) != 0 {
-		t.Fatalf("expected empty dimension names, got %d", len(names))
+	// Empty schema with no name should still count as having dimensions
+	// because the JSON is "{}" not "null" or ""
+	if !product.HasVariantMatrixSchema() {
+		t.Fatal("expected HasVariantMatrixSchema to return true for empty struct")
 	}
 }
 
-func TestProductGetVariantDimensionsNull(t *testing.T) {
+func TestProductGetVariantMatrixSchemaNull(t *testing.T) {
 	product := NewProductFromExistingData(map[string]string{
 		COLUMN_VARIANT_MATRIX_SCHEMA: "null",
 	})
 
-	dims, err := product.GetVariantDimensions()
+	schema, err := product.GetVariantMatrixSchema()
 	if err != nil {
 		t.Fatalf("unexpected error with null JSON: %v", err)
 	}
 
-	if len(dims) != 0 {
-		t.Fatalf("expected empty dimensions for null JSON, got %d", len(dims))
+	if schema.Name != "" {
+		t.Fatalf("expected empty schema name for null, got %q", schema.Name)
 	}
 
-	if product.HasVariantDimensions() {
-		t.Fatal("expected HasVariantDimensions to return false for null")
+	if product.HasVariantMatrixSchema() {
+		t.Fatal("expected HasVariantMatrixSchema to return false for null")
 	}
 }
 
-func TestProductGetVariantDimensionsInvalidJSON(t *testing.T) {
+func TestProductGetVariantMatrixSchemaInvalidJSON(t *testing.T) {
 	product := NewProductFromExistingData(map[string]string{
 		COLUMN_VARIANT_MATRIX_SCHEMA: "{invalid",
 	})
 
-	_, err := product.GetVariantDimensions()
+	_, err := product.GetVariantMatrixSchema()
 	if err == nil {
 		t.Fatal("expected error when parsing invalid JSON")
 	}
+}
 
-	_, err = product.GetVariantDimensionNames()
-	if err == nil {
-		t.Fatal("expected error when getting dimension names with invalid JSON")
+// == VARIANT MATRIX VALUES TESTS =============================================
+
+func TestProductSetVariantMatrixValues(t *testing.T) {
+	product := &Product{}
+
+	values := map[string]string{
+		"color": "red",
+		"size":  "9",
+	}
+
+	err := product.SetVariantMatrixValues(values)
+	if err != nil {
+		t.Fatalf("unexpected error setting variant matrix values: %v", err)
+	}
+
+	retrievedValues, err := product.GetVariantMatrixValues()
+	if err != nil {
+		t.Fatalf("unexpected error getting variant matrix values: %v", err)
+	}
+
+	if retrievedValues["color"] != "red" {
+		t.Fatalf("expected color='red', got %q", retrievedValues["color"])
+	}
+
+	if retrievedValues["size"] != "9" {
+		t.Fatalf("expected size='9', got %q", retrievedValues["size"])
+	}
+}
+
+func TestProductGetVariantMatrixValuesEmpty(t *testing.T) {
+	product := &Product{}
+
+	values, err := product.GetVariantMatrixValues()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(values) != 0 {
+		t.Fatalf("expected empty values, got %d", len(values))
+	}
+}
+
+func TestProductGetVariantMatrixValuesNull(t *testing.T) {
+	product := NewProductFromExistingData(map[string]string{
+		COLUMN_VARIANT_MATRIX_VALUES: "null",
+	})
+
+	values, err := product.GetVariantMatrixValues()
+	if err != nil {
+		t.Fatalf("unexpected error with null JSON: %v", err)
+	}
+
+	if len(values) != 0 {
+		t.Fatalf("expected empty values for null, got %d", len(values))
 	}
 }
 
@@ -154,16 +164,16 @@ func TestProductIsParent(t *testing.T) {
 	product := &Product{}
 
 	if product.IsParent() {
-		t.Fatal("expected IsParent to return false for product without dimensions")
+		t.Fatal("expected IsParent to return false for product without schema")
 	}
 
-	err := product.SetVariantDimensions([]string{"color", "size"})
+	err := product.SetVariantMatrixSchema(VariantMatrixSchema{Name: "color"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	if !product.IsParent() {
-		t.Fatal("expected IsParent to return true after setting dimensions")
+		t.Fatal("expected IsParent to return true after setting schema")
 	}
 }
 

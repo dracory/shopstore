@@ -136,10 +136,10 @@ if err := store.ProductCreate(ctx, product); err != nil {
 // 1. Create parent (display-only, defines variant dimensions)
 parent := shopstore.NewProduct().
     SetTitle("Nike Air Max").
-    SetStatus(shopstore.PRODUCT_STATUS_PARENT)
+    SetStatus(shopstore.PRODUCT_STATUS_ACTIVE)
 
 // Define variant dimensions (schema)
-_ = parent.SetVariantDimensions([]shopstore.VariantDimension{
+_ = parent.SetVariantMatrixSchema(shopstore.VariantSchema{
     {Name: "color", Required: true, Options: []string{"red", "blue", "black"}},
     {Name: "size", Required: true, Options: []string{"8", "9", "10", "11"}},
 })
@@ -158,7 +158,7 @@ variant := shopstore.NewProduct().
     SetStatus(shopstore.PRODUCT_STATUS_ACTIVE)
 
 // Store variant's dimension values
-_ = variant.SetVariantMatrixValues(`{"color": "red", "size": "9"}`)
+_ = variant.SetVariantMatrixValues(map[string]string{"color": "red", "size": "9"})
 
 if err := store.ProductCreate(ctx, variant); err != nil {
     panic(err)
@@ -177,16 +177,15 @@ for _, v := range variants {
 
 **Querying products:**
 ```go
-// Get only parent products (no parent_id)
+// Get all top-level products (no parent_id)
 parents, err := store.ProductList(ctx, shopstore.NewProductQuery().
-    SetParentID("0").
-    SetStatus(shopstore.PRODUCT_STATUS_PARENT))
+    SetParentID("0"))
 
 // Get variants of a specific parent
 variants, err := store.ProductList(ctx, shopstore.NewProductQuery().
     SetParentID(parentID))
 
-// Check if product is a parent
+// Check if product is a parent (has variant dimensions)
 isParent, err := store.ProductIsParent(ctx, productID)
 
 // Get parent of a variant

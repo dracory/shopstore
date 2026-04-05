@@ -90,5 +90,3 @@ const PRODUCT_STATUS_DRAFT = "draft"
 const PRODUCT_STATUS_ACTIVE = "active"
 
 const PRODUCT_STATUS_DISABLED = "disabled"
-
-const PRODUCT_STATUS_PARENT = "parent"

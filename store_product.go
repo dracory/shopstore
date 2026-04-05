@@ -334,7 +334,7 @@ func (store *Store) ProductIsParent(ctx context.Context, productID string) (bool
 		return false, nil
 	}
 
-	return product.HasVariantDimensions(), nil
+	return product.HasVariantMatrixSchema(), nil
 }
 
 // ProductGetParent returns the parent product of a variant
