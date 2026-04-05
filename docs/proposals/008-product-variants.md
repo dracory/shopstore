@@ -252,6 +252,112 @@ const COLUMN_PARENT_ID = "parent_id"
 const PRODUCT_STATUS_PARENT = "parent" // Display only, not purchasable
 ```
 
+### Variant Dimensions via Metas
+
+To enforce consistency across variants, store the dimension schema (e.g., ["color", "size"]) in the parent's metas:
+
+```go
+// Define which metas each variant must have
+parent.SetMeta("variant_dimensions", `["color","size"]`)
+
+// Or structured with validation rules
+parent.SetMeta("variant_dimensions", `[
+    {"name": "color", "required": true},
+    {"name": "size", "required": true}
+]`)
+```
+
+**Why metas:**
+- No new database column needed
+- Uses existing infrastructure
+- Flexible structure (can extend later)
+
+**Validation in Store:**
+
+```go
+func (s *Store) ProductCreate(ctx context.Context, product ProductInterface) error {
+    // If this is a variant, validate against parent's dimensions
+    if product.GetParentID() != "" {
+        parent, err := s.ProductFindByID(ctx, product.GetParentID())
+        if err != nil {
+            return err
+        }
+        
+        dimJSON := parent.GetMeta("variant_dimensions")
+        if dimJSON != "" {
+            var dims []string
+            json.Unmarshal([]byte(dimJSON), &dims)
+            
+            // Ensure variant has all required dimension metas
+            variantMetas, _ := product.GetMetas()
+            for _, dim := range dims {
+                if _, ok := variantMetas[dim]; !ok {
+                    return fmt.Errorf("variant missing required dimension meta: %s", dim)
+                }
+            }
+        }
+    }
+    
+    // ... continue with create
+}
+```
+
+**Helper Methods:**
+
+```go
+// On Product entity
+
+// SetVariantDimensions defines which metas variants must have
+func (p *Product) SetVariantDimensions(dims []string) error {
+    if p.GetParentID() != "" {
+        return errors.New("cannot set dimensions on a variant")
+    }
+    jsonBytes, _ := json.Marshal(dims)
+    return p.SetMeta("variant_dimensions", string(jsonBytes))
+}
+
+// GetVariantDimensions returns required dimension names
+func (p *Product) GetVariantDimensions() ([]string, error) {
+    dimJSON := p.GetMeta("variant_dimensions")
+    if dimJSON == "" {
+        return []string{}, nil
+    }
+    var dims []string
+    err := json.Unmarshal([]byte(dimJSON), &dims)
+    return dims, err
+}
+
+// HasVariantDimensions returns true if parent has dimensions defined
+func (p *Product) HasVariantDimensions() bool {
+    return p.GetMeta("variant_dimensions") != ""
+}
+```
+
+**Usage Flow:**
+
+```go
+// 1. Create parent with dimension schema
+parent := NewProduct().
+    SetTitle("Nike Air Max").
+    SetStatus(PRODUCT_STATUS_PARENT)
+parent.SetVariantDimensions([]string{"color", "size"})
+store.ProductCreate(ctx, parent)
+
+// 2. Create variant - validated against schema
+variant := NewProduct().
+    SetParentID(parent.GetID()).
+    SetMeta("color", "red").  // Required
+    SetMeta("size", "9")      // Required
+    SetMeta("material", "leather")  // Optional, not in schema
+store.ProductCreate(ctx, variant) // Succeeds
+
+// 3. Invalid variant - missing required dimension
+badVariant := NewProduct().
+    SetParentID(parent.GetID()).
+    SetMeta("color", "blue")  // Missing "size"!
+store.ProductCreate(ctx, badVariant) // Fails: variant missing required dimension meta: size
+```
+
 ## Helper Methods
 
 ```go
