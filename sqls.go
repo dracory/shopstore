@@ -2,6 +2,7 @@ package shopstore
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/dracory/sb"
@@ -402,16 +403,21 @@ func (store *Store) sqlProductTableCreate() (string, error) {
 
 func migration_001_product_table_add_parent_id(store *Store) (err error) {
 	builder := sb.NewBuilder(store.dbDriverName)
-	sql, params, err := builder.TableColumnExists(store.productTableName, COLUMN_PARENT_ID)
+	sqlStr, params, err := builder.TableColumnExists(store.productTableName, COLUMN_PARENT_ID)
 	if err != nil {
 		return err
 	}
 
-	row := store.db.QueryRowContext(context.Background(), sql, params...)
+	row := store.db.QueryRowContext(context.Background(), sqlStr, params...)
 	var count int
 	err = row.Scan(&count)
 	if err != nil {
-		return err
+		// If no rows returned, table doesn't exist yet, treat as column doesn't exist
+		if err == sql.ErrNoRows {
+			count = 0
+		} else {
+			return err
+		}
 	}
 
 	// Column already exists, skip migration
@@ -419,7 +425,7 @@ func migration_001_product_table_add_parent_id(store *Store) (err error) {
 		return nil
 	}
 
-	sql2, err := builder.TableColumnAdd(store.productTableName, sb.Column{
+	sqlStr2, err := builder.TableColumnAdd(store.productTableName, sb.Column{
 		Name:    COLUMN_PARENT_ID,
 		Type:    sb.COLUMN_TYPE_STRING,
 		Length:  40,
@@ -429,7 +435,7 @@ func migration_001_product_table_add_parent_id(store *Store) (err error) {
 		return err
 	}
 
-	_, err = store.db.ExecContext(context.Background(), sql2)
+	_, err = store.db.ExecContext(context.Background(), sqlStr2)
 	if err != nil {
 		return err
 	}
@@ -443,20 +449,25 @@ func migration_002_product_table_add_variant_dimensions(store *Store) (err error
 	builder := sb.NewBuilder(store.dbDriverName)
 
 	// Add variant_matrix_schema column
-	sql, params, err := builder.TableColumnExists(store.productTableName, COLUMN_VARIANT_MATRIX_SCHEMA)
+	sqlStr, params, err := builder.TableColumnExists(store.productTableName, COLUMN_VARIANT_MATRIX_SCHEMA)
 	if err != nil {
 		return err
 	}
 
-	row := store.db.QueryRowContext(context.Background(), sql, params...)
+	row := store.db.QueryRowContext(context.Background(), sqlStr, params...)
 	var count int
 	err = row.Scan(&count)
 	if err != nil {
-		return err
+		// If no rows returned, table doesn't exist yet, treat as column doesn't exist
+		if err == sql.ErrNoRows {
+			count = 0
+		} else {
+			return err
+		}
 	}
 
 	if count == 0 {
-		sql2, err := builder.TableColumnAdd(store.productTableName, sb.Column{
+		sqlStr2, err := builder.TableColumnAdd(store.productTableName, sb.Column{
 			Name:    COLUMN_VARIANT_MATRIX_SCHEMA,
 			Type:    sb.COLUMN_TYPE_TEXT,
 			Default: "{}",
@@ -465,7 +476,7 @@ func migration_002_product_table_add_variant_dimensions(store *Store) (err error
 			return err
 		}
 
-		_, err = store.db.ExecContext(context.Background(), sql2)
+		_, err = store.db.ExecContext(context.Background(), sqlStr2)
 		if err != nil {
 			return err
 		}
@@ -473,19 +484,24 @@ func migration_002_product_table_add_variant_dimensions(store *Store) (err error
 	}
 
 	// Add variant_matrix_values column
-	sql, params, err = builder.TableColumnExists(store.productTableName, COLUMN_VARIANT_MATRIX_VALUES)
+	sqlStr, params, err = builder.TableColumnExists(store.productTableName, COLUMN_VARIANT_MATRIX_VALUES)
 	if err != nil {
 		return err
 	}
 
-	row = store.db.QueryRowContext(context.Background(), sql, params...)
+	row = store.db.QueryRowContext(context.Background(), sqlStr, params...)
 	err = row.Scan(&count)
 	if err != nil {
-		return err
+		// If no rows returned, table doesn't exist yet, treat as column doesn't exist
+		if err == sql.ErrNoRows {
+			count = 0
+		} else {
+			return err
+		}
 	}
 
 	if count == 0 {
-		sql2, err := builder.TableColumnAdd(store.productTableName, sb.Column{
+		sqlStr2, err := builder.TableColumnAdd(store.productTableName, sb.Column{
 			Name:    COLUMN_VARIANT_MATRIX_VALUES,
 			Type:    sb.COLUMN_TYPE_TEXT,
 			Default: "{}",
@@ -494,7 +510,7 @@ func migration_002_product_table_add_variant_dimensions(store *Store) (err error
 			return err
 		}
 
-		_, err = store.db.ExecContext(context.Background(), sql2)
+		_, err = store.db.ExecContext(context.Background(), sqlStr2)
 		if err != nil {
 			return err
 		}
