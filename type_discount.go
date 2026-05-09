@@ -423,3 +423,8 @@ func (d *Discount) IsExpired() bool {
 func (d *Discount) IsValidNow() bool {
 	return d.IsActive() && d.IsStarted() && !d.IsEnded()
 }
+
+// MarkAsNotDirty resets the dirty state, clearing all change tracking.
+func (d *Discount) MarkAsNotDirty() {
+	d.DataObject.MarkAsNotDirty()
+}

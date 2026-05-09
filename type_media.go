@@ -324,3 +324,8 @@ func (m *Media) IsImage() bool {
 func (m *Media) IsVideo() bool {
 	return strings.HasPrefix(m.GetType(), "video/")
 }
+
+// MarkAsNotDirty resets the dirty state, clearing all change tracking.
+func (m *Media) MarkAsNotDirty() {
+	m.DataObject.MarkAsNotDirty()
+}

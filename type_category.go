@@ -291,3 +291,8 @@ func (category *Category) SetUpdatedAt(updatedAt string) CategoryInterface {
 	category.Set(COLUMN_UPDATED_AT, updatedAt)
 	return category
 }
+
+// MarkAsNotDirty resets the dirty state, clearing all change tracking.
+func (category *Category) MarkAsNotDirty() {
+	category.DataObject.MarkAsNotDirty()
+}

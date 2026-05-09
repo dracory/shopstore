@@ -346,3 +346,8 @@ func (order *Order) SetUpdatedAt(updatedAt string) OrderInterface {
 	order.Set(COLUMN_UPDATED_AT, updatedAt)
 	return order
 }
+
+// MarkAsNotDirty resets the dirty state, clearing all change tracking.
+func (order *Order) MarkAsNotDirty() {
+	order.DataObject.MarkAsNotDirty()
+}

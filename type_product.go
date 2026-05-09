@@ -432,3 +432,8 @@ func (product *Product) SetUpdatedAt(updatedAt string) ProductInterface {
 	product.Set(COLUMN_UPDATED_AT, updatedAt)
 	return product
 }
+
+// MarkAsNotDirty resets the dirty state, clearing all change tracking.
+func (product *Product) MarkAsNotDirty() {
+	product.DataObject.MarkAsNotDirty()
+}

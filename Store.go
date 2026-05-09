@@ -9,11 +9,6 @@ import (
 	"github.com/dracory/database"
 )
 
-type migration struct {
-	sql    string
-	params []interface{}
-}
-
 var _ StoreInterface = (*Store)(nil) // verify it extends the interface
 
 type Store struct {

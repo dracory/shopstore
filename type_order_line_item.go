@@ -311,6 +311,11 @@ func (o *OrderLineItem) SetUpdatedAt(updatedAt string) OrderLineItemInterface {
 	return o
 }
 
+// MarkAsNotDirty resets the dirty state, clearing all change tracking.
+func (o *OrderLineItem) MarkAsNotDirty() {
+	o.DataObject.MarkAsNotDirty()
+}
+
 // IsActive returns true if the order line item is in an active state.
 func (o *OrderLineItem) IsActive() bool {
 	status := o.GetStatus()
