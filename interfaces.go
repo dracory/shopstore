@@ -746,8 +746,12 @@ type ProductInterface interface {
 // Provides CRUD operations, soft deletion, counting, listing with pagination,
 // and variant management for all entity types (categories, discounts, media, orders, products).
 type StoreInterface interface {
-	// AutoMigrate creates or updates database tables to match the current schema.
-	AutoMigrate() error
+	// MigrateDown drops the shop store tables
+	MigrateDown(ctx context.Context, tx ...*sql.Tx) error
+
+	// MigrateUp creates or updates database tables to match the current schema.
+	MigrateUp(ctx context.Context, tx ...*sql.Tx) error
+
 	// DB returns the underlying SQL database connection.
 	DB() *sql.DB
 	// EnableDebug enables or disables debug logging for SQL queries.

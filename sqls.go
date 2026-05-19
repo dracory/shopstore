@@ -519,3 +519,69 @@ func migration_002_product_table_add_variant_dimensions(store *Store) (err error
 
 	return nil
 }
+
+// sqlCategoryTableDrop returns a SQL string for dropping the category table
+func (store *Store) sqlCategoryTableDrop() (string, error) {
+	sql, err := sb.NewBuilder(store.dbDriverName).
+		Table(store.categoryTableName).
+		Drop()
+	if err != nil {
+		return "", err
+	}
+	return sql, nil
+}
+
+// sqlDiscountTableDrop returns a SQL string for dropping the discount table
+func (store *Store) sqlDiscountTableDrop() (string, error) {
+	sql, err := sb.NewBuilder(store.dbDriverName).
+		Table(store.discountTableName).
+		Drop()
+	if err != nil {
+		return "", err
+	}
+	return sql, nil
+}
+
+// sqlMediaTableDrop returns a SQL string for dropping the media table
+func (store *Store) sqlMediaTableDrop() (string, error) {
+	sql, err := sb.NewBuilder(store.dbDriverName).
+		Table(store.mediaTableName).
+		Drop()
+	if err != nil {
+		return "", err
+	}
+	return sql, nil
+}
+
+// sqlOrderLineItemTableDrop returns a SQL string for dropping the order line item table
+func (store *Store) sqlOrderLineItemTableDrop() (string, error) {
+	sql, err := sb.NewBuilder(store.dbDriverName).
+		Table(store.orderLineItemTableName).
+		Drop()
+	if err != nil {
+		return "", err
+	}
+	return sql, nil
+}
+
+// sqlOrderTableDrop returns a SQL string for dropping the order table
+func (store *Store) sqlOrderTableDrop() (string, error) {
+	sql, err := sb.NewBuilder(store.dbDriverName).
+		Table(store.orderTableName).
+		Drop()
+	if err != nil {
+		return "", err
+	}
+	return sql, nil
+}
+
+// sqlProductTableDrop returns a SQL string for dropping the product table
+func (store *Store) sqlProductTableDrop() (string, error) {
+	sql, err := sb.NewBuilder(store.dbDriverName).
+		Table(store.productTableName).
+		Drop()
+	if err != nil {
+		return "", err
+	}
+	return sql, nil
+}

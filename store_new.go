@@ -1,6 +1,7 @@
 package shopstore
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 
@@ -71,7 +72,7 @@ func NewStore(opts NewStoreOptions) (*Store, error) {
 	store.timeoutSeconds = 2 * 60 * 60 // 2 hours
 
 	if store.automigrateEnabled {
-		err := store.AutoMigrate()
+		err := store.MigrateUp(context.Background())
 
 		if err != nil {
 			return nil, err

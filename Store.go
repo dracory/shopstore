@@ -37,8 +37,13 @@ func (store *Store) logSql(sqlOperationType string, sql string, params ...interf
 	}
 }
 
-// AutoMigrate auto migrate
-func (store *Store) AutoMigrate() error {
+// MigrateUp creates or updates database tables to match the current schema
+func (store *Store) MigrateUp(ctx context.Context, tx ...*sql.Tx) error {
+	var txToUse *sql.Tx
+	if len(tx) > 0 {
+		txToUse = tx[0]
+	}
+
 	sqlGenerators := []func() (string, error){
 		store.sqlCategoryTableCreate,
 		store.sqlDiscountTableCreate,
@@ -56,10 +61,15 @@ func (store *Store) AutoMigrate() error {
 
 		store.logSql("create table", sql)
 
-		_, err = store.db.Exec(sql)
-		if err != nil {
-			log.Println(err)
-			return err
+		var errExec error
+		if txToUse != nil {
+			_, errExec = txToUse.ExecContext(ctx, sql)
+		} else {
+			_, errExec = store.db.ExecContext(ctx, sql)
+		}
+		if errExec != nil {
+			log.Println(errExec)
+			return errExec
 		}
 	}
 
@@ -71,6 +81,45 @@ func (store *Store) AutoMigrate() error {
 	err = migration_002_product_table_add_variant_dimensions(store)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// MigrateDown drops the shop store tables
+func (store *Store) MigrateDown(ctx context.Context, tx ...*sql.Tx) error {
+	var txToUse *sql.Tx
+	if len(tx) > 0 {
+		txToUse = tx[0]
+	}
+
+	sqlGenerators := []func() (string, error){
+		store.sqlCategoryTableDrop,
+		store.sqlDiscountTableDrop,
+		store.sqlMediaTableDrop,
+		store.sqlOrderLineItemTableDrop,
+		store.sqlOrderTableDrop,
+		store.sqlProductTableDrop,
+	}
+
+	for _, generator := range sqlGenerators {
+		sql, err := generator()
+		if err != nil {
+			return err
+		}
+
+		store.logSql("drop table", sql)
+
+		var errExec error
+		if txToUse != nil {
+			_, errExec = txToUse.ExecContext(ctx, sql)
+		} else {
+			_, errExec = store.db.ExecContext(ctx, sql)
+		}
+		if errExec != nil {
+			log.Println(errExec)
+			return errExec
+		}
 	}
 
 	return nil
