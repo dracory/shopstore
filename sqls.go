@@ -2,10 +2,10 @@ package shopstore
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 
 	"github.com/dracory/sb"
+	"github.com/dracory/sb/schema"
 )
 
 // sqlCategoryTableCreate returns a SQL string for creating the category table
@@ -402,40 +402,23 @@ func (store *Store) sqlProductTableCreate() (string, error) {
 }
 
 func migration_001_product_table_add_parent_id(store *Store) (err error) {
-	builder := sb.NewBuilder(store.dbDriverName)
-	sqlStr, params, err := builder.TableColumnExists(store.productTableName, COLUMN_PARENT_ID)
+	qctx := store.toQuerableContext(context.Background())
+	exists, err := schema.TableColumnExists(qctx, store.productTableName, COLUMN_PARENT_ID)
 	if err != nil {
 		return err
 	}
 
-	row := store.db.QueryRowContext(context.Background(), sqlStr, params...)
-	var count int
-	err = row.Scan(&count)
-	if err != nil {
-		// If no rows returned, table doesn't exist yet, treat as column doesn't exist
-		if err == sql.ErrNoRows {
-			count = 0
-		} else {
-			return err
-		}
-	}
-
 	// Column already exists, skip migration
-	if count > 0 {
+	if exists {
 		return nil
 	}
 
-	sqlStr2, err := builder.TableColumnAdd(store.productTableName, sb.Column{
+	err = schema.TableColumnAdd(qctx, store.productTableName, sb.Column{
 		Name:    COLUMN_PARENT_ID,
 		Type:    sb.COLUMN_TYPE_STRING,
 		Length:  40,
 		Default: "0",
 	})
-	if err != nil {
-		return err
-	}
-
-	_, err = store.db.ExecContext(context.Background(), sqlStr2)
 	if err != nil {
 		return err
 	}
@@ -446,28 +429,16 @@ func migration_001_product_table_add_parent_id(store *Store) (err error) {
 }
 
 func migration_002_product_table_add_variant_dimensions(store *Store) (err error) {
-	builder := sb.NewBuilder(store.dbDriverName)
+	qctx := store.toQuerableContext(context.Background())
 
 	// Add variant_matrix_schema column
-	sqlStr, params, err := builder.TableColumnExists(store.productTableName, COLUMN_VARIANT_MATRIX_SCHEMA)
+	exists, err := schema.TableColumnExists(qctx, store.productTableName, COLUMN_VARIANT_MATRIX_SCHEMA)
 	if err != nil {
 		return err
 	}
 
-	row := store.db.QueryRowContext(context.Background(), sqlStr, params...)
-	var count int
-	err = row.Scan(&count)
-	if err != nil {
-		// If no rows returned, table doesn't exist yet, treat as column doesn't exist
-		if err == sql.ErrNoRows {
-			count = 0
-		} else {
-			return err
-		}
-	}
-
-	if count == 0 {
-		sqlStr2, err := builder.TableColumnAdd(store.productTableName, sb.Column{
+	if !exists {
+		err = schema.TableColumnAdd(qctx, store.productTableName, sb.Column{
 			Name:    COLUMN_VARIANT_MATRIX_SCHEMA,
 			Type:    sb.COLUMN_TYPE_TEXT,
 			Default: "{}",
@@ -475,42 +446,21 @@ func migration_002_product_table_add_variant_dimensions(store *Store) (err error
 		if err != nil {
 			return err
 		}
-
-		_, err = store.db.ExecContext(context.Background(), sqlStr2)
-		if err != nil {
-			return err
-		}
 		fmt.Println("Migration 002a completed: added variant_matrix_schema column")
 	}
 
 	// Add variant_matrix_values column
-	sqlStr, params, err = builder.TableColumnExists(store.productTableName, COLUMN_VARIANT_MATRIX_VALUES)
+	exists, err = schema.TableColumnExists(qctx, store.productTableName, COLUMN_VARIANT_MATRIX_VALUES)
 	if err != nil {
 		return err
 	}
 
-	row = store.db.QueryRowContext(context.Background(), sqlStr, params...)
-	err = row.Scan(&count)
-	if err != nil {
-		// If no rows returned, table doesn't exist yet, treat as column doesn't exist
-		if err == sql.ErrNoRows {
-			count = 0
-		} else {
-			return err
-		}
-	}
-
-	if count == 0 {
-		sqlStr2, err := builder.TableColumnAdd(store.productTableName, sb.Column{
+	if !exists {
+		err = schema.TableColumnAdd(qctx, store.productTableName, sb.Column{
 			Name:    COLUMN_VARIANT_MATRIX_VALUES,
 			Type:    sb.COLUMN_TYPE_TEXT,
 			Default: "{}",
 		})
-		if err != nil {
-			return err
-		}
-
-		_, err = store.db.ExecContext(context.Background(), sqlStr2)
 		if err != nil {
 			return err
 		}
