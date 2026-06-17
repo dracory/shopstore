@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dracory/sb"
 	"github.com/dromara/carbon/v2"
 )
 
@@ -42,16 +41,16 @@ func TestNewDiscountDefaults(t *testing.T) {
 		t.Fatal("expected generated code to be non-empty")
 	}
 
-	if discount.GetStartsAt() != sb.NULL_DATETIME {
-		t.Fatalf("expected starts at %q, got %q", sb.NULL_DATETIME, discount.GetStartsAt())
+	if discount.GetStartsAt() != "0000-00-00 00:00:00" {
+		t.Fatalf("expected starts at %q, got %q", "0000-00-00 00:00:00", discount.GetStartsAt())
 	}
 
-	if discount.GetEndsAt() != sb.NULL_DATETIME {
-		t.Fatalf("expected ends at %q, got %q", sb.NULL_DATETIME, discount.GetEndsAt())
+	if discount.GetEndsAt() != "0000-00-00 00:00:00" {
+		t.Fatalf("expected ends at %q, got %q", "0000-00-00 00:00:00", discount.GetEndsAt())
 	}
 
-	if discount.GetSoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected soft deleted at %q, got %q", sb.MAX_DATETIME, discount.GetSoftDeletedAt())
+	if discount.GetSoftDeletedAt() != MAX_DATETIME {
+		t.Fatalf("expected soft deleted at %q, got %q", MAX_DATETIME, discount.GetSoftDeletedAt())
 	}
 
 	if discount.GetID() == "" {

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/dracory/dataobject"
-	"github.com/dracory/sb"
 	"github.com/dracory/str"
 	"github.com/dromara/carbon/v2"
 	"github.com/spf13/cast"
@@ -64,12 +63,12 @@ func NewDiscount() DiscountInterface {
 		SetDescription("").
 		SetAmount(0.00).
 		SetCode(code).
-		SetStartsAt(sb.NULL_DATETIME).
-		SetEndsAt(sb.NULL_DATETIME).
+		SetStartsAt("0000-00-00 00:00:00").
+		SetEndsAt("0000-00-00 00:00:00").
 		SetMemo("").
 		SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
-		SetSoftDeletedAt(sb.MAX_DATETIME)
+		SetSoftDeletedAt(MAX_DATETIME)
 
 	d.SetMetas(map[string]string{})
 
@@ -391,7 +390,7 @@ func (d *Discount) IsInactive() bool {
 // IsStarted returns true if the discount period has started (starts_at <= now).
 func (d *Discount) IsStarted() bool {
 	startsAt := d.GetStartsAt()
-	if startsAt == sb.NULL_DATETIME || startsAt == "" {
+	if startsAt == "0000-00-00 00:00:00" || startsAt == "" {
 		return false
 	}
 	startsAtCarbon := d.GetStartsAtCarbon()
@@ -404,7 +403,7 @@ func (d *Discount) IsStarted() bool {
 // IsEnded returns true if the discount period has ended (ends_at <= now).
 func (d *Discount) IsEnded() bool {
 	endsAt := d.GetEndsAt()
-	if endsAt == sb.NULL_DATETIME || endsAt == "" {
+	if endsAt == "0000-00-00 00:00:00" || endsAt == "" {
 		return false
 	}
 	endsAtCarbon := d.GetEndsAtCarbon()

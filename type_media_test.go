@@ -3,7 +3,6 @@ package shopstore
 import (
 	"testing"
 
-	"github.com/dracory/sb"
 	"github.com/dromara/carbon/v2"
 )
 
@@ -41,8 +40,8 @@ func TestNewMediaDefaults(t *testing.T) {
 		t.Fatal("expected updated at to be set")
 	}
 
-	if media.GetSoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected soft deleted at %q, got %q", sb.MAX_DATETIME, media.GetSoftDeletedAt())
+	if media.GetSoftDeletedAt() != MAX_DATETIME {
+		t.Fatalf("expected soft deleted at %q, got %q", MAX_DATETIME, media.GetSoftDeletedAt())
 	}
 
 	metas, err := media.GetMetas()
@@ -338,7 +337,7 @@ func TestMediaStatusPredicates(t *testing.T) {
 func TestMediaIsSoftDeleted(t *testing.T) {
 	media := &Media{}
 
-	if _, ok := media.SetSoftDeletedAt(sb.MAX_DATETIME).(*Media); !ok {
+	if _, ok := media.SetSoftDeletedAt(MAX_DATETIME).(*Media); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Media")
 	}
 

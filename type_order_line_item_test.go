@@ -3,7 +3,6 @@ package shopstore
 import (
 	"testing"
 
-	"github.com/dracory/sb"
 	"github.com/dromara/carbon/v2"
 )
 
@@ -53,8 +52,8 @@ func TestNewOrderLineItemDefaults(t *testing.T) {
 		t.Fatal("expected updated at to be set")
 	}
 
-	if item.GetSoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected soft deleted at %q, got %q", sb.MAX_DATETIME, item.GetSoftDeletedAt())
+	if item.GetSoftDeletedAt() != MAX_DATETIME {
+		t.Fatalf("expected soft deleted at %q, got %q", MAX_DATETIME, item.GetSoftDeletedAt())
 	}
 
 	metas, err := item.GetMetas()
@@ -315,14 +314,14 @@ func TestOrderLineItemSetterChainingAndGetters(t *testing.T) {
 func TestOrderLineItemIsSoftDeleted(t *testing.T) {
 	item := &OrderLineItem{}
 
-	if _, ok := item.SetSoftDeletedAt(sb.MAX_DATETIME).(*OrderLineItem); !ok {
+	if _, ok := item.SetSoftDeletedAt(MAX_DATETIME).(*OrderLineItem); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *OrderLineItem")
 	}
-	if item.GetSoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected SoftDeletedAt to be %q, got %q", sb.MAX_DATETIME, item.GetSoftDeletedAt())
+	if item.GetSoftDeletedAt() != MAX_DATETIME {
+		t.Fatalf("expected SoftDeletedAt to be %q, got %q", MAX_DATETIME, item.GetSoftDeletedAt())
 	}
-	if item.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != sb.MAX_DATETIME {
-		t.Fatalf("expected SoftDeletedAtCarbon to be %q, got %q", sb.MAX_DATETIME, item.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
+	if item.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC) != MAX_DATETIME {
+		t.Fatalf("expected SoftDeletedAtCarbon to be %q, got %q", MAX_DATETIME, item.GetSoftDeletedAtCarbon().ToDateTimeString(carbon.UTC))
 	}
 
 	if _, ok := item.SetSoftDeletedAt("2024-01-01 00:00:00").(*OrderLineItem); !ok {

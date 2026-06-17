@@ -4,8 +4,6 @@ import (
 	"context"
 	"strings"
 	"testing"
-
-	"github.com/dracory/sb"
 )
 
 func TestStoreProductCreate(t *testing.T) {
@@ -111,7 +109,7 @@ func TestStoreProductFindByID(t *testing.T) {
 		t.Fatal("Product size meta MUST BE 'xxl', found: ", productFound.GetMeta("xxl"))
 	}
 
-	if !strings.Contains(productFound.GetSoftDeletedAt(), sb.MAX_DATETIME) {
+	if !strings.Contains(productFound.GetSoftDeletedAt(), MAX_DATETIME) {
 		t.Fatal("Product MUST NOT be soft deleted", productFound.GetSoftDeletedAt())
 	}
 }
@@ -140,7 +138,7 @@ func TestStoreProductSoftDelete(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	if product.GetSoftDeletedAt() != sb.MAX_DATETIME {
+	if product.GetSoftDeletedAt() != MAX_DATETIME {
 		t.Fatal("Product MUST NOT be soft deleted")
 	}
 
@@ -174,7 +172,7 @@ func TestStoreProductSoftDelete(t *testing.T) {
 		return
 	}
 
-	if strings.Contains(productFindWithDeleted[0].GetSoftDeletedAt(), sb.NULL_DATETIME) {
+	if strings.Contains(productFindWithDeleted[0].GetSoftDeletedAt(), "0000-00-00 00:00:00") {
 		t.Fatal("Product MUST be soft deleted", productFindWithDeleted[0].GetSoftDeletedAt())
 	}
 }

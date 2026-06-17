@@ -8,8 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dracory/database"
-	"github.com/dracory/sb"
 	_ "modernc.org/sqlite"
 )
 
@@ -76,7 +74,7 @@ func TestStoreCategoryCreate(t *testing.T) {
 		SetStatus(CATEGORY_STATUS_DRAFT).
 		SetTitle("CATEGORY_TITLE")
 
-	err = store.CategoryCreate(database.Context(context.Background(), store.DB()), category)
+	err = store.CategoryCreate(context.Background(), category)
 
 	if err != nil {
 		t.Fatal("unexpected error:", err)
@@ -98,7 +96,7 @@ func TestStoreCategoryDelete(t *testing.T) {
 		SetStatus(CATEGORY_STATUS_DRAFT).
 		SetTitle("CATEGORY_TITLE")
 
-	ctx := database.Context(context.Background(), store.DB())
+	ctx := context.Background()
 
 	err = store.CategoryCreate(ctx, category)
 
@@ -134,7 +132,7 @@ func TestStoreCategoryDeleteByID(t *testing.T) {
 		SetStatus(CATEGORY_STATUS_DRAFT).
 		SetTitle("CATEGORY_TITLE")
 
-	ctx := database.Context(context.Background(), store.DB())
+	ctx := context.Background()
 
 	err = store.CategoryCreate(ctx, category)
 
@@ -174,7 +172,7 @@ func TestStoreCategoryFindByID(t *testing.T) {
 		SetStatus(CATEGORY_STATUS_DRAFT).
 		SetTitle("CATEGORY_TITLE")
 
-	ctx := database.Context(context.Background(), store.DB())
+	ctx := context.Background()
 
 	err = store.CategoryCreate(ctx, category)
 
@@ -208,7 +206,7 @@ func TestStoreCategoryFindByID(t *testing.T) {
 		t.Fatal("unexpected category parent id")
 	}
 
-	if !strings.Contains(categoryFound.GetSoftDeletedAt(), sb.MAX_DATETIME) {
+	if !strings.Contains(categoryFound.GetSoftDeletedAt(), MAX_DATETIME) {
 		t.Fatal("Exam MUST NOT be soft deleted", categoryFound.GetSoftDeletedAt())
 		return
 	}
@@ -229,7 +227,7 @@ func TestStoreCategorySoftDelete(t *testing.T) {
 		SetStatus(CATEGORY_STATUS_DRAFT).
 		SetTitle("CATEGORY_TITLE")
 
-	ctx := database.Context(context.Background(), store.DB())
+	ctx := context.Background()
 
 	err = store.CategoryCreate(ctx, category)
 
@@ -267,7 +265,7 @@ func TestStoreCategorySoftDelete(t *testing.T) {
 		t.Fatal("unexpected category id")
 	}
 
-	if strings.Contains(list[0].GetSoftDeletedAt(), sb.MAX_DATETIME) {
+	if strings.Contains(list[0].GetSoftDeletedAt(), MAX_DATETIME) {
 		t.Fatal("Category MUST be soft deleted, but found: ", list[0].GetSoftDeletedAt())
 		return
 	}
@@ -288,7 +286,7 @@ func TestStoreCategorySoftDeleteByID(t *testing.T) {
 		SetStatus(CATEGORY_STATUS_DRAFT).
 		SetTitle("CATEGORY_TITLE")
 
-	ctx := database.Context(context.Background(), store.DB())
+	ctx := context.Background()
 
 	err = store.CategoryCreate(ctx, category)
 
@@ -326,7 +324,7 @@ func TestStoreCategorySoftDeleteByID(t *testing.T) {
 		t.Fatal("unexpected category id")
 	}
 
-	if strings.Contains(list[0].GetSoftDeletedAt(), sb.MAX_DATETIME) {
+	if strings.Contains(list[0].GetSoftDeletedAt(), MAX_DATETIME) {
 		t.Fatal("Category MUST be soft deleted, but found: ", list[0].GetSoftDeletedAt())
 		return
 	}
@@ -347,7 +345,7 @@ func TestStoreCategoryUpdate(t *testing.T) {
 		SetStatus(CATEGORY_STATUS_DRAFT).
 		SetTitle("CATEGORY_TITLE")
 
-	ctx := database.Context(context.Background(), store.DB())
+	ctx := context.Background()
 
 	err = store.CategoryCreate(ctx, category)
 
@@ -556,7 +554,7 @@ func TestStoreDiscountFindByID(t *testing.T) {
 		t.Fatal("Exam end date MUST BE '2022-01-01 23:59:59', found: ", discountFound.GetEndsAt())
 	}
 
-	if !strings.Contains(discountFound.GetSoftDeletedAt(), sb.MAX_DATETIME) {
+	if !strings.Contains(discountFound.GetSoftDeletedAt(), MAX_DATETIME) {
 		t.Fatal("Exam MUST NOT be soft deleted", discountFound.GetSoftDeletedAt())
 		return
 	}
@@ -757,7 +755,7 @@ func TestStoreMediaDeleteByID(t *testing.T) {
 		SetType(MEDIA_TYPE_IMAGE_JPG).
 		SetSequence(1)
 
-	ctx := database.Context(context.Background(), store.DB())
+	ctx := context.Background()
 
 	err = store.MediaCreate(ctx, media)
 
@@ -801,7 +799,7 @@ func TestStoreMediaFindByID(t *testing.T) {
 		SetType(MEDIA_TYPE_IMAGE_JPG).
 		SetSequence(1)
 
-	ctx := database.Context(context.Background(), store.DB())
+	ctx := context.Background()
 
 	err = store.MediaCreate(ctx, media)
 
@@ -835,7 +833,7 @@ func TestStoreMediaFindByID(t *testing.T) {
 		t.Fatal("unexpected category parent id")
 	}
 
-	if !strings.Contains(mediaFound.GetSoftDeletedAt(), sb.MAX_DATETIME) {
+	if !strings.Contains(mediaFound.GetSoftDeletedAt(), MAX_DATETIME) {
 		t.Fatal("Exam MUST NOT be soft deleted", mediaFound.GetSoftDeletedAt())
 		return
 	}
@@ -860,7 +858,7 @@ func TestStoreMediaSoftDelete(t *testing.T) {
 		SetType(MEDIA_TYPE_IMAGE_JPG).
 		SetSequence(1)
 
-	ctx := database.Context(context.Background(), store.DB())
+	ctx := context.Background()
 
 	err = store.MediaCreate(ctx, media)
 
@@ -898,7 +896,7 @@ func TestStoreMediaSoftDelete(t *testing.T) {
 		t.Fatal("unexpected media id")
 	}
 
-	if strings.Contains(list[0].GetSoftDeletedAt(), sb.MAX_DATETIME) {
+	if strings.Contains(list[0].GetSoftDeletedAt(), MAX_DATETIME) {
 		t.Fatal("Media MUST be soft deleted, but found: ", list[0].GetSoftDeletedAt())
 		return
 	}
@@ -923,7 +921,7 @@ func TestStoreMediaSoftDeleteByID(t *testing.T) {
 		SetType(MEDIA_TYPE_IMAGE_JPG).
 		SetSequence(1)
 
-	ctx := database.Context(context.Background(), store.DB())
+	ctx := context.Background()
 
 	err = store.MediaCreate(ctx, media)
 
@@ -961,7 +959,7 @@ func TestStoreMediaSoftDeleteByID(t *testing.T) {
 		t.Fatal("unexpected media id")
 	}
 
-	if strings.Contains(list[0].GetSoftDeletedAt(), sb.MAX_DATETIME) {
+	if strings.Contains(list[0].GetSoftDeletedAt(), MAX_DATETIME) {
 		t.Fatal("Media MUST be soft deleted, but found: ", list[0].GetSoftDeletedAt())
 		return
 	}
@@ -986,7 +984,7 @@ func TestStoreMediaUpdate(t *testing.T) {
 		SetType(MEDIA_TYPE_IMAGE_JPG).
 		SetSequence(1)
 
-	ctx := database.Context(context.Background(), store.DB())
+	ctx := context.Background()
 
 	err = store.MediaCreate(ctx, media)
 

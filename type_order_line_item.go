@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/dracory/dataobject"
-	"github.com/dracory/sb"
+
 	"github.com/dromara/carbon/v2"
 	"github.com/spf13/cast"
 )
@@ -45,7 +45,7 @@ func NewOrderLineItem() OrderLineItemInterface {
 		SetMemo("").
 		SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
-		SetSoftDeletedAt(sb.MAX_DATETIME)
+		SetSoftDeletedAt(MAX_DATETIME)
 
 	_ = o.SetMetas(map[string]string{})
 

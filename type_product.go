@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/dracory/dataobject"
-	"github.com/dracory/sb"
 	"github.com/dracory/str"
 	"github.com/dromara/carbon/v2"
 	"github.com/spf13/cast"
@@ -54,7 +53,7 @@ func NewProduct() ProductInterface {
 		SetMemo("").
 		SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
-		SetSoftDeletedAt(sb.MAX_DATETIME)
+		SetSoftDeletedAt(MAX_DATETIME)
 
 	_ = o.SetMetas(map[string]string{})
 	_ = o.SetVariantMatrixSchema(VariantMatrixSchema{})
@@ -90,7 +89,7 @@ func (product *Product) IsDraft() bool {
 
 // IsSoftDeleted returns true if the product is soft deleted.
 func (product *Product) IsSoftDeleted() bool {
-	return product.GetSoftDeletedAtCarbon().Compare("<", carbon.Now(carbon.UTC))
+	return product.GetSoftDeletedAt() != MAX_DATETIME
 }
 
 // IsVariant returns true if this product is a variant of another product.

@@ -3,56 +3,26 @@ package shopstore
 import (
 	"context"
 	"errors"
-	"strconv"
 	"strings"
 
-	"github.com/doug-martin/goqu/v9"
-	"github.com/doug-martin/goqu/v9/exp"
-	"github.com/dracory/database"
-	"github.com/dracory/sb"
+	contractsorm "github.com/dracory/neat/contracts/database/orm"
 	"github.com/dromara/carbon/v2"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 )
 
 func (store *Store) ProductCount(ctx context.Context, options ProductQueryInterface) (int64, error) {
-	q, _, err := store.productQuery(options.SetCountOnly(true))
-
+	q, err := store.productQuery(options)
 	if err != nil {
 		return -1, err
 	}
 
-	sqlStr, params, errSql := q.Prepared(true).
-		Limit(1).
-		Select(goqu.COUNT(goqu.Star()).As("count")).
-		ToSQL()
-
-	if errSql != nil {
-		return -1, nil
-	}
-
-	store.logSql("count", sqlStr, params...)
-
-	mapped, err := database.SelectToMapString(store.toQuerableContext(ctx), sqlStr, params...)
-
-	if err != nil {
+	var count int64
+	if err := q.Count(&count); err != nil {
 		return -1, err
 	}
 
-	if len(mapped) < 1 {
-		return -1, nil
-	}
-
-	countStr := mapped[0]["count"]
-
-	i, err := strconv.ParseInt(countStr, 10, 64)
-
-	if err != nil {
-		return -1, err
-
-	}
-
-	return i, nil
+	return count, nil
 }
 
 func (store *Store) ProductCreate(ctx context.Context, product ProductInterface) error {
@@ -62,24 +32,15 @@ func (store *Store) ProductCreate(ctx context.Context, product ProductInterface)
 
 	product.SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
 	product.SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
-	product.SetSoftDeletedAt(sb.MAX_DATETIME)
+	product.SetSoftDeletedAt(MAX_DATETIME)
 
 	data := product.Data()
-
-	sqlStr, params, errSql := goqu.Dialect(store.dbDriverName).
-		Insert(store.productTableName).
-		Prepared(true).
-		Rows(data).
-		ToSQL()
-
-	if errSql != nil {
-		return errSql
+	row := map[string]any{}
+	for k, v := range data {
+		row[k] = v
 	}
 
-	store.logSql("insert", sqlStr, params...)
-
-	_, err := database.Execute(store.toQuerableContext(ctx), sqlStr, params...)
-
+	err := store.db.Query().Table(store.productTableName).Create(row)
 	if err != nil {
 		return err
 	}
@@ -102,20 +63,7 @@ func (store *Store) ProductDeleteByID(ctx context.Context, id string) error {
 		return errors.New("product id is empty")
 	}
 
-	sqlStr, params, errSql := goqu.Dialect(store.dbDriverName).
-		Delete(store.productTableName).
-		Prepared(true).
-		Where(goqu.C(COLUMN_ID).Eq(id)).
-		ToSQL()
-
-	if errSql != nil {
-		return errSql
-	}
-
-	store.logSql("delete", sqlStr, params...)
-
-	_, err := database.Execute(store.toQuerableContext(ctx), sqlStr, params...)
-
+	_, err := store.db.Query().Table(store.productTableName).Where(COLUMN_ID+" = ?", id).Delete()
 	return err
 }
 
@@ -160,29 +108,20 @@ func (store *Store) ProductFindByID(ctx context.Context, id string) (ProductInte
 }
 
 func (store *Store) ProductList(ctx context.Context, options ProductQueryInterface) ([]ProductInterface, error) {
-	q, columns, err := store.productQuery(options)
-
+	q, err := store.productQuery(options)
 	if err != nil {
 		return []ProductInterface{}, err
 	}
 
-	sqlStr, sqlParams, errSql := q.Prepared(true).Select(columns...).ToSQL()
-
-	if errSql != nil {
-		return []ProductInterface{}, nil
-	}
-
-	store.logSql("select", sqlStr)
-
-	modelMaps, err := database.SelectToMapString(store.toQuerableContext(ctx), sqlStr, sqlParams...)
-	if err != nil {
+	var results []map[string]any
+	if err := q.Get(&results); err != nil {
 		return []ProductInterface{}, err
 	}
 
 	list := []ProductInterface{}
 
-	lo.ForEach(modelMaps, func(modelMap map[string]string, index int) {
-		model := NewProductFromExistingData(modelMap)
+	lo.ForEach(results, func(result map[string]any, index int) {
+		model := NewProductFromExistingData(mapAnyToString(result))
 		list = append(list, model)
 	})
 
@@ -206,108 +145,93 @@ func (store *Store) ProductUpdate(ctx context.Context, product ProductInterface)
 		return nil
 	}
 
-	sqlStr, params, errSql := goqu.Dialect(store.dbDriverName).
-		Update(store.productTableName).
-		Prepared(true).
-		Set(dataChanged).
-		Where(goqu.C(COLUMN_ID).Eq(product.GetID())).
-		ToSQL()
-
-	if errSql != nil {
-		return errSql
+	row := map[string]any{}
+	for k, v := range dataChanged {
+		row[k] = v
 	}
 
-	store.logSql("update", sqlStr, params...)
-
-	_, err := database.Execute(store.toQuerableContext(ctx), sqlStr, params...)
+	_, err := store.db.Query().Table(store.productTableName).Where(COLUMN_ID+" = ?", product.GetID()).Update(row)
 
 	product.MarkAsNotDirty()
 
 	return err
 }
 
-func (store *Store) productQuery(options ProductQueryInterface) (selectDataset *goqu.SelectDataset, columns []any, err error) {
+func (store *Store) productQuery(options ProductQueryInterface) (contractsorm.Query, error) {
 	if options == nil {
-		return nil, nil, errors.New("product options cannot be nil")
+		return nil, errors.New("product options cannot be nil")
 	}
 
 	if err := options.Validate(); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	q := goqu.Dialect(store.dbDriverName).From(store.productTableName)
+	q := store.db.Query().Table(store.productTableName)
 
 	if options.HasID() {
-		q = q.Where(goqu.C(COLUMN_ID).Eq(options.ID()))
+		q = q.Where(COLUMN_ID+" = ?", options.ID())
 	}
 
 	if options.HasIDIn() {
-		q = q.Where(goqu.C(COLUMN_ID).In(options.IDIn()))
+		ids := make([]any, len(options.IDIn()))
+		for i, id := range options.IDIn() {
+			ids[i] = id
+		}
+		q = q.WhereIn(COLUMN_ID, ids)
 	}
 
 	if options.HasTitleLike() {
-		// Sanitize the input by escaping special characters
-		// This is a basic example, a more robust solution should be used in production
 		searchTerm := strings.ReplaceAll(options.TitleLike(), "'", "''")
-		searchTerm = strings.ReplaceAll(searchTerm, "%", "%")
-		searchTerm = strings.ReplaceAll(searchTerm, "_", "_")
-		q = q.Where(goqu.C(COLUMN_TITLE).ILike(`%` + searchTerm + `%`))
+		searchTerm = strings.ReplaceAll(searchTerm, "%", "\\%")
+		searchTerm = strings.ReplaceAll(searchTerm, "_", "\\_")
+		q = q.Where(COLUMN_TITLE+" LIKE ?", "%"+searchTerm+"%")
 	}
 
 	if options.HasStatus() {
-		q = q.Where(goqu.C(COLUMN_STATUS).Eq(options.Status()))
+		q = q.Where(COLUMN_STATUS+" = ?", options.Status())
 	}
 
 	if options.HasStatusIn() {
-		q = q.Where(goqu.C(COLUMN_STATUS).In(options.StatusIn()))
+		statuses := make([]any, len(options.StatusIn()))
+		for i, status := range options.StatusIn() {
+			statuses[i] = status
+		}
+		q = q.WhereIn(COLUMN_STATUS, statuses)
 	}
 
 	if options.HasParentID() {
-		q = q.Where(goqu.C(COLUMN_PARENT_ID).Eq(options.ParentID()))
+		q = q.Where(COLUMN_PARENT_ID+" = ?", options.ParentID())
 	}
 
 	if options.HasCreatedAtGte() && options.HasCreatedAtLte() {
-		q = q.Where(goqu.C(COLUMN_CREATED_AT).Between(exp.NewRangeVal(options.CreatedAtGte(), options.CreatedAtLte())))
+		q = q.Where(COLUMN_CREATED_AT+" BETWEEN ? AND ?", options.CreatedAtGte(), options.CreatedAtLte())
 	} else if options.HasCreatedAtGte() {
-		q = q.Where(goqu.C(COLUMN_CREATED_AT).Gte(options.CreatedAtGte()))
+		q = q.Where(COLUMN_CREATED_AT+" >= ?", options.CreatedAtGte())
 	} else if options.HasCreatedAtLte() {
-		q = q.Where(goqu.C(COLUMN_CREATED_AT).Lte(options.CreatedAtLte()))
+		q = q.Where(COLUMN_CREATED_AT+" <= ?", options.CreatedAtLte())
 	}
 
 	if !options.IsCountOnly() {
 		if options.HasLimit() {
-			q = q.Limit(cast.ToUint(options.Limit()))
+			q = q.Limit(cast.ToInt(options.Limit()))
 		}
 
 		if options.HasOffset() {
-			q = q.Offset(cast.ToUint(options.Offset()))
+			q = q.Offset(cast.ToInt(options.Offset()))
 		}
 	}
 
-	sortOrder := lo.Ternary(options.HasSortDirection(), options.SortDirection(), sb.DESC)
+	sortOrder := lo.Ternary(options.HasSortDirection(), options.SortDirection(), "desc")
 
 	if options.HasOrderBy() {
-		if strings.EqualFold(sortOrder, sb.ASC) {
-			q = q.Order(goqu.I(options.OrderBy()).Asc())
-		} else {
-			q = q.Order(goqu.I(options.OrderBy()).Desc())
-		}
+		q = q.OrderBy(options.OrderBy(), sortOrder)
 	}
 
-	columns = []any{}
-
-	for _, column := range options.Columns() {
-		columns = append(columns, column)
+	if !options.SoftDeletedIncluded() {
+		q = q.Where(COLUMN_SOFT_DELETED_AT+" = ?", MAX_DATETIME)
 	}
 
-	if options.SoftDeletedIncluded() {
-		return q, columns, nil // soft deleted products requested specifically
-	}
-
-	softDeleted := goqu.C(COLUMN_SOFT_DELETED_AT).
-		Gt(carbon.Now(carbon.UTC).ToDateTimeString())
-
-	return q.Where(softDeleted), columns, nil
+	return q, nil
 }
 
 // ProductVariantList returns all variants for a given parent product ID
@@ -357,4 +281,13 @@ func (store *Store) ProductGetParent(ctx context.Context, productID string) (Pro
 	}
 
 	return store.ProductFindByID(ctx, product.GetParentID())
+}
+
+// mapAnyToString converts a map[string]any to map[string]string
+func mapAnyToString(m map[string]any) map[string]string {
+	result := make(map[string]string, len(m))
+	for k, v := range m {
+		result[k] = cast.ToString(v)
+	}
+	return result
 }

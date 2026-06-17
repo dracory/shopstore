@@ -3,7 +3,6 @@ package shopstore
 import (
 	"testing"
 
-	"github.com/dracory/sb"
 	"github.com/dromara/carbon/v2"
 )
 
@@ -41,8 +40,8 @@ func TestNewCategoryDefaults(t *testing.T) {
 		t.Fatal("expected updated at to be set")
 	}
 
-	if category.GetSoftDeletedAt() != sb.MAX_DATETIME {
-		t.Fatalf("expected soft deleted at to be %q, got %q", sb.MAX_DATETIME, category.GetSoftDeletedAt())
+	if category.GetSoftDeletedAt() != MAX_DATETIME {
+		t.Fatalf("expected soft deleted at to be %q, got %q", MAX_DATETIME, category.GetSoftDeletedAt())
 	}
 
 	metas, err := category.GetMetas()
@@ -177,7 +176,7 @@ func TestCategoryStatusPredicates(t *testing.T) {
 func TestCategoryIsSoftDeleted(t *testing.T) {
 	category := &Category{}
 
-	if _, ok := category.SetSoftDeletedAt(sb.MAX_DATETIME).(*Category); !ok {
+	if _, ok := category.SetSoftDeletedAt(MAX_DATETIME).(*Category); !ok {
 		t.Fatal("expected SetSoftDeletedAt to return *Category")
 	}
 

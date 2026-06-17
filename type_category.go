@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/dracory/dataobject"
-	"github.com/dracory/sb"
 	"github.com/dromara/carbon/v2"
 )
 
@@ -42,7 +41,7 @@ func NewCategory() CategoryInterface {
 		SetMemo("").        // By default empty
 		SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
-		SetSoftDeletedAt(sb.MAX_DATETIME)
+		SetSoftDeletedAt(MAX_DATETIME)
 
 	_ = o.SetMetas(map[string]string{})
 
@@ -76,7 +75,7 @@ func (category *Category) IsInactive() bool {
 
 // IsSoftDeleted returns true if the category is soft deleted.
 func (category *Category) IsSoftDeleted() bool {
-	return category.GetSoftDeletedAt() != sb.MAX_DATETIME
+	return category.GetSoftDeletedAt() != MAX_DATETIME
 }
 
 // IsRoot returns true if the category has no parent (parent_id is empty)

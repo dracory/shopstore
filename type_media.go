@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/dracory/dataobject"
-	"github.com/dracory/sb"
+
 	"github.com/dromara/carbon/v2"
 	"github.com/spf13/cast"
 )
@@ -44,7 +44,7 @@ func NewMedia() MediaInterface {
 		SetMemo("").        // By default empty
 		SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
-		SetSoftDeletedAt(sb.MAX_DATETIME)
+		SetSoftDeletedAt(MAX_DATETIME)
 
 	_ = o.SetMetas(map[string]string{})
 
@@ -312,7 +312,7 @@ func (m *Media) IsInactive() bool {
 
 // IsSoftDeleted returns true if the media is soft deleted.
 func (m *Media) IsSoftDeleted() bool {
-	return m.GetSoftDeletedAt() != sb.MAX_DATETIME
+	return m.GetSoftDeletedAt() != MAX_DATETIME
 }
 
 // IsImage returns true if the media type starts with "image/".

@@ -3,84 +3,39 @@ package shopstore
 import (
 	"context"
 	"errors"
-	"log"
-	"strconv"
-	"strings"
 
-	"github.com/doug-martin/goqu/v9"
-	"github.com/doug-martin/goqu/v9/exp"
-	"github.com/dracory/database"
-	"github.com/dracory/sb"
+	contractsorm "github.com/dracory/neat/contracts/database/orm"
 	"github.com/dromara/carbon/v2"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 )
 
 func (store *Store) DiscountCount(ctx context.Context, options DiscountQueryInterface) (int64, error) {
-	q, _, err := store.discountQuery(options.SetCountOnly(true))
-
+	q, err := store.discountQuery(options)
 	if err != nil {
 		return -1, err
 	}
 
-	sqlStr, params, errSql := q.Prepared(true).
-		Limit(1).
-		Select(goqu.COUNT(goqu.Star()).As("count")).
-		ToSQL()
-
-	if errSql != nil {
-		return -1, nil
-	}
-
-	if store.debugEnabled {
-		log.Println(sqlStr)
-	}
-
-	mapped, err := database.SelectToMapString(store.toQuerableContext(ctx), sqlStr, params...)
-
-	if err != nil {
+	var count int64
+	if err := q.Count(&count); err != nil {
 		return -1, err
 	}
 
-	if len(mapped) < 1 {
-		return -1, nil
-	}
-
-	countStr := mapped[0]["count"]
-
-	i, err := strconv.ParseInt(countStr, 10, 64)
-
-	if err != nil {
-		return -1, err
-
-	}
-
-	return i, nil
+	return count, nil
 }
 
 func (store *Store) DiscountCreate(ctx context.Context, discount DiscountInterface) error {
 	discount.SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
 	discount.SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
-	discount.SetSoftDeletedAt(sb.MAX_DATETIME)
+	discount.SetSoftDeletedAt(MAX_DATETIME)
 
 	data := discount.Data()
-
-	sqlStr, params, errSql := goqu.Dialect(store.dbDriverName).
-		Insert(store.discountTableName).
-		Prepared(true).
-		Rows(data).
-		ToSQL()
-
-	if errSql != nil {
-		return errSql
+	row := map[string]any{}
+	for k, v := range data {
+		row[k] = v
 	}
 
-	if store.debugEnabled {
-		log.Println(sqlStr)
-	}
-
-	_, err := database.Execute(store.toQuerableContext(ctx), sqlStr, params...)
-
+	err := store.db.Query().Table(store.discountTableName).Create(row)
 	if err != nil {
 		return err
 	}
@@ -103,22 +58,7 @@ func (store *Store) DiscountDeleteByID(ctx context.Context, id string) error {
 		return errors.New("discount id is empty")
 	}
 
-	sqlStr, params, errSql := goqu.Dialect(store.dbDriverName).
-		Delete(store.discountTableName).
-		Prepared(true).
-		Where(goqu.C(COLUMN_ID).Eq(id)).
-		ToSQL()
-
-	if errSql != nil {
-		return errSql
-	}
-
-	if store.debugEnabled {
-		log.Println(sqlStr)
-	}
-
-	_, err := database.Execute(store.toQuerableContext(ctx), sqlStr, params...)
-
+	_, err := store.db.Query().Table(store.discountTableName).Where(COLUMN_ID+" = ?", id).Delete()
 	return err
 }
 
@@ -164,32 +104,20 @@ func (store *Store) DiscountFindByCode(ctx context.Context, code string) (Discou
 }
 
 func (store *Store) DiscountList(ctx context.Context, options DiscountQueryInterface) ([]DiscountInterface, error) {
-	q, columns, err := store.discountQuery(options)
-
+	q, err := store.discountQuery(options)
 	if err != nil {
 		return []DiscountInterface{}, err
 	}
 
-	sqlStr, sqlParams, errSql := q.Prepared(true).Select(columns...).ToSQL()
-
-	if errSql != nil {
-		return []DiscountInterface{}, nil
-	}
-
-	if store.debugEnabled {
-		log.Println(sqlStr)
-	}
-
-	modelMaps, err := database.SelectToMapString(store.toQuerableContext(ctx), sqlStr, sqlParams...)
-
-	if err != nil {
+	var results []map[string]any
+	if err := q.Get(&results); err != nil {
 		return []DiscountInterface{}, err
 	}
 
 	list := []DiscountInterface{}
 
-	lo.ForEach(modelMaps, func(modelMap map[string]string, index int) {
-		model := NewDiscountFromExistingData(modelMap)
+	lo.ForEach(results, func(result map[string]any, index int) {
+		model := NewDiscountFromExistingData(mapAnyToString(result))
 		list = append(list, model)
 	})
 
@@ -233,119 +161,104 @@ func (store *Store) DiscountUpdate(ctx context.Context, discount DiscountInterfa
 		return nil
 	}
 
-	sqlStr, params, errSql := goqu.Dialect(store.dbDriverName).
-		Update(store.discountTableName).
-		Prepared(true).
-		Set(dataChanged).
-		Where(goqu.C("id").Eq(discount.GetID())).
-		ToSQL()
-
-	if errSql != nil {
-		return errSql
+	row := map[string]any{}
+	for k, v := range dataChanged {
+		row[k] = v
 	}
 
-	if store.debugEnabled {
-		log.Println(sqlStr)
-	}
-
-	_, err := database.Execute(store.toQuerableContext(ctx), sqlStr, params...)
+	_, err := store.db.Query().Table(store.discountTableName).Where(COLUMN_ID+" = ?", discount.GetID()).Update(row)
 
 	discount.MarkAsNotDirty()
 
 	return err
 }
 
-func (store *Store) discountQuery(options DiscountQueryInterface) (selectDataset *goqu.SelectDataset, columns []any, err error) {
+func (store *Store) discountQuery(options DiscountQueryInterface) (contractsorm.Query, error) {
 	if options == nil {
 		options = NewDiscountQuery()
 	}
 
 	if err := options.Validate(); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	q := goqu.Dialect(store.dbDriverName).From(store.discountTableName)
+	q := store.db.Query().Table(store.discountTableName)
 
 	if options.HasID() {
-		q = q.Where(goqu.C(COLUMN_ID).Eq(options.ID()))
+		q = q.Where(COLUMN_ID+" = ?", options.ID())
 	}
 
 	if options.HasIDIn() {
-		q = q.Where(goqu.C(COLUMN_ID).In(options.IDIn()))
+		ids := make([]any, len(options.IDIn()))
+		for i, id := range options.IDIn() {
+			ids[i] = id
+		}
+		q = q.WhereIn(COLUMN_ID, ids)
 	}
 
 	if options.HasStatus() {
-		q = q.Where(goqu.C(COLUMN_STATUS).Eq(options.Status()))
+		q = q.Where(COLUMN_STATUS+" = ?", options.Status())
 	}
 
 	if options.HasStatusIn() {
-		q = q.Where(goqu.C(COLUMN_STATUS).In(options.StatusIn()))
+		statuses := make([]any, len(options.StatusIn()))
+		for i, status := range options.StatusIn() {
+			statuses[i] = status
+		}
+		q = q.WhereIn(COLUMN_STATUS, statuses)
 	}
 
 	if options.HasCode() {
-		q = q.Where(goqu.C(COLUMN_CODE).Eq(options.Code()))
+		q = q.Where(COLUMN_CODE+" = ?", options.Code())
 	}
 
 	if options.HasCreatedAtGte() && options.HasCreatedAtLte() {
-		q = q.Where(goqu.C(COLUMN_CREATED_AT).Between(exp.NewRangeVal(options.CreatedAtGte(), options.CreatedAtLte())))
+		q = q.Where(COLUMN_CREATED_AT+" BETWEEN ? AND ?", options.CreatedAtGte(), options.CreatedAtLte())
 	} else if options.HasCreatedAtGte() {
-		q = q.Where(goqu.C(COLUMN_CREATED_AT).Gte(options.CreatedAtGte()))
+		q = q.Where(COLUMN_CREATED_AT+" >= ?", options.CreatedAtGte())
 	} else if options.HasCreatedAtLte() {
-		q = q.Where(goqu.C(COLUMN_CREATED_AT).Lte(options.CreatedAtLte()))
+		q = q.Where(COLUMN_CREATED_AT+" <= ?", options.CreatedAtLte())
 	}
 
 	if options.HasStartsAtGte() && options.HasStartsAtLte() {
-		q = q.Where(goqu.C(COLUMN_STARTS_AT).Between(exp.NewRangeVal(options.StartsAtGte(), options.StartsAtLte())))
+		q = q.Where(COLUMN_STARTS_AT+" BETWEEN ? AND ?", options.StartsAtGte(), options.StartsAtLte())
 	} else if options.HasStartsAtGte() {
-		q = q.Where(goqu.C(COLUMN_STARTS_AT).Gte(options.StartsAtGte()))
+		q = q.Where(COLUMN_STARTS_AT+" >= ?", options.StartsAtGte())
 	} else if options.HasStartsAtLte() {
-		q = q.Where(goqu.C(COLUMN_STARTS_AT).Lte(options.StartsAtLte()))
+		q = q.Where(COLUMN_STARTS_AT+" <= ?", options.StartsAtLte())
 	}
 
 	if options.HasEndsAtGte() && options.HasEndsAtLte() {
-		q = q.Where(goqu.C(COLUMN_ENDS_AT).Between(exp.NewRangeVal(options.EndsAtGte(), options.EndsAtLte())))
+		q = q.Where(COLUMN_ENDS_AT+" BETWEEN ? AND ?", options.EndsAtGte(), options.EndsAtLte())
 	} else if options.HasEndsAtGte() {
-		q = q.Where(goqu.C(COLUMN_ENDS_AT).Gte(options.EndsAtGte()))
+		q = q.Where(COLUMN_ENDS_AT+" >= ?", options.EndsAtGte())
 	} else if options.HasEndsAtLte() {
-		q = q.Where(goqu.C(COLUMN_ENDS_AT).Lte(options.EndsAtLte()))
+		q = q.Where(COLUMN_ENDS_AT+" <= ?", options.EndsAtLte())
 	}
 
 	if options.HasType() {
-		q = q.Where(goqu.C(COLUMN_TYPE).Eq(options.Type()))
+		q = q.Where(COLUMN_TYPE+" = ?", options.Type())
 	}
 
 	if !options.IsCountOnly() {
 		if options.HasLimit() {
-			q = q.Limit(cast.ToUint(options.Limit()))
+			q = q.Limit(cast.ToInt(options.Limit()))
 		}
 
 		if options.HasOffset() {
-			q = q.Offset(cast.ToUint(options.Offset()))
+			q = q.Offset(cast.ToInt(options.Offset()))
 		}
 	}
 
-	sortOrder := lo.Ternary(options.HasSortDirection(), options.SortDirection(), sb.DESC)
+	sortOrder := lo.Ternary(options.HasSortDirection(), options.SortDirection(), "desc")
 
 	if options.HasOrderBy() {
-		if strings.EqualFold(sortOrder, sb.ASC) {
-			q = q.Order(goqu.I(options.OrderBy()).Asc())
-		} else {
-			q = q.Order(goqu.I(options.OrderBy()).Desc())
-		}
+		q = q.OrderBy(options.OrderBy(), sortOrder)
 	}
 
-	columns = []any{}
-
-	for _, column := range options.Columns() {
-		columns = append(columns, column)
+	if !options.SoftDeletedIncluded() {
+		q = q.Where(COLUMN_SOFT_DELETED_AT+" = ?", MAX_DATETIME)
 	}
 
-	if options.SoftDeletedIncluded() {
-		return q, columns, nil // soft deleted discounts requested specifically
-	}
-
-	softDeleted := goqu.C(COLUMN_SOFT_DELETED_AT).
-		Gt(carbon.Now(carbon.UTC).ToDateTimeString())
-
-	return q.Where(softDeleted), columns, nil
+	return q, nil
 }
