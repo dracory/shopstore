@@ -8,6 +8,7 @@ import (
 	contractsorm "github.com/dracory/neat/contracts/database/orm"
 	"github.com/dromara/carbon/v2"
 	"github.com/samber/lo"
+	"github.com/spf13/cast"
 )
 
 func (store *Store) CategoryCount(ctx context.Context, options CategoryQueryInterface) (int64, error) {
@@ -209,6 +210,22 @@ func (store *Store) categoryQuery(options CategoryQueryInterface) (contractsorm.
 		searchTerm = strings.ReplaceAll(searchTerm, "%", "\\%")
 		searchTerm = strings.ReplaceAll(searchTerm, "_", "\\_")
 		q = q.Where(COLUMN_TITLE+" LIKE ?", "%"+searchTerm+"%")
+	}
+
+	if !options.IsCountOnly() {
+		if options.HasLimit() {
+			q = q.Limit(cast.ToInt(options.Limit()))
+		}
+
+		if options.HasOffset() {
+			q = q.Offset(cast.ToInt(options.Offset()))
+		}
+	}
+
+	sortOrder := lo.Ternary(options.HasSortDirection(), options.SortDirection(), "desc")
+
+	if options.HasOrderBy() {
+		q = q.OrderBy(options.OrderBy(), sortOrder)
 	}
 
 	if options.SoftDeletedIncluded() {

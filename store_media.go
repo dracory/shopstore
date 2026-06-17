@@ -8,6 +8,7 @@ import (
 	contractsorm "github.com/dracory/neat/contracts/database/orm"
 	"github.com/dromara/carbon/v2"
 	"github.com/samber/lo"
+	"github.com/spf13/cast"
 )
 
 func (store *Store) MediaCount(ctx context.Context, options MediaQueryInterface) (int64, error) {
@@ -212,7 +213,23 @@ func (store *Store) mediaQuery(options MediaQueryInterface) (contractsorm.Query,
 	}
 
 	if options.HasType() {
-		q = q.Where(COLUMN_TYPE+" = ?", options.Type())
+		q = q.Where(COLUMN_MEDIA_TYPE+" = ?", options.Type())
+	}
+
+	if !options.IsCountOnly() {
+		if options.HasLimit() {
+			q = q.Limit(cast.ToInt(options.Limit()))
+		}
+
+		if options.HasOffset() {
+			q = q.Offset(cast.ToInt(options.Offset()))
+		}
+	}
+
+	sortOrder := lo.Ternary(options.HasSortDirection(), options.SortDirection(), "desc")
+
+	if options.HasOrderBy() {
+		q = q.OrderBy(options.OrderBy(), sortOrder)
 	}
 
 	if options.SoftDeletedIncluded() {
