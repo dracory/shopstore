@@ -57,13 +57,11 @@ func (store *Store) MigrateUp(ctx context.Context, tx ...*sql.Tx) error {
 		return err
 	}
 
-	err := migration_001_product_table_add_parent_id(store)
-	if err != nil {
+	if err := migration_001_product_table_add_parent_id(store); err != nil {
 		return err
 	}
 
-	err = migration_002_product_table_add_variant_dimensions(store)
-	if err != nil {
+	if err := migration_002_product_table_add_variant_dimensions(store); err != nil {
 		return err
 	}
 

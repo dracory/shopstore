@@ -1,37 +1,41 @@
 package shopstore
 
 import (
-	"context"
-	"fmt"
-	"strings"
+	contractsschema "github.com/dracory/neat/contracts/database/schema"
 )
 
-func migration_001_product_table_add_parent_id(store *Store) (err error) {
-	db, _ := store.db.DB()
-	_, err = db.ExecContext(context.Background(), "ALTER TABLE "+store.productTableName+" ADD COLUMN "+COLUMN_PARENT_ID+" TEXT DEFAULT '0'")
-	if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
-		return err
+// migration_001_product_table_add_parent_id adds the parent_id column to the product table if it doesn't exist.
+// This handles existing tables that were created before parent_id was added to the schema.
+func migration_001_product_table_add_parent_id(store *Store) error {
+	if store.db.Schema().HasColumn(store.productTableName, COLUMN_PARENT_ID) {
+		return nil
 	}
-	fmt.Println("Migration 001 completed: added parent_id column")
-	return nil
+
+	return store.db.Schema().Table(store.productTableName, func(table contractsschema.Blueprint) {
+		table.String(COLUMN_PARENT_ID, 40).Default("0")
+	})
 }
 
-func migration_002_product_table_add_variant_dimensions(store *Store) (err error) {
-	db, _ := store.db.DB()
-
-	// Add variant_matrix_schema column
-	_, err = db.ExecContext(context.Background(), "ALTER TABLE "+store.productTableName+" ADD COLUMN "+COLUMN_VARIANT_MATRIX_SCHEMA+" TEXT DEFAULT '{}'")
-	if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
-		return err
+// migration_002_product_table_add_variant_dimensions adds variant matrix columns to the product table if they don't exist.
+// This handles existing tables that were created before variant columns were added to the schema.
+func migration_002_product_table_add_variant_dimensions(store *Store) error {
+	if !store.db.Schema().HasColumn(store.productTableName, COLUMN_VARIANT_MATRIX_SCHEMA) {
+		err := store.db.Schema().Table(store.productTableName, func(table contractsschema.Blueprint) {
+			table.Text(COLUMN_VARIANT_MATRIX_SCHEMA).Default("{}")
+		})
+		if err != nil {
+			return err
+		}
 	}
-	fmt.Println("Migration 002a completed: added variant_matrix_schema column")
 
-	// Add variant_matrix_values column
-	_, err = db.ExecContext(context.Background(), "ALTER TABLE "+store.productTableName+" ADD COLUMN "+COLUMN_VARIANT_MATRIX_VALUES+" TEXT DEFAULT '{}'")
-	if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
-		return err
+	if !store.db.Schema().HasColumn(store.productTableName, COLUMN_VARIANT_MATRIX_VALUES) {
+		err := store.db.Schema().Table(store.productTableName, func(table contractsschema.Blueprint) {
+			table.Text(COLUMN_VARIANT_MATRIX_VALUES).Default("{}")
+		})
+		if err != nil {
+			return err
+		}
 	}
-	fmt.Println("Migration 002b completed: added variant_matrix_values column")
 
 	return nil
 }
