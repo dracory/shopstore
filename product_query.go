@@ -24,9 +24,17 @@ type ProductQueryInterface interface {
 	ID() string
 	SetID(id string) ProductQueryInterface
 
+	HasIDNotID() bool
+	IDNotID() string
+	SetIDNotID(idNotID string) ProductQueryInterface
+
 	HasIDIn() bool
 	IDIn() []string
 	SetIDIn(idIn []string) ProductQueryInterface
+
+	HasIDNotIn() bool
+	IDNotIn() []string
+	SetIDNotIn(idNotIn []string) ProductQueryInterface
 
 	HasLimit() bool
 	Limit() int
@@ -91,8 +99,16 @@ func (c *productQueryImplementation) Validate() error {
 		return errors.New("product query. id cannot be empty")
 	}
 
+	if c.HasIDNotID() && c.IDNotID() == "" {
+		return errors.New("product query. id_not_id cannot be empty")
+	}
+
 	if c.HasIDIn() && len(c.IDIn()) == 0 {
 		return errors.New("product query. id_in cannot be empty")
+	}
+
+	if c.HasIDNotIn() && len(c.IDNotIn()) == 0 {
+		return errors.New("product query. id_not_in cannot be empty")
 	}
 
 	if c.HasSortDirection() && c.SortDirection() == "" {
@@ -212,6 +228,24 @@ func (c *productQueryImplementation) SetID(id string) ProductQueryInterface {
 	return c
 }
 
+func (c *productQueryImplementation) HasIDNotID() bool {
+	return c.hasProperty("id_not_id")
+}
+
+func (c *productQueryImplementation) IDNotID() string {
+	if !c.HasIDNotID() {
+		return ""
+	}
+
+	return c.properties["id_not_id"].(string)
+}
+
+func (c *productQueryImplementation) SetIDNotID(idNotID string) ProductQueryInterface {
+	c.properties["id_not_id"] = idNotID
+
+	return c
+}
+
 func (c *productQueryImplementation) HasIDIn() bool {
 	return c.hasProperty("id_in")
 }
@@ -226,6 +260,24 @@ func (c *productQueryImplementation) IDIn() []string {
 
 func (c *productQueryImplementation) SetIDIn(idIn []string) ProductQueryInterface {
 	c.properties["id_in"] = idIn
+
+	return c
+}
+
+func (c *productQueryImplementation) HasIDNotIn() bool {
+	return c.hasProperty("id_not_in")
+}
+
+func (c *productQueryImplementation) IDNotIn() []string {
+	if !c.HasIDNotIn() {
+		return []string{}
+	}
+
+	return c.properties["id_not_in"].([]string)
+}
+
+func (c *productQueryImplementation) SetIDNotIn(idNotIn []string) ProductQueryInterface {
+	c.properties["id_not_in"] = idNotIn
 
 	return c
 }
