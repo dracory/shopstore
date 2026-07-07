@@ -2,6 +2,26 @@ package shopstore
 
 import "errors"
 
+const (
+	propertyColumns             = "columns"
+	propertyCountOnly           = "count_only"
+	propertyCreatedAtGte        = "created_at_gte"
+	propertyCreatedAtLte        = "created_at_lte"
+	propertyID                  = "id"
+	propertyNotID               = "not_id"
+	propertyIDIn                = "id_in"
+	propertyNotIDIn             = "not_id_in"
+	propertyLimit               = "limit"
+	propertyOffset              = "offset"
+	propertyOrderBy             = "order_by"
+	propertySortDirection       = "sort_direction"
+	propertySoftDeletedIncluded = "soft_deleted_included"
+	propertyStatus              = "status"
+	propertyStatusIn            = "status_in"
+	propertyTitleLike           = "title_like"
+	propertyParentID            = "parent_id"
+)
+
 type ProductQueryInterface interface {
 	Validate() error
 
@@ -24,17 +44,17 @@ type ProductQueryInterface interface {
 	ID() string
 	SetID(id string) ProductQueryInterface
 
-	HasIDNotID() bool
-	IDNotID() string
-	SetIDNotID(idNotID string) ProductQueryInterface
+	HasNotID() bool
+	NotID() string
+	SetNotID(notID string) ProductQueryInterface
 
 	HasIDIn() bool
 	IDIn() []string
 	SetIDIn(idIn []string) ProductQueryInterface
 
-	HasIDNotIn() bool
-	IDNotIn() []string
-	SetIDNotIn(idNotIn []string) ProductQueryInterface
+	HasNotIDIn() bool
+	NotIDIn() []string
+	SetNotIDIn(notIDIn []string) ProductQueryInterface
 
 	HasLimit() bool
 	Limit() int
@@ -99,16 +119,16 @@ func (c *productQueryImplementation) Validate() error {
 		return errors.New("product query. id cannot be empty")
 	}
 
-	if c.HasIDNotID() && c.IDNotID() == "" {
-		return errors.New("product query. id_not_id cannot be empty")
+	if c.HasNotID() && c.NotID() == "" {
+		return errors.New("product query. not_id cannot be empty")
 	}
 
 	if c.HasIDIn() && len(c.IDIn()) == 0 {
 		return errors.New("product query. id_in cannot be empty")
 	}
 
-	if c.HasIDNotIn() && len(c.IDNotIn()) == 0 {
-		return errors.New("product query. id_not_in cannot be empty")
+	if c.HasNotIDIn() && len(c.NotIDIn()) == 0 {
+		return errors.New("product query. not_id_in cannot be empty")
 	}
 
 	if c.HasSortDirection() && c.SortDirection() == "" {
@@ -143,21 +163,21 @@ func (c *productQueryImplementation) Validate() error {
 }
 
 func (c *productQueryImplementation) Columns() []string {
-	if !c.hasProperty("columns") {
+	if !c.hasProperty(propertyColumns) {
 		return []string{}
 	}
 
-	return c.properties["columns"].([]string)
+	return c.properties[propertyColumns].([]string)
 }
 
 func (c *productQueryImplementation) SetColumns(columns []string) ProductQueryInterface {
-	c.properties["columns"] = columns
+	c.properties[propertyColumns] = columns
 
 	return c
 }
 
 func (c *productQueryImplementation) HasCountOnly() bool {
-	return c.hasProperty("count_only")
+	return c.hasProperty(propertyCountOnly)
 }
 
 func (c *productQueryImplementation) IsCountOnly() bool {
@@ -165,17 +185,17 @@ func (c *productQueryImplementation) IsCountOnly() bool {
 		return false
 	}
 
-	return c.properties["count_only"].(bool)
+	return c.properties[propertyCountOnly].(bool)
 }
 
 func (c *productQueryImplementation) SetCountOnly(countOnly bool) ProductQueryInterface {
-	c.properties["count_only"] = countOnly
+	c.properties[propertyCountOnly] = countOnly
 
 	return c
 }
 
 func (c *productQueryImplementation) HasCreatedAtGte() bool {
-	return c.hasProperty("created_at_gte")
+	return c.hasProperty(propertyCreatedAtGte)
 }
 
 func (c *productQueryImplementation) CreatedAtGte() string {
@@ -183,17 +203,17 @@ func (c *productQueryImplementation) CreatedAtGte() string {
 		return ""
 	}
 
-	return c.properties["created_at_gte"].(string)
+	return c.properties[propertyCreatedAtGte].(string)
 }
 
 func (c *productQueryImplementation) SetCreatedAtGte(createdAtGte string) ProductQueryInterface {
-	c.properties["created_at_gte"] = createdAtGte
+	c.properties[propertyCreatedAtGte] = createdAtGte
 
 	return c
 }
 
 func (c *productQueryImplementation) HasCreatedAtLte() bool {
-	return c.hasProperty("created_at_lte")
+	return c.hasProperty(propertyCreatedAtLte)
 }
 
 func (c *productQueryImplementation) CreatedAtLte() string {
@@ -201,17 +221,17 @@ func (c *productQueryImplementation) CreatedAtLte() string {
 		return ""
 	}
 
-	return c.properties["created_at_lte"].(string)
+	return c.properties[propertyCreatedAtLte].(string)
 }
 
 func (c *productQueryImplementation) SetCreatedAtLte(createdAtLte string) ProductQueryInterface {
-	c.properties["created_at_lte"] = createdAtLte
+	c.properties[propertyCreatedAtLte] = createdAtLte
 
 	return c
 }
 
 func (c *productQueryImplementation) HasID() bool {
-	return c.hasProperty("id")
+	return c.hasProperty(propertyID)
 }
 
 func (c *productQueryImplementation) ID() string {
@@ -219,35 +239,35 @@ func (c *productQueryImplementation) ID() string {
 		return ""
 	}
 
-	return c.properties["id"].(string)
+	return c.properties[propertyID].(string)
 }
 
 func (c *productQueryImplementation) SetID(id string) ProductQueryInterface {
-	c.properties["id"] = id
+	c.properties[propertyID] = id
 
 	return c
 }
 
-func (c *productQueryImplementation) HasIDNotID() bool {
-	return c.hasProperty("id_not_id")
+func (c *productQueryImplementation) HasNotID() bool {
+	return c.hasProperty(propertyNotID)
 }
 
-func (c *productQueryImplementation) IDNotID() string {
-	if !c.HasIDNotID() {
+func (c *productQueryImplementation) NotID() string {
+	if !c.HasNotID() {
 		return ""
 	}
 
-	return c.properties["id_not_id"].(string)
+	return c.properties[propertyNotID].(string)
 }
 
-func (c *productQueryImplementation) SetIDNotID(idNotID string) ProductQueryInterface {
-	c.properties["id_not_id"] = idNotID
+func (c *productQueryImplementation) SetNotID(notID string) ProductQueryInterface {
+	c.properties[propertyNotID] = notID
 
 	return c
 }
 
 func (c *productQueryImplementation) HasIDIn() bool {
-	return c.hasProperty("id_in")
+	return c.hasProperty(propertyIDIn)
 }
 
 func (c *productQueryImplementation) IDIn() []string {
@@ -255,35 +275,35 @@ func (c *productQueryImplementation) IDIn() []string {
 		return []string{}
 	}
 
-	return c.properties["id_in"].([]string)
+	return c.properties[propertyIDIn].([]string)
 }
 
 func (c *productQueryImplementation) SetIDIn(idIn []string) ProductQueryInterface {
-	c.properties["id_in"] = idIn
+	c.properties[propertyIDIn] = idIn
 
 	return c
 }
 
-func (c *productQueryImplementation) HasIDNotIn() bool {
-	return c.hasProperty("id_not_in")
+func (c *productQueryImplementation) HasNotIDIn() bool {
+	return c.hasProperty(propertyNotIDIn)
 }
 
-func (c *productQueryImplementation) IDNotIn() []string {
-	if !c.HasIDNotIn() {
+func (c *productQueryImplementation) NotIDIn() []string {
+	if !c.HasNotIDIn() {
 		return []string{}
 	}
 
-	return c.properties["id_not_in"].([]string)
+	return c.properties[propertyNotIDIn].([]string)
 }
 
-func (c *productQueryImplementation) SetIDNotIn(idNotIn []string) ProductQueryInterface {
-	c.properties["id_not_in"] = idNotIn
+func (c *productQueryImplementation) SetNotIDIn(notIDIn []string) ProductQueryInterface {
+	c.properties[propertyNotIDIn] = notIDIn
 
 	return c
 }
 
 func (c *productQueryImplementation) HasLimit() bool {
-	return c.hasProperty("limit")
+	return c.hasProperty(propertyLimit)
 }
 
 func (c *productQueryImplementation) Limit() int {
@@ -291,17 +311,17 @@ func (c *productQueryImplementation) Limit() int {
 		return 0
 	}
 
-	return c.properties["limit"].(int)
+	return c.properties[propertyLimit].(int)
 }
 
 func (c *productQueryImplementation) SetLimit(limit int) ProductQueryInterface {
-	c.properties["limit"] = limit
+	c.properties[propertyLimit] = limit
 
 	return c
 }
 
 func (c *productQueryImplementation) HasOffset() bool {
-	return c.hasProperty("offset")
+	return c.hasProperty(propertyOffset)
 }
 
 func (c *productQueryImplementation) Offset() int {
@@ -309,17 +329,17 @@ func (c *productQueryImplementation) Offset() int {
 		return 0
 	}
 
-	return c.properties["offset"].(int)
+	return c.properties[propertyOffset].(int)
 }
 
 func (c *productQueryImplementation) SetOffset(offset int) ProductQueryInterface {
-	c.properties["offset"] = offset
+	c.properties[propertyOffset] = offset
 
 	return c
 }
 
 func (c *productQueryImplementation) HasOrderBy() bool {
-	return c.hasProperty("order_by")
+	return c.hasProperty(propertyOrderBy)
 }
 
 func (c *productQueryImplementation) OrderBy() string {
@@ -327,17 +347,17 @@ func (c *productQueryImplementation) OrderBy() string {
 		return ""
 	}
 
-	return c.properties["order_by"].(string)
+	return c.properties[propertyOrderBy].(string)
 }
 
 func (c *productQueryImplementation) SetOrderBy(orderBy string) ProductQueryInterface {
-	c.properties["order_by"] = orderBy
+	c.properties[propertyOrderBy] = orderBy
 
 	return c
 }
 
 func (c *productQueryImplementation) HasSortDirection() bool {
-	return c.hasProperty("sort_direction")
+	return c.hasProperty(propertySortDirection)
 }
 
 func (c *productQueryImplementation) SortDirection() string {
@@ -345,17 +365,17 @@ func (c *productQueryImplementation) SortDirection() string {
 		return ""
 	}
 
-	return c.properties["sort_direction"].(string)
+	return c.properties[propertySortDirection].(string)
 }
 
 func (c *productQueryImplementation) SetSortDirection(sortDirection string) ProductQueryInterface {
-	c.properties["sort_direction"] = sortDirection
+	c.properties[propertySortDirection] = sortDirection
 
 	return c
 }
 
 func (c *productQueryImplementation) HasSoftDeletedIncluded() bool {
-	return c.hasProperty("soft_deleted_included")
+	return c.hasProperty(propertySoftDeletedIncluded)
 }
 
 func (c *productQueryImplementation) SoftDeletedIncluded() bool {
@@ -363,17 +383,17 @@ func (c *productQueryImplementation) SoftDeletedIncluded() bool {
 		return false
 	}
 
-	return c.properties["soft_deleted_included"].(bool)
+	return c.properties[propertySoftDeletedIncluded].(bool)
 }
 
 func (c *productQueryImplementation) SetSoftDeletedIncluded(softDeletedIncluded bool) ProductQueryInterface {
-	c.properties["soft_deleted_included"] = softDeletedIncluded
+	c.properties[propertySoftDeletedIncluded] = softDeletedIncluded
 
 	return c
 }
 
 func (c *productQueryImplementation) HasStatus() bool {
-	return c.hasProperty("status")
+	return c.hasProperty(propertyStatus)
 }
 
 func (c *productQueryImplementation) Status() string {
@@ -381,17 +401,17 @@ func (c *productQueryImplementation) Status() string {
 		return ""
 	}
 
-	return c.properties["status"].(string)
+	return c.properties[propertyStatus].(string)
 }
 
 func (c *productQueryImplementation) SetStatus(status string) ProductQueryInterface {
-	c.properties["status"] = status
+	c.properties[propertyStatus] = status
 
 	return c
 }
 
 func (c *productQueryImplementation) HasStatusIn() bool {
-	return c.hasProperty("status_in")
+	return c.hasProperty(propertyStatusIn)
 }
 
 func (c *productQueryImplementation) StatusIn() []string {
@@ -399,17 +419,17 @@ func (c *productQueryImplementation) StatusIn() []string {
 		return []string{}
 	}
 
-	return c.properties["status_in"].([]string)
+	return c.properties[propertyStatusIn].([]string)
 }
 
 func (c *productQueryImplementation) SetStatusIn(statusIn []string) ProductQueryInterface {
-	c.properties["status_in"] = statusIn
+	c.properties[propertyStatusIn] = statusIn
 
 	return c
 }
 
 func (c *productQueryImplementation) HasTitleLike() bool {
-	return c.hasProperty("title_like")
+	return c.hasProperty(propertyTitleLike)
 }
 
 func (c *productQueryImplementation) TitleLike() string {
@@ -417,17 +437,17 @@ func (c *productQueryImplementation) TitleLike() string {
 		return ""
 	}
 
-	return c.properties["title_like"].(string)
+	return c.properties[propertyTitleLike].(string)
 }
 
 func (c *productQueryImplementation) SetTitleLike(titleLike string) ProductQueryInterface {
-	c.properties["title_like"] = titleLike
+	c.properties[propertyTitleLike] = titleLike
 
 	return c
 }
 
 func (c *productQueryImplementation) HasParentID() bool {
-	return c.hasProperty("parent_id")
+	return c.hasProperty(propertyParentID)
 }
 
 func (c *productQueryImplementation) ParentID() string {
@@ -435,11 +455,11 @@ func (c *productQueryImplementation) ParentID() string {
 		return ""
 	}
 
-	return c.properties["parent_id"].(string)
+	return c.properties[propertyParentID].(string)
 }
 
 func (c *productQueryImplementation) SetParentID(parentID string) ProductQueryInterface {
-	c.properties["parent_id"] = parentID
+	c.properties[propertyParentID] = parentID
 
 	return c
 }

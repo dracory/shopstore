@@ -203,8 +203,8 @@ func TestStoreProductList_ExcludeIDs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Test IDNotID: exclude p1
-	list, err := store.ProductList(ctx, NewProductQuery().SetIDNotID(p1.GetID()))
+	// Test NotID: exclude p1
+	list, err := store.ProductList(ctx, NewProductQuery().SetNotID(p1.GetID()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -217,8 +217,8 @@ func TestStoreProductList_ExcludeIDs(t *testing.T) {
 		}
 	}
 
-	// Test IDNotIn: exclude p1 and p2
-	list, err = store.ProductList(ctx, NewProductQuery().SetIDNotIn([]string{p1.GetID(), p2.GetID()}))
+	// Test NotIDIn: exclude p1 and p2
+	list, err = store.ProductList(ctx, NewProductQuery().SetNotIDIn([]string{p1.GetID(), p2.GetID()}))
 	if err != nil {
 		t.Fatal(err)
 	}

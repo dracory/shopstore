@@ -172,8 +172,8 @@ func (store *Store) productQuery(options ProductQueryInterface) (contractsorm.Qu
 		q = q.Where(COLUMN_ID+" = ?", options.ID())
 	}
 
-	if options.HasIDNotID() {
-		q = q.Where(COLUMN_ID+" != ?", options.IDNotID())
+	if options.HasNotID() {
+		q = q.Where(COLUMN_ID+" != ?", options.NotID())
 	}
 
 	if options.HasIDIn() {
@@ -184,9 +184,9 @@ func (store *Store) productQuery(options ProductQueryInterface) (contractsorm.Qu
 		q = q.WhereIn(COLUMN_ID, ids)
 	}
 
-	if options.HasIDNotIn() {
-		ids := make([]any, len(options.IDNotIn()))
-		for i, id := range options.IDNotIn() {
+	if options.HasNotIDIn() {
+		ids := make([]any, len(options.NotIDIn()))
+		for i, id := range options.NotIDIn() {
 			ids[i] = id
 		}
 		q = q.WhereNotIn(COLUMN_ID, ids)
