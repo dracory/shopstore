@@ -10,7 +10,7 @@ const (
 	propertyID                  = "id"
 	propertyNotID               = "not_id"
 	propertyIDIn                = "id_in"
-	propertyNotIDIn             = "not_id_in"
+	propertyIDNotIn             = "id_not_in"
 	propertyLimit               = "limit"
 	propertyOffset              = "offset"
 	propertyOrderBy             = "order_by"
@@ -52,9 +52,9 @@ type ProductQueryInterface interface {
 	IDIn() []string
 	SetIDIn(idIn []string) ProductQueryInterface
 
-	HasNotIDIn() bool
-	NotIDIn() []string
-	SetNotIDIn(notIDIn []string) ProductQueryInterface
+	HasIDNotIn() bool
+	IDNotIn() []string
+	SetIDNotIn(idNotIn []string) ProductQueryInterface
 
 	HasLimit() bool
 	Limit() int
@@ -127,8 +127,8 @@ func (c *productQueryImplementation) Validate() error {
 		return errors.New("product query. id_in cannot be empty")
 	}
 
-	if c.HasNotIDIn() && len(c.NotIDIn()) == 0 {
-		return errors.New("product query. not_id_in cannot be empty")
+	if c.HasIDNotIn() && len(c.IDNotIn()) == 0 {
+		return errors.New("product query. id_not_in cannot be empty")
 	}
 
 	if c.HasSortDirection() && c.SortDirection() == "" {
@@ -284,20 +284,20 @@ func (c *productQueryImplementation) SetIDIn(idIn []string) ProductQueryInterfac
 	return c
 }
 
-func (c *productQueryImplementation) HasNotIDIn() bool {
-	return c.hasProperty(propertyNotIDIn)
+func (c *productQueryImplementation) HasIDNotIn() bool {
+	return c.hasProperty(propertyIDNotIn)
 }
 
-func (c *productQueryImplementation) NotIDIn() []string {
-	if !c.HasNotIDIn() {
+func (c *productQueryImplementation) IDNotIn() []string {
+	if !c.HasIDNotIn() {
 		return []string{}
 	}
 
-	return c.properties[propertyNotIDIn].([]string)
+	return c.properties[propertyIDNotIn].([]string)
 }
 
-func (c *productQueryImplementation) SetNotIDIn(notIDIn []string) ProductQueryInterface {
-	c.properties[propertyNotIDIn] = notIDIn
+func (c *productQueryImplementation) SetIDNotIn(idNotIn []string) ProductQueryInterface {
+	c.properties[propertyIDNotIn] = idNotIn
 
 	return c
 }
