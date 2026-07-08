@@ -176,3 +176,56 @@ func TestStoreProductSoftDelete(t *testing.T) {
 		t.Fatal("Product MUST be soft deleted", productFindWithDeleted[0].GetSoftDeletedAt())
 	}
 }
+
+func TestStoreProductList_ExcludeIDs(t *testing.T) {
+	store, err := initStore(":memory:")
+	if err != nil {
+		t.Fatal("unexpected error:", err)
+	}
+
+	ctx := context.Background()
+
+	// Create 3 products
+	p1 := NewProduct().SetTitle("Product 1")
+	p2 := NewProduct().SetTitle("Product 2")
+	p3 := NewProduct().SetTitle("Product 3")
+
+	err = store.ProductCreate(ctx, p1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = store.ProductCreate(ctx, p2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = store.ProductCreate(ctx, p3)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Test NotID: exclude p1
+	list, err := store.ProductList(ctx, NewProductQuery().SetNotID(p1.GetID()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 2 {
+		t.Fatalf("expected 2 products, got %d", len(list))
+	}
+	for _, p := range list {
+		if p.GetID() == p1.GetID() {
+			t.Errorf("product %s should have been excluded", p1.GetID())
+		}
+	}
+
+	// Test IDNotIn: exclude p1 and p2
+	list, err = store.ProductList(ctx, NewProductQuery().SetIDNotIn([]string{p1.GetID(), p2.GetID()}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 1 {
+		t.Fatalf("expected 1 product, got %d", len(list))
+	}
+	if list[0].GetID() != p3.GetID() {
+		t.Errorf("expected product %s, got %s", p3.GetID(), list[0].GetID())
+	}
+}
