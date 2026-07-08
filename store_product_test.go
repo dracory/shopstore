@@ -215,3 +215,144 @@ func TestStoreProductList_ExcludeIDs(t *testing.T) {
 		t.Errorf("expected product %s, got %s", p3.GetID(), list[0].GetID())
 	}
 }
+
+func TestStoreProductList_MetasIn(t *testing.T) {
+	store, err := initStore(":memory:")
+	if err != nil {
+		t.Fatal("unexpected error:", err)
+	}
+
+	ctx := context.Background()
+
+	// Create products with different meta values
+	p1 := NewProduct().SetTitle("Product 1")
+	err = p1.SetMetas(map[string]string{"is_featured": "featured", "color": "green"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p2 := NewProduct().SetTitle("Product 2")
+	err = p2.SetMetas(map[string]string{"is_featured": "not_featured", "color": "green"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p3 := NewProduct().SetTitle("Product 3")
+	err = p3.SetMetas(map[string]string{"is_featured": "featured", "color": "red"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = store.ProductCreate(ctx, p1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = store.ProductCreate(ctx, p2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = store.ProductCreate(ctx, p3)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Test MetasIn: filter by single meta key-value (is_featured=featured)
+	list, err := store.ProductList(ctx, NewProductQuery().SetMetasIn(map[string]string{
+		"is_featured": "featured",
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 2 {
+		t.Fatalf("expected 2 featured products, got %d", len(list))
+	}
+
+	// Test MetasIn: filter by multiple meta key-values (is_featured=featured AND color=green)
+	list, err = store.ProductList(ctx, NewProductQuery().SetMetasIn(map[string]string{
+		"is_featured": "featured",
+		"color":       "green",
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 1 {
+		t.Fatalf("expected 1 product matching both filters, got %d", len(list))
+	}
+	if list[0].GetID() != p1.GetID() {
+		t.Errorf("expected product %s, got %s", p1.GetID(), list[0].GetID())
+	}
+}
+
+func TestStoreProductList_MetasNotIn(t *testing.T) {
+	store, err := initStore(":memory:")
+	if err != nil {
+		t.Fatal("unexpected error:", err)
+	}
+
+	ctx := context.Background()
+
+	// Create products with different meta values
+	p1 := NewProduct().SetTitle("Product 1")
+	err = p1.SetMetas(map[string]string{"is_featured": "featured", "color": "green"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p2 := NewProduct().SetTitle("Product 2")
+	err = p2.SetMetas(map[string]string{"is_featured": "not_featured", "color": "green"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p3 := NewProduct().SetTitle("Product 3")
+	err = p3.SetMetas(map[string]string{"is_featured": "featured", "color": "red"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// p4 has no is_featured key at all — must be included in MetasNotIn results
+	p4 := NewProduct().SetTitle("Product 4")
+	err = p4.SetMetas(map[string]string{"color": "blue"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = store.ProductCreate(ctx, p1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = store.ProductCreate(ctx, p2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = store.ProductCreate(ctx, p3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = store.ProductCreate(ctx, p4)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Test MetasNotIn: exclude products where is_featured=featured
+	// Should return p2 (not_featured) and p4 (key absent → NULL != value is NULL → must be included)
+	list, err := store.ProductList(ctx, NewProductQuery().SetMetasNotIn(map[string]string{
+		"is_featured": "featured",
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 2 {
+		t.Fatalf("expected 2 products (not featured + missing key), got %d", len(list))
+	}
+	gotIDs := map[string]bool{}
+	for _, p := range list {
+		gotIDs[p.GetID()] = true
+	}
+	if !gotIDs[p2.GetID()] {
+		t.Errorf("expected product %s in results", p2.GetID())
+	}
+	if !gotIDs[p4.GetID()] {
+		t.Errorf("expected product %s (missing key) in results", p4.GetID())
+	}
+}

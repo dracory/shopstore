@@ -19,6 +19,8 @@ const (
 	propertyStatusIn            = "status_in"
 	propertyTitleLike           = "title_like"
 	propertyParentID            = "parent_id"
+	propertyMetasIn             = "metas_in"
+	propertyMetasNotIn          = "metas_not_in"
 )
 
 type ProductQueryInterface interface {
@@ -87,6 +89,14 @@ type ProductQueryInterface interface {
 	ParentID() string
 	SetParentID(parentID string) ProductQueryInterface
 
+	HasMetasIn() bool
+	MetasIn() map[string]string
+	SetMetasIn(metasIn map[string]string) ProductQueryInterface
+
+	HasMetasNotIn() bool
+	MetasNotIn() map[string]string
+	SetMetasNotIn(metasNotIn map[string]string) ProductQueryInterface
+
 	hasProperty(name string) bool
 }
 
@@ -148,6 +158,28 @@ func (c *productQueryImplementation) Validate() error {
 
 	if c.HasTitleLike() && c.TitleLike() == "" {
 		return errors.New("product query. title_like cannot be empty")
+	}
+
+	if c.HasMetasIn() {
+		if len(c.MetasIn()) == 0 {
+			return errors.New("product query. metas_in cannot be empty")
+		}
+		for k, v := range c.MetasIn() {
+			if k == "" || v == "" {
+				return errors.New("product query. metas_in keys and values cannot be empty")
+			}
+		}
+	}
+
+	if c.HasMetasNotIn() {
+		if len(c.MetasNotIn()) == 0 {
+			return errors.New("product query. metas_not_in cannot be empty")
+		}
+		for k, v := range c.MetasNotIn() {
+			if k == "" || v == "" {
+				return errors.New("product query. metas_not_in keys and values cannot be empty")
+			}
+		}
 	}
 
 	return nil
@@ -433,6 +465,42 @@ func (c *productQueryImplementation) ParentID() string {
 
 func (c *productQueryImplementation) SetParentID(parentID string) ProductQueryInterface {
 	c.properties[propertyParentID] = parentID
+
+	return c
+}
+
+func (c *productQueryImplementation) HasMetasIn() bool {
+	return c.hasProperty(propertyMetasIn)
+}
+
+func (c *productQueryImplementation) MetasIn() map[string]string {
+	if !c.HasMetasIn() {
+		return map[string]string{}
+	}
+
+	return c.properties[propertyMetasIn].(map[string]string)
+}
+
+func (c *productQueryImplementation) SetMetasIn(metasIn map[string]string) ProductQueryInterface {
+	c.properties[propertyMetasIn] = metasIn
+
+	return c
+}
+
+func (c *productQueryImplementation) HasMetasNotIn() bool {
+	return c.hasProperty(propertyMetasNotIn)
+}
+
+func (c *productQueryImplementation) MetasNotIn() map[string]string {
+	if !c.HasMetasNotIn() {
+		return map[string]string{}
+	}
+
+	return c.properties[propertyMetasNotIn].(map[string]string)
+}
+
+func (c *productQueryImplementation) SetMetasNotIn(metasNotIn map[string]string) ProductQueryInterface {
+	c.properties[propertyMetasNotIn] = metasNotIn
 
 	return c
 }

@@ -211,6 +211,20 @@ func (store *Store) productQuery(options ProductQueryInterface) (contractsorm.Qu
 		q = q.Where(COLUMN_PARENT_ID+" = ?", options.ParentID())
 	}
 
+	if options.HasMetasIn() {
+		for key, value := range options.MetasIn() {
+			jsonPath := buildJsonPath(key)
+			q = q.Where("json_extract("+COLUMN_METAS+", '"+jsonPath+"') = ?", value)
+		}
+	}
+
+	if options.HasMetasNotIn() {
+		for key, value := range options.MetasNotIn() {
+			jsonPath := buildJsonPath(key)
+			q = q.Where("IFNULL(json_extract("+COLUMN_METAS+", '"+jsonPath+"'), '') != ?", value)
+		}
+	}
+
 	if options.HasCreatedAtGte() && options.HasCreatedAtLte() {
 		q = q.Where(COLUMN_CREATED_AT+" BETWEEN ? AND ?", options.CreatedAtGte(), options.CreatedAtLte())
 	} else if options.HasCreatedAtGte() {
@@ -298,4 +312,14 @@ func mapAnyToString(m map[string]any) map[string]string {
 		result[k] = cast.ToString(v)
 	}
 	return result
+}
+
+// buildJsonPath builds a SQLite JSON path for a top-level key in the metas column.
+// The key is wrapped in double-quotes inside the path so that special characters
+// (e.g. '.', '"', ']') are treated as literal key names rather than path syntax.
+// Single quotes are doubled to prevent breaking out of the surrounding SQL string literal.
+func buildJsonPath(key string) string {
+	escaped := strings.ReplaceAll(key, "'", "''")
+	escaped = strings.ReplaceAll(escaped, `"`, `\"`)
+	return "$.\"" + escaped + "\""
 }
