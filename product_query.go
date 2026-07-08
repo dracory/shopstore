@@ -8,7 +8,6 @@ const (
 	propertyCreatedAtGte        = "created_at_gte"
 	propertyCreatedAtLte        = "created_at_lte"
 	propertyID                  = "id"
-	propertyNotID               = "not_id"
 	propertyIDIn                = "id_in"
 	propertyIDNotIn             = "id_not_in"
 	propertyLimit               = "limit"
@@ -43,10 +42,6 @@ type ProductQueryInterface interface {
 	HasID() bool
 	ID() string
 	SetID(id string) ProductQueryInterface
-
-	HasNotID() bool
-	NotID() string
-	SetNotID(notID string) ProductQueryInterface
 
 	HasIDIn() bool
 	IDIn() []string
@@ -117,10 +112,6 @@ func (c *productQueryImplementation) Validate() error {
 
 	if c.HasID() && c.ID() == "" {
 		return errors.New("product query. id cannot be empty")
-	}
-
-	if c.HasNotID() && c.NotID() == "" {
-		return errors.New("product query. not_id cannot be empty")
 	}
 
 	if c.HasIDIn() && len(c.IDIn()) == 0 {
@@ -244,24 +235,6 @@ func (c *productQueryImplementation) ID() string {
 
 func (c *productQueryImplementation) SetID(id string) ProductQueryInterface {
 	c.properties[propertyID] = id
-
-	return c
-}
-
-func (c *productQueryImplementation) HasNotID() bool {
-	return c.hasProperty(propertyNotID)
-}
-
-func (c *productQueryImplementation) NotID() string {
-	if !c.HasNotID() {
-		return ""
-	}
-
-	return c.properties[propertyNotID].(string)
-}
-
-func (c *productQueryImplementation) SetNotID(notID string) ProductQueryInterface {
-	c.properties[propertyNotID] = notID
 
 	return c
 }
