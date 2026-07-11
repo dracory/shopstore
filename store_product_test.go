@@ -4,8 +4,6 @@ import (
 	"context"
 	"strings"
 	"testing"
-
-	"github.com/dracory/neat"
 )
 
 func TestStoreProductCreate(t *testing.T) {
@@ -174,8 +172,8 @@ func TestStoreProductSoftDelete(t *testing.T) {
 		return
 	}
 
-	if strings.Contains(productFindWithDeleted[0].GetSoftDeletedAt(), neat.NullDateTime) {
-		t.Fatal("Product MUST be soft deleted", productFindWithDeleted[0].GetSoftDeletedAt())
+	if productFindWithDeleted[0].GetSoftDeletedAt() == MAX_DATETIME {
+		t.Fatal("Product MUST be soft deleted, got:", productFindWithDeleted[0].GetSoftDeletedAt())
 	}
 }
 
