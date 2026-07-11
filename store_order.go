@@ -58,13 +58,45 @@ func (store *Store) OrderDeleteByID(ctx context.Context, id string) error {
 		return errors.New("order id is empty")
 	}
 
+	if err := store.assertOrderDeletable(ctx, id); err != nil {
+		return err
+	}
+
 	_, err := store.db.Query().Table(store.orderTableName).Where(COLUMN_ID+" = ?", id).Delete()
 	return err
 }
 
+// assertOrderDeletable performs a non-atomic check-then-act: the count queries and the
+// subsequent delete/softdelete are not wrapped in a transaction. A concurrent insert
+// of a child row between the check and the delete could create an orphaned reference.
+// Transaction wrapping is a future improvement if the concurrency model requires it.
+func (store *Store) assertOrderDeletable(ctx context.Context, orderID string) error {
+	lineItemCount, err := store.OrderLineItemCount(ctx, NewOrderLineItemQuery().SetOrderID(orderID))
+	if err != nil {
+		return err
+	}
+	if lineItemCount > 0 {
+		return ErrOrderHasActiveLineItems
+	}
+
+	mediaCount, err := store.MediaCount(ctx, NewMediaQuery().SetEntityID(orderID))
+	if err != nil {
+		return err
+	}
+	if mediaCount > 0 {
+		return ErrOrderHasActiveMedia
+	}
+
+	return nil
+}
+
 func (store *Store) OrderSoftDelete(ctx context.Context, order OrderInterface) error {
 	if order == nil {
-		return errors.New("order is empty")
+		return errors.New("order is nil")
+	}
+
+	if err := store.assertOrderDeletable(ctx, order.GetID()); err != nil {
+		return err
 	}
 
 	order.SetSoftDeletedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
@@ -73,10 +105,16 @@ func (store *Store) OrderSoftDelete(ctx context.Context, order OrderInterface) e
 }
 
 func (store *Store) OrderSoftDeleteByID(ctx context.Context, id string) error {
-	order, err := store.OrderFindByID(ctx, id)
+	if id == "" {
+		return errors.New("order id is empty")
+	}
 
+	order, err := store.OrderFindByID(ctx, id)
 	if err != nil {
 		return err
+	}
+	if order == nil {
+		return nil
 	}
 
 	return store.OrderSoftDelete(ctx, order)
@@ -325,10 +363,16 @@ func (store *Store) OrderLineItemSoftDelete(ctx context.Context, orderLineItem O
 }
 
 func (store *Store) OrderLineItemSoftDeleteByID(ctx context.Context, id string) error {
-	item, err := store.OrderLineItemFindByID(ctx, id)
+	if id == "" {
+		return errors.New("order line id is empty")
+	}
 
+	item, err := store.OrderLineItemFindByID(ctx, id)
 	if err != nil {
 		return err
+	}
+	if item == nil {
+		return nil
 	}
 
 	return store.OrderLineItemSoftDelete(ctx, item)

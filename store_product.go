@@ -63,13 +63,53 @@ func (store *Store) ProductDeleteByID(ctx context.Context, id string) error {
 		return errors.New("product id is empty")
 	}
 
+	if err := store.assertProductDeletable(ctx, id); err != nil {
+		return err
+	}
+
 	_, err := store.db.Query().Table(store.productTableName).Where(COLUMN_ID+" = ?", id).Delete()
 	return err
 }
 
+// assertProductDeletable performs a non-atomic check-then-act: the count queries and the
+// subsequent delete/softdelete are not wrapped in a transaction. A concurrent insert
+// of a child row between the check and the delete could create an orphaned reference.
+// Transaction wrapping is a future improvement if the concurrency model requires it.
+func (store *Store) assertProductDeletable(ctx context.Context, productID string) error {
+	variantCount, err := store.ProductCount(ctx, NewProductQuery().SetParentID(productID))
+	if err != nil {
+		return err
+	}
+	if variantCount > 0 {
+		return ErrProductHasActiveVariants
+	}
+
+	lineItemCount, err := store.OrderLineItemCount(ctx, NewOrderLineItemQuery().SetProductID(productID))
+	if err != nil {
+		return err
+	}
+	if lineItemCount > 0 {
+		return ErrProductHasActiveLineItems
+	}
+
+	mediaCount, err := store.MediaCount(ctx, NewMediaQuery().SetEntityID(productID))
+	if err != nil {
+		return err
+	}
+	if mediaCount > 0 {
+		return ErrProductHasActiveMedia
+	}
+
+	return nil
+}
+
 func (store *Store) ProductSoftDelete(ctx context.Context, product ProductInterface) error {
 	if product == nil {
-		return errors.New("product is empty")
+		return errors.New("product is nil")
+	}
+
+	if err := store.assertProductDeletable(ctx, product.GetID()); err != nil {
+		return err
 	}
 
 	product.SetSoftDeletedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
@@ -78,10 +118,16 @@ func (store *Store) ProductSoftDelete(ctx context.Context, product ProductInterf
 }
 
 func (store *Store) ProductSoftDeleteByID(ctx context.Context, id string) error {
-	product, err := store.ProductFindByID(ctx, id)
+	if id == "" {
+		return errors.New("product id is empty")
+	}
 
+	product, err := store.ProductFindByID(ctx, id)
 	if err != nil {
 		return err
+	}
+	if product == nil {
+		return nil
 	}
 
 	return store.ProductSoftDelete(ctx, product)

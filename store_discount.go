@@ -135,10 +135,16 @@ func (store *Store) DiscountSoftDelete(ctx context.Context, discount DiscountInt
 }
 
 func (store *Store) DiscountSoftDeleteByID(ctx context.Context, id string) error {
-	discount, err := store.DiscountFindByID(ctx, id)
+	if id == "" {
+		return errors.New("discount id is empty")
+	}
 
+	discount, err := store.DiscountFindByID(ctx, id)
 	if err != nil {
 		return err
+	}
+	if discount == nil {
+		return nil
 	}
 
 	return store.DiscountSoftDelete(ctx, discount)

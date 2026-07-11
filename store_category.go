@@ -61,8 +61,36 @@ func (store *Store) CategoryDeleteByID(ctx context.Context, id string) error {
 		return errors.New("id is empty")
 	}
 
+	if err := store.assertCategoryDeletable(ctx, id); err != nil {
+		return err
+	}
+
 	_, err := store.db.Query().Table(store.categoryTableName).Where(COLUMN_ID+" = ?", id).Delete()
 	return err
+}
+
+// assertCategoryDeletable performs a non-atomic check-then-act: the count queries and the
+// subsequent delete/softdelete are not wrapped in a transaction. A concurrent insert
+// of a child row between the check and the delete could create an orphaned reference.
+// Transaction wrapping is a future improvement if the concurrency model requires it.
+func (store *Store) assertCategoryDeletable(ctx context.Context, categoryID string) error {
+	childCount, err := store.CategoryCount(ctx, NewCategoryQuery().SetParentID(categoryID))
+	if err != nil {
+		return err
+	}
+	if childCount > 0 {
+		return ErrCategoryHasActiveChildren
+	}
+
+	mediaCount, err := store.MediaCount(ctx, NewMediaQuery().SetEntityID(categoryID))
+	if err != nil {
+		return err
+	}
+	if mediaCount > 0 {
+		return ErrCategoryHasActiveMedia
+	}
+
+	return nil
 }
 
 func (store *Store) CategoryFindByID(ctx context.Context, id string) (CategoryInterface, error) {
@@ -116,6 +144,10 @@ func (store *Store) CategoryList(ctx context.Context, options CategoryQueryInter
 func (store *Store) CategorySoftDelete(ctx context.Context, category CategoryInterface) error {
 	if category == nil {
 		return errors.New("category is nil")
+	}
+
+	if err := store.assertCategoryDeletable(ctx, category.GetID()); err != nil {
+		return err
 	}
 
 	category.SetSoftDeletedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))

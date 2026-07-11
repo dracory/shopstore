@@ -1,5 +1,19 @@
 package shopstore
 
+import "errors"
+
+var (
+	ErrOrderHasActiveLineItems = errors.New("cannot delete order with active line items")
+	ErrOrderHasActiveMedia     = errors.New("cannot delete order with active media")
+
+	ErrProductHasActiveVariants  = errors.New("cannot delete product with active variants")
+	ErrProductHasActiveLineItems = errors.New("cannot delete product referenced by active order line items")
+	ErrProductHasActiveMedia     = errors.New("cannot delete product with active media")
+
+	ErrCategoryHasActiveChildren = errors.New("cannot delete category with active children")
+	ErrCategoryHasActiveMedia    = errors.New("cannot delete category with active media")
+)
+
 const CATEGORY_STATUS_ACTIVE = "active"
 const CATEGORY_STATUS_DRAFT = "draft"
 const CATEGORY_STATUS_INACTIVE = "inactive"
