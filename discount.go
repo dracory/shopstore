@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/dracory/dataobject"
+	"github.com/dracory/neat"
 	"github.com/dracory/str"
 	"github.com/dromara/carbon/v2"
 	"github.com/spf13/cast"
@@ -63,8 +64,8 @@ func NewDiscount() DiscountInterface {
 		SetDescription("").
 		SetAmount(0.00).
 		SetCode(code).
-		SetStartsAt("0000-00-00 00:00:00").
-		SetEndsAt("0000-00-00 00:00:00").
+		SetStartsAt(neat.NullDateTime).
+		SetEndsAt(neat.NullDateTime).
 		SetMemo("").
 		SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
