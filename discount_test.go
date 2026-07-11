@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dracory/neat"
 	"github.com/dromara/carbon/v2"
 )
 
@@ -41,12 +42,12 @@ func TestNewDiscountDefaults(t *testing.T) {
 		t.Fatal("expected generated code to be non-empty")
 	}
 
-	if discount.GetStartsAt() != "0000-00-00 00:00:00" {
-		t.Fatalf("expected starts at %q, got %q", "0000-00-00 00:00:00", discount.GetStartsAt())
+	if discount.GetStartsAt() != neat.NullDateTime {
+		t.Fatalf("expected starts at %q, got %q", neat.NullDateTime, discount.GetStartsAt())
 	}
 
-	if discount.GetEndsAt() != "0000-00-00 00:00:00" {
-		t.Fatalf("expected ends at %q, got %q", "0000-00-00 00:00:00", discount.GetEndsAt())
+	if discount.GetEndsAt() != neat.NullDateTime {
+		t.Fatalf("expected ends at %q, got %q", neat.NullDateTime, discount.GetEndsAt())
 	}
 
 	if discount.GetSoftDeletedAt() != MAX_DATETIME {
@@ -504,5 +505,47 @@ func TestDiscountIsValidNow(t *testing.T) {
 	d.SetEndsAt(past)
 	if d.IsValidNow() {
 		t.Fatal("expected ended discount to not be valid")
+	}
+}
+
+func TestDiscountNullDateTimeSentinelPredicates(t *testing.T) {
+	discount := NewDiscount()
+
+	if discount.GetStartsAt() != neat.NullDateTime {
+		t.Fatalf("expected default starts_at to be %q, got %q", neat.NullDateTime, discount.GetStartsAt())
+	}
+
+	if discount.GetEndsAt() != neat.NullDateTime {
+		t.Fatalf("expected default ends_at to be %q, got %q", neat.NullDateTime, discount.GetEndsAt())
+	}
+
+	if discount.IsStarted() {
+		t.Fatal("expected default discount with neat.NullDateTime start not to be started")
+	}
+
+	if discount.IsEnded() {
+		t.Fatal("expected default discount with neat.NullDateTime end not to be ended")
+	}
+
+	if discount.IsExpired() {
+		t.Fatal("expected default discount with neat.NullDateTime end not to be expired")
+	}
+
+	if discount.IsValidNow() {
+		t.Fatal("expected default draft discount with null sentinel dates not to be valid now")
+	}
+
+	// Active status with null sentinel dates should still not be valid now
+	discount.SetStatus(DISCOUNT_STATUS_ACTIVE)
+	if !discount.IsActive() {
+		t.Fatal("expected discount to be active after status change")
+	}
+
+	if discount.IsValidNow() {
+		t.Fatal("expected active discount with null sentinel dates not to be valid now")
+	}
+
+	if discount.IsStarted() || discount.IsEnded() {
+		t.Fatal("expected null sentinel dates to mean neither started nor ended")
 	}
 }

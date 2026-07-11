@@ -391,7 +391,7 @@ func (d *Discount) IsInactive() bool {
 // IsStarted returns true if the discount period has started (starts_at <= now).
 func (d *Discount) IsStarted() bool {
 	startsAt := d.GetStartsAt()
-	if startsAt == "0000-00-00 00:00:00" || startsAt == "" {
+	if startsAt == neat.NullDateTime || startsAt == "" {
 		return false
 	}
 	startsAtCarbon := d.GetStartsAtCarbon()
@@ -404,7 +404,7 @@ func (d *Discount) IsStarted() bool {
 // IsEnded returns true if the discount period has ended (ends_at <= now).
 func (d *Discount) IsEnded() bool {
 	endsAt := d.GetEndsAt()
-	if endsAt == "0000-00-00 00:00:00" || endsAt == "" {
+	if endsAt == neat.NullDateTime || endsAt == "" {
 		return false
 	}
 	endsAtCarbon := d.GetEndsAtCarbon()
