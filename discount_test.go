@@ -4,7 +4,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dracory/neat"
 	"github.com/dromara/carbon/v2"
 )
 
@@ -42,12 +41,12 @@ func TestNewDiscountDefaults(t *testing.T) {
 		t.Fatal("expected generated code to be non-empty")
 	}
 
-	if discount.GetStartsAt() != neat.NullDateTime {
-		t.Fatalf("expected starts at %q, got %q", neat.NullDateTime, discount.GetStartsAt())
+	if discount.GetStartsAt() != NULL_DATETIME {
+		t.Fatalf("expected starts at %q, got %q", NULL_DATETIME, discount.GetStartsAt())
 	}
 
-	if discount.GetEndsAt() != neat.NullDateTime {
-		t.Fatalf("expected ends at %q, got %q", neat.NullDateTime, discount.GetEndsAt())
+	if discount.GetEndsAt() != NULL_DATETIME {
+		t.Fatalf("expected ends at %q, got %q", NULL_DATETIME, discount.GetEndsAt())
 	}
 
 	if discount.GetSoftDeletedAt() != MAX_DATETIME {
@@ -511,24 +510,24 @@ func TestDiscountIsValidNow(t *testing.T) {
 func TestDiscountNullDateTimeSentinelPredicates(t *testing.T) {
 	discount := NewDiscount()
 
-	if discount.GetStartsAt() != neat.NullDateTime {
-		t.Fatalf("expected default starts_at to be %q, got %q", neat.NullDateTime, discount.GetStartsAt())
+	if discount.GetStartsAt() != NULL_DATETIME {
+		t.Fatalf("expected default starts_at to be %q, got %q", NULL_DATETIME, discount.GetStartsAt())
 	}
 
-	if discount.GetEndsAt() != neat.NullDateTime {
-		t.Fatalf("expected default ends_at to be %q, got %q", neat.NullDateTime, discount.GetEndsAt())
+	if discount.GetEndsAt() != NULL_DATETIME {
+		t.Fatalf("expected default ends_at to be %q, got %q", NULL_DATETIME, discount.GetEndsAt())
 	}
 
 	if discount.IsStarted() {
-		t.Fatal("expected default discount with neat.NullDateTime start not to be started")
+		t.Fatal("expected default discount with NULL_DATETIME start not to be started")
 	}
 
 	if discount.IsEnded() {
-		t.Fatal("expected default discount with neat.NullDateTime end not to be ended")
+		t.Fatal("expected default discount with NULL_DATETIME end not to be ended")
 	}
 
 	if discount.IsExpired() {
-		t.Fatal("expected default discount with neat.NullDateTime end not to be expired")
+		t.Fatal("expected default discount with NULL_DATETIME end not to be expired")
 	}
 
 	if discount.IsValidNow() {

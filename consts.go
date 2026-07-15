@@ -1,6 +1,10 @@
 package shopstore
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/dracory/neat"
+)
 
 var (
 	ErrOrderHasActiveLineItems = errors.New("cannot delete order with active line items")
@@ -39,7 +43,11 @@ const COLUMN_SEQUENCE = "sequence"
 const COLUMN_SOFT_DELETED_AT = "soft_deleted_at"
 
 // MAX_DATETIME is a far-future datetime used as the default soft-delete sentinel.
-const MAX_DATETIME = "9999-12-31 23:59:59"
+const MAX_DATETIME = neat.MaxDateTime
+
+// NULL_DATETIME is the earliest possible datetime value used as the default null sentinel value.
+const NULL_DATETIME = neat.NullDateTime
+
 const COLUMN_SHORT_DESCRIPTION = "short_description"
 const COLUMN_STARTS_AT = "starts_at"
 const COLUMN_STATUS = "status"

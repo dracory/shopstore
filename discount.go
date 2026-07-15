@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/dracory/dataobject"
-	"github.com/dracory/neat"
 	"github.com/dracory/str"
 	"github.com/dromara/carbon/v2"
 	"github.com/spf13/cast"
@@ -64,8 +63,8 @@ func NewDiscount() DiscountInterface {
 		SetDescription("").
 		SetAmount(0.00).
 		SetCode(code).
-		SetStartsAt(neat.NullDateTime).
-		SetEndsAt(neat.NullDateTime).
+		SetStartsAt(NULL_DATETIME).
+		SetEndsAt(NULL_DATETIME).
 		SetMemo("").
 		SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
@@ -391,7 +390,7 @@ func (d *Discount) IsInactive() bool {
 // IsStarted returns true if the discount period has started (starts_at <= now).
 func (d *Discount) IsStarted() bool {
 	startsAt := d.GetStartsAt()
-	if startsAt == neat.NullDateTime || startsAt == "" {
+	if startsAt == NULL_DATETIME || startsAt == "" {
 		return false
 	}
 	startsAtCarbon := d.GetStartsAtCarbon()
@@ -404,7 +403,7 @@ func (d *Discount) IsStarted() bool {
 // IsEnded returns true if the discount period has ended (ends_at <= now).
 func (d *Discount) IsEnded() bool {
 	endsAt := d.GetEndsAt()
-	if endsAt == neat.NullDateTime || endsAt == "" {
+	if endsAt == NULL_DATETIME || endsAt == "" {
 		return false
 	}
 	endsAtCarbon := d.GetEndsAtCarbon()
