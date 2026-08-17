@@ -66,6 +66,9 @@ func NewDiscount() DiscountInterface {
 		SetStartsAt(NULL_DATETIME).
 		SetEndsAt(NULL_DATETIME).
 		SetMemo("").
+		SetMaxUses(DEFAULT_MAX_USES).
+		SetMaxUsesCount(0).
+		SetMaxUsesPerCustomer(DEFAULT_MAX_USES_PER_CUSTOMER).
 		SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetSoftDeletedAt(MAX_DATETIME)
@@ -225,6 +228,33 @@ func (d *Discount) SetMeta(name string, value string) error {
 	return d.MetasUpsert(map[string]string{name: value})
 }
 
+// getMaxUsesPerCustomerCountMap returns the internal map of customerID → count.
+func (d *Discount) getMaxUsesPerCustomerCountMap() map[string]int {
+	raw := d.GetMeta(META_MAX_USES_PER_CUSTOMER_COUNT)
+	if raw == "" {
+		raw = "{}"
+	}
+
+	m := map[string]int{}
+	_ = json.Unmarshal([]byte(raw), &m)
+
+	if m == nil {
+		m = map[string]int{}
+	}
+
+	return m
+}
+
+// setMaxUsesPerCustomerCountMap writes the internal map back to the metas column.
+func (d *Discount) setMaxUsesPerCustomerCountMap(m map[string]int) {
+	data, err := json.Marshal(m)
+	if err != nil {
+		return
+	}
+
+	_ = d.SetMeta(META_MAX_USES_PER_CUSTOMER_COUNT, string(data))
+}
+
 // GetMetas returns all metadata as a map. Returns empty map if no metas stored.
 func (d *Discount) GetMetas() (map[string]string, error) {
 	metasStr := d.Get(COLUMN_METAS)
@@ -372,6 +402,50 @@ func (d *Discount) SetUpdatedAt(updatedAt string) DiscountInterface {
 	return d
 }
 
+// GetMaxUses returns the global redemption cap. Defaults to DEFAULT_MAX_USES
+// (100,000), which is effectively unlimited for real-world promotions.
+func (d *Discount) GetMaxUses() int {
+	return cast.ToInt(d.Get(COLUMN_MAX_USES))
+}
+
+// SetMaxUses sets the global redemption cap. Defaults to DEFAULT_MAX_USES
+// (100,000), which is effectively unlimited for real-world promotions.
+// Lower it for finite-quantity codes (e.g., 50 for "first 50 customers").
+func (d *Discount) SetMaxUses(maxUses int) DiscountInterface {
+	d.Set(COLUMN_MAX_USES, cast.ToString(maxUses))
+	return d
+}
+
+// GetMaxUsesCount returns the number of times this discount has been redeemed.
+// This is a manually-incremented counter maintained by the host application
+// (incremented on order completion), not by the library itself.
+func (d *Discount) GetMaxUsesCount() int {
+	return cast.ToInt(d.Get(COLUMN_MAX_USES_COUNT))
+}
+
+// SetMaxUsesCount sets the redemption counter. Host applications increment
+// this after a successful order; the library does not auto-increment it.
+func (d *Discount) SetMaxUsesCount(count int) DiscountInterface {
+	d.Set(COLUMN_MAX_USES_COUNT, cast.ToString(count))
+	return d
+}
+
+// GetMaxUsesPerCustomer returns the per-customer redemption cap. Defaults to
+// DEFAULT_MAX_USES_PER_CUSTOMER (1,000), which is effectively unlimited per
+// customer.
+func (d *Discount) GetMaxUsesPerCustomer() int {
+	return cast.ToInt(d.Get(COLUMN_MAX_USES_PER_CUSTOMER))
+}
+
+// SetMaxUsesPerCustomer sets the per-customer redemption cap. Defaults to
+// DEFAULT_MAX_USES_PER_CUSTOMER (1,000), which is effectively unlimited per
+// customer. Lower it for finite per-customer limits (e.g., 1 for "one use
+// per customer").
+func (d *Discount) SetMaxUsesPerCustomer(maxUsesPerCustomer int) DiscountInterface {
+	d.Set(COLUMN_MAX_USES_PER_CUSTOMER, cast.ToString(maxUsesPerCustomer))
+	return d
+}
+
 // IsActive returns true if the discount status is active.
 func (d *Discount) IsActive() bool {
 	return d.GetStatus() == DISCOUNT_STATUS_ACTIVE
@@ -418,9 +492,68 @@ func (d *Discount) IsExpired() bool {
 	return d.IsEnded()
 }
 
-// IsValidNow returns true if the discount is active, started, and not ended.
+// IsValidNow returns true if the discount is active, started, not ended,
+// and has not exhausted its global redemption cap.
 func (d *Discount) IsValidNow() bool {
-	return d.IsActive() && d.IsStarted() && !d.IsEnded()
+	return d.IsActive() && d.IsStarted() && !d.IsEnded() && !d.IsMaxUsesReached()
+}
+
+// IsMaxUsesReached returns true if the redemption count has reached the
+// global redemption cap. There is no special "unlimited" value; the default
+// cap (DEFAULT_MAX_USES) is simply set high enough to be effectively unlimited.
+func (d *Discount) IsMaxUsesReached() bool {
+	return d.GetMaxUsesCount() >= d.GetMaxUses()
+}
+
+// GetMaxUsesPerCustomerCount returns the redemption count for a specific customer.
+func (d *Discount) GetMaxUsesPerCustomerCount(customerID string) int {
+	if customerID == "" {
+		return 0
+	}
+
+	m := d.getMaxUsesPerCustomerCountMap()
+	return m[customerID]
+}
+
+// IncrementMaxUsesPerCustomer increments the per-customer redemption count by 1.
+// Call this after a successful order, then call DiscountUpdate to persist.
+func (d *Discount) IncrementMaxUsesPerCustomer(customerID string) DiscountInterface {
+	if customerID == "" {
+		return d
+	}
+
+	m := d.getMaxUsesPerCustomerCountMap()
+	m[customerID]++
+	d.setMaxUsesPerCustomerCountMap(m)
+
+	return d
+}
+
+// IsMaxUsesPerCustomerReached returns true if this customer has reached their
+// per-customer redemption cap. The count is looked up internally from the
+// stored per-customer map. For high-volume shops, the host can ignore this
+// and compute the count from order history instead.
+func (d *Discount) IsMaxUsesPerCustomerReached(customerID string) bool {
+	if customerID == "" {
+		return false
+	}
+
+	return d.GetMaxUsesPerCustomerCount(customerID) >= d.GetMaxUsesPerCustomer()
+}
+
+// GetMaxUsesPerCustomerLeft returns how many redemptions this customer has
+// remaining before reaching their per-customer cap.
+func (d *Discount) GetMaxUsesPerCustomerLeft(customerID string) int {
+	if customerID == "" {
+		return d.GetMaxUsesPerCustomer()
+	}
+
+	remaining := d.GetMaxUsesPerCustomer() - d.GetMaxUsesPerCustomerCount(customerID)
+	if remaining < 0 {
+		return 0
+	}
+
+	return remaining
 }
 
 // MarkAsNotDirty resets the dirty state, clearing all change tracking.

@@ -213,6 +213,26 @@ type DiscountInterface interface {
 	// SetUpdatedAt sets the last update timestamp.
 	SetUpdatedAt(updatedAt string) DiscountInterface
 
+	// GetMaxUses returns the global redemption cap. Defaults to DEFAULT_MAX_USES
+	// (100,000), which is effectively unlimited for real-world promotions.
+	GetMaxUses() int
+	// SetMaxUses sets the global redemption cap. Defaults to DEFAULT_MAX_USES
+	// (100,000), which is effectively unlimited. Lower it for finite-quantity codes.
+	SetMaxUses(maxUses int) DiscountInterface
+
+	// GetMaxUsesCount returns the number of times this discount has been redeemed.
+	GetMaxUsesCount() int
+	// SetMaxUsesCount sets the redemption counter. Host applications increment
+	// this after a successful order; the library does not auto-increment it.
+	SetMaxUsesCount(count int) DiscountInterface
+
+	// GetMaxUsesPerCustomer returns the per-customer redemption cap. Defaults to
+	// DEFAULT_MAX_USES_PER_CUSTOMER (1,000), which is effectively unlimited.
+	GetMaxUsesPerCustomer() int
+	// SetMaxUsesPerCustomer sets the per-customer redemption cap. Defaults to
+	// DEFAULT_MAX_USES_PER_CUSTOMER (1,000), which is effectively unlimited.
+	SetMaxUsesPerCustomer(maxUsesPerCustomer int) DiscountInterface
+
 	// Status predicates
 
 	// IsActive returns true if status is active.
@@ -230,8 +250,30 @@ type DiscountInterface interface {
 	IsEnded() bool
 	// IsExpired returns true if the discount is no longer valid.
 	IsExpired() bool
-	// IsValidNow returns true if the discount is currently valid (started and not ended).
+	// IsValidNow returns true if the discount is currently valid (active,
+	// started, not ended, and global redemption cap not reached).
 	IsValidNow() bool
+
+	// Usage predicates
+
+	// IsMaxUsesReached returns true if the redemption count has reached the
+	// global redemption cap. There is no special "unlimited" value; the default
+	// cap (DEFAULT_MAX_USES) is set high enough to be effectively unlimited.
+	IsMaxUsesReached() bool
+
+	// GetMaxUsesPerCustomerCount returns the redemption count for a specific customer.
+	GetMaxUsesPerCustomerCount(customerID string) int
+
+	// IncrementMaxUsesPerCustomer increments the per-customer redemption count by 1.
+	// Call this after a successful order, then call DiscountUpdate to persist.
+	IncrementMaxUsesPerCustomer(customerID string) DiscountInterface
+
+	// IsMaxUsesPerCustomerReached returns true if this customer has reached their
+	// per-customer redemption cap.
+	IsMaxUsesPerCustomerReached(customerID string) bool
+
+	// GetMaxUsesPerCustomerLeft returns remaining redemptions for this customer.
+	GetMaxUsesPerCustomerLeft(customerID string) int
 }
 
 // MediaInterface defines the contract for media entities (images, videos, etc).

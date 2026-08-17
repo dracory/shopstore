@@ -54,6 +54,23 @@ const COLUMN_STATUS = "status"
 const COLUMN_TYPE = "type"
 const COLUMN_TITLE = "title"
 const COLUMN_UPDATED_AT = "updated_at"
+const COLUMN_MAX_USES = "max_uses"
+const COLUMN_MAX_USES_COUNT = "max_uses_count"
+const COLUMN_MAX_USES_PER_CUSTOMER = "max_uses_per_customer"
+
+// META_MAX_USES_PER_CUSTOMER_COUNT is the metas key for the per-customer
+// redemption count map (JSON: customerID → count). Stored in the metas column
+// rather than a dedicated column to avoid schema bloat.
+const META_MAX_USES_PER_CUSTOMER_COUNT = "max_uses_per_customer_count"
+
+// DEFAULT_MAX_USES is the default global redemption cap. It is set high enough
+// to be effectively unlimited for real-world promotions while remaining a
+// sensible, human-readable number. Host applications can raise or lower it.
+const DEFAULT_MAX_USES = 100000
+
+// DEFAULT_MAX_USES_PER_CUSTOMER is the default per-customer redemption cap.
+// Set high enough to be effectively unlimited per customer.
+const DEFAULT_MAX_USES_PER_CUSTOMER = 1000
 
 const MEDIA_STATUS_DRAFT = "draft"
 const MEDIA_STATUS_ACTIVE = "active"

@@ -65,6 +65,14 @@ func (store *Store) MigrateUp(ctx context.Context, tx ...*sql.Tx) error {
 		return err
 	}
 
+	if err := migration_003_discount_table_add_max_uses(store); err != nil {
+		return err
+	}
+
+	if err := migration_005_discount_table_metas_to_longtext(store); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -154,9 +162,12 @@ func (store *Store) discountTableCreate() error {
 		table.String(COLUMN_TYPE, 20)
 		table.Decimal(COLUMN_AMOUNT)
 		table.String(COLUMN_CODE, 100)
+		table.Integer(COLUMN_MAX_USES)
+		table.Integer(COLUMN_MAX_USES_COUNT)
+		table.Integer(COLUMN_MAX_USES_PER_CUSTOMER)
 		table.DateTime(COLUMN_STARTS_AT)
 		table.DateTime(COLUMN_ENDS_AT)
-		table.Text(COLUMN_METAS)
+		table.LongText(COLUMN_METAS)
 		table.Text(COLUMN_MEMO)
 		table.DateTime(COLUMN_CREATED_AT)
 		table.DateTime(COLUMN_UPDATED_AT)
