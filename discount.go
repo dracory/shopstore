@@ -18,10 +18,6 @@ const DISCOUNT_STATUS_INACTIVE = "inactive"
 const DISCOUNT_TYPE_AMOUNT = "amount"
 const DISCOUNT_TYPE_PERCENT = "percent"
 
-const DISCOUNT_DURATION_FOREVER = "forever"
-const DISCOUNT_DURATION_MONTHS = "months"
-const DISCOUNT_DURATION_ONCE = "once"
-
 // == CLASS ==================================================================
 
 // Discount represents a discount/promotion in the shop store.
