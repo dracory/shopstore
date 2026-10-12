@@ -21,7 +21,7 @@ func migration_001_product_table_add_parent_id(store *Store) error {
 func migration_002_product_table_add_variant_dimensions(store *Store) error {
 	if !store.db.Schema().HasColumn(store.productTableName, COLUMN_VARIANT_MATRIX_SCHEMA) {
 		err := store.db.Schema().Table(store.productTableName, func(table contractsschema.Blueprint) {
-			table.Text(COLUMN_VARIANT_MATRIX_SCHEMA).Default("{}")
+			table.Text(COLUMN_VARIANT_MATRIX_SCHEMA)
 		})
 		if err != nil {
 			return err
@@ -30,7 +30,7 @@ func migration_002_product_table_add_variant_dimensions(store *Store) error {
 
 	if !store.db.Schema().HasColumn(store.productTableName, COLUMN_VARIANT_MATRIX_VALUES) {
 		err := store.db.Schema().Table(store.productTableName, func(table contractsschema.Blueprint) {
-			table.Text(COLUMN_VARIANT_MATRIX_VALUES).Default("{}")
+			table.Text(COLUMN_VARIANT_MATRIX_VALUES)
 		})
 		if err != nil {
 			return err
@@ -80,7 +80,7 @@ func migration_003_discount_table_add_max_uses(store *Store) error {
 func migration_005_discount_table_metas_to_longtext(store *Store) error {
 	if store.db.Schema().HasColumn(store.discountTableName, COLUMN_METAS) {
 		err := store.db.Schema().Table(store.discountTableName, func(table contractsschema.Blueprint) {
-			table.LongText(COLUMN_METAS).Default("{}").Change()
+			table.LongText(COLUMN_METAS).Change()
 		})
 		if err != nil {
 			return err
