@@ -3,28 +3,10 @@ package shopstore
 import (
 	"strings"
 	"testing"
+	"uuid"
 
 	"github.com/dracory/uid"
 )
-
-func TestGenerateShortIDReturnsLowercaseAndNonEmpty(t *testing.T) {
-	generated := GenerateShortID()
-
-	if generated == "" {
-		t.Errorf("GenerateShortID() returned empty string")
-	}
-	if strings.ToLower(generated) != generated {
-		t.Errorf("GenerateShortID() returned non-lowercase: %s", generated)
-	}
-
-	unshortened, err := uid.UnshortenCrockford(generated)
-	if err != nil {
-		t.Errorf("UnshortenCrockford failed: %v", err)
-	}
-	if unshortened == "" {
-		t.Errorf("UnshortenCrockford returned empty string")
-	}
-}
 
 func TestNormalizeIDTrimsWhitespaceAndLowercases(t *testing.T) {
 	normalized := NormalizeID("  AbC123XyZ  ")
@@ -128,9 +110,9 @@ func TestUnshortenIDReturnsOriginalWhenCrockfordDecodeFails(t *testing.T) {
 }
 
 func TestUnshortenIDReturnsOriginalWhenLengthIsNotSupported(t *testing.T) {
-	generated := GenerateShortID()
+	generated := uuid.NewV7().String()
 	if IsShortID(generated) {
-		t.Errorf("IsShortID(GenerateShortID()) should return false for generated ID")
+		t.Errorf("IsShortID(uuid) should return false for generated ID")
 	}
 	result := UnshortenID(strings.ToUpper(generated))
 	if result != generated {

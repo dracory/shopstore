@@ -2,6 +2,7 @@ package shopstore
 
 import (
 	"encoding/json"
+	"uuid"
 
 	"github.com/dracory/dataobject"
 	"github.com/dracory/str"
@@ -42,7 +43,7 @@ var _ ProductInterface = (*Product)(nil)
 // - VariantMatrixValues: empty map
 func NewProduct() ProductInterface {
 	o := (&Product{}).
-		SetID(GenerateShortID()).
+		SetID(uuid.NewV7().String()).
 		SetStatus(PRODUCT_STATUS_DRAFT).
 		SetTitle("").
 		SetDescription("").

@@ -2,6 +2,7 @@ package shopstore
 
 import (
 	"encoding/json"
+	"uuid"
 
 	"github.com/dracory/dataobject"
 	"github.com/dromara/carbon/v2"
@@ -34,7 +35,7 @@ var _ CategoryInterface = (*Category)(nil)
 // - Metas: empty map
 func NewCategory() CategoryInterface {
 	o := (&Category{}).
-		SetID(GenerateShortID()).
+		SetID(uuid.NewV7().String()).
 		SetStatus(CATEGORY_STATUS_DRAFT).
 		SetParentID("").    // By default empty, root category
 		SetDescription(""). // By default empty

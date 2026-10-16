@@ -2,6 +2,7 @@ package shopstore
 
 import (
 	"encoding/json"
+	"uuid"
 
 	"github.com/dracory/dataobject"
 	"github.com/dracory/str"
@@ -52,7 +53,7 @@ func NewDiscount() DiscountInterface {
 	code := generateDiscountCode()
 
 	d := (&Discount{}).
-		SetID(GenerateShortID()).
+		SetID(uuid.NewV7().String()).
 		SetStatus(DISCOUNT_STATUS_DRAFT).
 		SetType(DISCOUNT_TYPE_PERCENT).
 		SetTitle("").

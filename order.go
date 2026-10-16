@@ -2,6 +2,7 @@ package shopstore
 
 import (
 	"encoding/json"
+	"uuid"
 
 	"github.com/dracory/dataobject"
 
@@ -36,7 +37,7 @@ var _ OrderInterface = (*Order)(nil)
 // - Metas: empty map
 func NewOrder() OrderInterface {
 	o := (&Order{}).
-		SetID(GenerateShortID()).
+		SetID(uuid.NewV7().String()).
 		SetStatus(ORDER_STATUS_PENDING).
 		SetQuantityInt(1). // By default 1
 		SetPriceFloat(0).  // Free. By default

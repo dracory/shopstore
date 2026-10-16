@@ -3,6 +3,7 @@ package shopstore
 import (
 	"encoding/json"
 	"strings"
+	"uuid"
 
 	"github.com/dracory/dataobject"
 
@@ -37,7 +38,7 @@ var _ MediaInterface = (*Media)(nil)
 // - Metas: empty map
 func NewMedia() MediaInterface {
 	o := (&Media{}).
-		SetID(GenerateShortID()).
+		SetID(uuid.NewV7().String()).
 		SetStatus(MEDIA_STATUS_DRAFT).
 		SetTitle("").       // By default empty, root category
 		SetDescription(""). // By default empty

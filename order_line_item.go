@@ -2,6 +2,7 @@ package shopstore
 
 import (
 	"encoding/json"
+	"uuid"
 
 	"github.com/dracory/dataobject"
 
@@ -37,7 +38,7 @@ var _ OrderLineItemInterface = (*OrderLineItem)(nil)
 // - Metas: empty map
 func NewOrderLineItem() OrderLineItemInterface {
 	o := (&OrderLineItem{}).
-		SetID(GenerateShortID()).
+		SetID(uuid.NewV7().String()).
 		SetStatus(ORDER_STATUS_PENDING).
 		SetTitle("").
 		SetQuantityInt(1). // By default 1
