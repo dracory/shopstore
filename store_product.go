@@ -260,14 +260,14 @@ func (store *Store) productQuery(options ProductQueryInterface) (contractsorm.Qu
 	if options.HasMetasIn() {
 		for key, value := range options.MetasIn() {
 			jsonPath := buildJsonPath(key)
-			q = q.Where("json_extract("+COLUMN_METAS+", '"+jsonPath+"') = ?", value)
+			q = q.Where("json_extract("+COLUMN_METAS+", ?) = ?", jsonPath, value)
 		}
 	}
 
 	if options.HasMetasNotIn() {
 		for key, value := range options.MetasNotIn() {
 			jsonPath := buildJsonPath(key)
-			q = q.Where("IFNULL(json_extract("+COLUMN_METAS+", '"+jsonPath+"'), '') != ?", value)
+			q = q.Where("IFNULL(json_extract("+COLUMN_METAS+", ?), '') != ?", jsonPath, value)
 		}
 	}
 
@@ -363,9 +363,9 @@ func mapAnyToString(m map[string]any) map[string]string {
 // buildJsonPath builds a SQLite JSON path for a top-level key in the metas column.
 // The key is wrapped in double-quotes inside the path so that special characters
 // (e.g. '.', '"', ']') are treated as literal key names rather than path syntax.
-// Single quotes are doubled to prevent breaking out of the surrounding SQL string literal.
+// Embedded double-quotes use the JSON path \" escape; the result is meant to be
+// bound as a parameter, never interpolated into SQL.
 func buildJsonPath(key string) string {
-	escaped := strings.ReplaceAll(key, "'", "''")
-	escaped = strings.ReplaceAll(escaped, `"`, `\"`)
+	escaped := strings.ReplaceAll(key, `"`, `\"`)
 	return "$.\"" + escaped + "\""
 }
