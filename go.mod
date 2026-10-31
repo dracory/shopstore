@@ -4,7 +4,7 @@ go 1.27.0
 
 require (
 	github.com/dracory/dataobject v1.7.0
-	github.com/dracory/neat v0.60.0
+	github.com/dracory/neat v0.60.1
 	github.com/dracory/str v0.19.0
 	github.com/dracory/uid v1.14.0
 	github.com/dromara/carbon/v2 v2.7.0
