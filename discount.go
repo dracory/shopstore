@@ -70,7 +70,7 @@ func NewDiscount() DiscountInterface {
 		SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC)).
 		SetSoftDeletedAt(MAX_DATETIME)
 
-	d.SetMetas(map[string]string{})
+	_ = d.SetMetas(map[string]string{})
 
 	return d
 }

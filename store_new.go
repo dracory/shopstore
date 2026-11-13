@@ -16,6 +16,7 @@ type NewStoreOptions struct {
 	OrderTableName         string
 	OrderLineItemTableName string
 	ProductTableName       string
+	SettingTableName       string
 	DB                     *sql.DB
 	AutomigrateEnabled     bool
 	DebugEnabled           bool
@@ -47,6 +48,10 @@ func NewStore(opts NewStoreOptions) (*Store, error) {
 		return nil, errors.New("shop store: ProductTableName is required")
 	}
 
+	if opts.SettingTableName == "" {
+		return nil, errors.New("shop store: SettingTableName is required")
+	}
+
 	if opts.DB == nil {
 		return nil, errors.New("shop store: DB is required")
 	}
@@ -63,6 +68,7 @@ func NewStore(opts NewStoreOptions) (*Store, error) {
 		orderTableName:         opts.OrderTableName,
 		orderLineItemTableName: opts.OrderLineItemTableName,
 		productTableName:       opts.ProductTableName,
+		settingTableName:       opts.SettingTableName,
 		automigrateEnabled:     opts.AutomigrateEnabled,
 		db:                     neatDB,
 		debugEnabled:           opts.DebugEnabled,

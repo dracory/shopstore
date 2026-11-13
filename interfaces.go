@@ -784,6 +784,60 @@ type ProductInterface interface {
 	SetVariantMatrixValues(values map[string]string) error
 }
 
+// SettingInterface defines the contract for key/value shop settings.
+// Settings hold shop-wide configuration such as the display currency.
+type SettingInterface interface {
+	// DataObject methods
+
+	// Data returns a map of all field values for serialization.
+	Data() map[string]string
+	// DataChanged returns a map of only the fields that have been modified since load.
+	DataChanged() map[string]string
+	// MarkAsNotDirty resets the dirty state, clearing all change tracking.
+	MarkAsNotDirty()
+
+	// Setters and Getters
+
+	// GetCreatedAt returns the creation timestamp as a string.
+	GetCreatedAt() string
+	// GetCreatedAtCarbon returns the creation timestamp as a Carbon instance.
+	GetCreatedAtCarbon() *carbon.Carbon
+	// SetCreatedAt sets the creation timestamp.
+	SetCreatedAt(createdAt string) SettingInterface
+
+	// GetID returns the unique identifier.
+	GetID() string
+	// SetID sets the unique identifier.
+	SetID(id string) SettingInterface
+
+	// GetKey returns the setting key.
+	GetKey() string
+	// SetKey sets the setting key.
+	SetKey(key string) SettingInterface
+
+	// GetSoftDeletedAt returns the soft deletion timestamp.
+	GetSoftDeletedAt() string
+	// GetSoftDeletedAtCarbon returns the soft deletion timestamp as a Carbon instance.
+	GetSoftDeletedAtCarbon() *carbon.Carbon
+	// SetSoftDeletedAt sets the soft deletion timestamp.
+	SetSoftDeletedAt(deletedAt string) SettingInterface
+
+	// GetUpdatedAt returns the last update timestamp.
+	GetUpdatedAt() string
+	// GetUpdatedAtCarbon returns the last update timestamp as a Carbon instance.
+	GetUpdatedAtCarbon() *carbon.Carbon
+	// SetUpdatedAt sets the last update timestamp.
+	SetUpdatedAt(updatedAt string) SettingInterface
+
+	// GetValue returns the setting value.
+	GetValue() string
+	// SetValue sets the setting value.
+	SetValue(value string) SettingInterface
+
+	// IsSoftDeleted returns true if the setting is soft deleted.
+	IsSoftDeleted() bool
+}
+
 // StoreInterface defines the contract for the shop store database operations.
 // Provides CRUD operations, soft deletion, counting, listing with pagination,
 // and variant management for all entity types (categories, discounts, media, orders, products).
@@ -813,6 +867,8 @@ type StoreInterface interface {
 	OrderLineItemTableName() string
 	// ProductTableName returns the database table name for products.
 	ProductTableName() string
+	// SettingTableName returns the database table name for settings.
+	SettingTableName() string
 
 	// Category operations
 
@@ -950,4 +1006,33 @@ type StoreInterface interface {
 	ProductIsParent(ctx context.Context, productID string) (bool, error)
 	// ProductGetParent retrieves the parent product for a variant.
 	ProductGetParent(ctx context.Context, productID string) (ProductInterface, error)
+
+	// Setting operations
+
+	// SettingCount returns the total count of settings matching the query options.
+	SettingCount(ctx context.Context, options SettingQueryInterface) (int64, error)
+	// SettingCreate inserts a new setting into the database.
+	SettingCreate(ctx context.Context, setting SettingInterface) error
+	// SettingDelete permanently deletes a setting from the database.
+	SettingDelete(ctx context.Context, setting SettingInterface) error
+	// SettingDeleteByID permanently deletes a setting by its ID.
+	SettingDeleteByID(ctx context.Context, settingID string) error
+	// SettingDeleteByKey permanently deletes a setting by its key.
+	SettingDeleteByKey(ctx context.Context, key string) error
+	// SettingFindByID retrieves a setting by its unique ID.
+	SettingFindByID(ctx context.Context, settingID string) (SettingInterface, error)
+	// SettingFindByKey retrieves a setting by its unique key.
+	SettingFindByKey(ctx context.Context, key string) (SettingInterface, error)
+	// SettingGet returns a setting value by key, or the default if not found.
+	SettingGet(ctx context.Context, key string, valueDefault string) (string, error)
+	// SettingSet saves a setting value by key, creating it if it does not exist.
+	SettingSet(ctx context.Context, key string, value string) error
+	// SettingList retrieves a list of settings matching the query options.
+	SettingList(ctx context.Context, options SettingQueryInterface) ([]SettingInterface, error)
+	// SettingSoftDelete soft deletes a setting by setting the deleted timestamp.
+	SettingSoftDelete(ctx context.Context, setting SettingInterface) error
+	// SettingSoftDeleteByID soft deletes a setting by its ID.
+	SettingSoftDeleteByID(ctx context.Context, settingID string) error
+	// SettingUpdate updates an existing setting in the database.
+	SettingUpdate(ctx context.Context, setting SettingInterface) error
 }

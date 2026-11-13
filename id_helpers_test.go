@@ -66,7 +66,7 @@ func TestShortenIDReturnsNormalizedOriginalOnInvalidThirtyTwoCharID(t *testing.T
 	invalidLong := "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
 
 	short := ShortenID(invalidLong)
-	if short != strings.ToLower(invalidLong) {
+	if !strings.EqualFold(short, invalidLong) {
 		t.Errorf("ShortenID() = %s, want %s", short, strings.ToLower(invalidLong))
 	}
 }

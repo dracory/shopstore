@@ -18,6 +18,7 @@ type Store struct {
 	orderTableName         string
 	orderLineItemTableName string
 	productTableName       string
+	settingTableName       string
 	db                     *neat.Database
 	timeoutSeconds         int64
 	automigrateEnabled     bool
@@ -26,13 +27,13 @@ type Store struct {
 }
 
 // logSql logs sql to the sql logger
-func (store *Store) logSql(sqlOperationType string, sql string, params ...interface{}) {
+func (store *Store) logSql(sqlOperationType string, sqlStatement string, params ...interface{}) {
 	if !store.debugEnabled {
 		return
 	}
 
 	if store.sqlLogger != nil {
-		store.sqlLogger.Debug("sql: "+sqlOperationType, slog.String("sql", sql), slog.Any("params", params))
+		store.sqlLogger.Debug("sql: "+sqlOperationType, slog.String("sql", sqlStatement), slog.Any("params", params))
 	}
 }
 
@@ -54,6 +55,9 @@ func (store *Store) MigrateUp(ctx context.Context, tx ...*sql.Tx) error {
 		return err
 	}
 	if err := store.productTableCreate(); err != nil {
+		return err
+	}
+	if err := store.settingTableCreate(); err != nil {
 		return err
 	}
 
@@ -84,6 +88,7 @@ func (store *Store) MigrateDown(ctx context.Context, tx ...*sql.Tx) error {
 	_ = store.db.Schema().DropIfExists(store.orderLineItemTableName)
 	_ = store.db.Schema().DropIfExists(store.orderTableName)
 	_ = store.db.Schema().DropIfExists(store.productTableName)
+	_ = store.db.Schema().DropIfExists(store.settingTableName)
 	return nil
 }
 
@@ -128,6 +133,10 @@ func (store *Store) OrderLineItemTableName() string {
 
 func (store *Store) ProductTableName() string {
 	return store.productTableName
+}
+
+func (store *Store) SettingTableName() string {
+	return store.settingTableName
 }
 
 func (store *Store) categoryTableCreate() error {
@@ -255,6 +264,21 @@ func (store *Store) productTableCreate() error {
 		table.Text(COLUMN_VARIANT_MATRIX_VALUES)
 		table.Text(COLUMN_METAS)
 		table.Text(COLUMN_MEMO)
+		table.DateTime(COLUMN_CREATED_AT)
+		table.DateTime(COLUMN_UPDATED_AT)
+		table.DateTime(COLUMN_SOFT_DELETED_AT)
+	})
+}
+
+func (store *Store) settingTableCreate() error {
+	if store.db.Schema().HasTable(store.settingTableName) {
+		return nil
+	}
+	return store.db.Schema().Create(store.settingTableName, func(table contractsschema.Blueprint) {
+		table.String(COLUMN_ID, 40)
+		table.Primary(COLUMN_ID)
+		table.String(COLUMN_SETTING_KEY, 255)
+		table.Text(COLUMN_SETTING_VALUE)
 		table.DateTime(COLUMN_CREATED_AT)
 		table.DateTime(COLUMN_UPDATED_AT)
 		table.DateTime(COLUMN_SOFT_DELETED_AT)

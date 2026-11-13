@@ -45,6 +45,7 @@ func initStore(filepath string) (StoreInterface, error) {
 		OrderTableName:         "shop_order",
 		OrderLineItemTableName: "shop_order_line_item",
 		ProductTableName:       "shop_product",
+		SettingTableName:       "shop_setting",
 		AutomigrateEnabled:     true,
 	})
 
@@ -365,6 +366,10 @@ func TestStoreCategoryUpdate(t *testing.T) {
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
+	}
+
+	if categoryFound == nil {
+		t.Fatal("expected category to be found")
 	}
 
 	if categoryFound.GetTitle() != "CATEGORY_TITLE_UPDATED" {
@@ -1004,6 +1009,10 @@ func TestStoreMediaUpdate(t *testing.T) {
 
 	if errFind != nil {
 		t.Fatal("unexpected error:", errFind)
+	}
+
+	if mediaFound == nil {
+		t.Fatal("expected media to be found")
 	}
 
 	if mediaFound.GetTitle() != "MEDIA_TITLE_UPDATED" {

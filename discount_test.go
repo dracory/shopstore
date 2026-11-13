@@ -700,7 +700,7 @@ func TestDiscountIsMaxUsesReached(t *testing.T) {
 
 func TestDiscountIsMaxUsesPerCustomerReached(t *testing.T) {
 	discount := &Discount{}
-	discount.SetMetas(map[string]string{})
+	_ = discount.SetMetas(map[string]string{})
 
 	// Default per-customer cap, customer with 0 uses — not reached
 	discount.SetMaxUsesPerCustomer(DEFAULT_MAX_USES_PER_CUSTOMER)
@@ -750,7 +750,7 @@ func TestDiscountIsMaxUsesPerCustomerReached(t *testing.T) {
 
 func TestDiscountGetMaxUsesPerCustomerLeft(t *testing.T) {
 	discount := &Discount{}
-	discount.SetMetas(map[string]string{})
+	_ = discount.SetMetas(map[string]string{})
 
 	// Cap=5, 0 uses — 5 left
 	discount.SetMaxUsesPerCustomer(5)
@@ -788,7 +788,7 @@ func TestDiscountGetMaxUsesPerCustomerLeft(t *testing.T) {
 
 func TestDiscountIncrementMaxUsesPerCustomer(t *testing.T) {
 	discount := &Discount{}
-	discount.SetMetas(map[string]string{})
+	_ = discount.SetMetas(map[string]string{})
 
 	// Increment returns *Discount (chainable)
 	if _, ok := discount.IncrementMaxUsesPerCustomer("cust-1").(*Discount); !ok {

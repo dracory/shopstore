@@ -40,6 +40,8 @@ const COLUMN_PRICE = "price"
 const COLUMN_PRODUCT_ID = "product_id"
 const COLUMN_QUANTITY = "quantity"
 const COLUMN_SEQUENCE = "sequence"
+const COLUMN_SETTING_KEY = "setting_key"
+const COLUMN_SETTING_VALUE = "setting_value"
 const COLUMN_SOFT_DELETED_AT = "soft_deleted_at"
 
 // MAX_DATETIME is a far-future datetime used as the default soft-delete sentinel.
