@@ -204,7 +204,7 @@ func (store *Store) mediaTableCreate() error {
 		table.String(COLUMN_ENTITY_ID, 40)
 		table.Integer(COLUMN_SEQUENCE)
 		table.String(COLUMN_MEDIA_TYPE, 50)
-		table.String(COLUMN_MEDIA_URL, 510)
+		table.LongText(COLUMN_MEDIA_URL)
 		table.String(COLUMN_TITLE, 255)
 		table.Text(COLUMN_DESCRIPTION)
 		table.Text(COLUMN_MEMO)
