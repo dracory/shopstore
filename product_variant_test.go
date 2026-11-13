@@ -199,3 +199,59 @@ func TestProductSetParentIDFluentInterface(t *testing.T) {
 		t.Fatal("expected SetParentID to return the same product for fluent interface")
 	}
 }
+
+func TestProductSetVariantMatrixSchemas(t *testing.T) {
+	product := &Product{}
+
+	schemas := []VariantMatrixSchema{
+		{Name: "size", Required: true, Options: []string{"S", "M", "L"}},
+		{Name: "color", Required: false, Options: []string{"red", "blue"}},
+	}
+
+	if err := product.SetVariantMatrixSchemas(schemas); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got, err := product.GetVariantMatrixSchemas()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("expected 2 dimensions, got %d", len(got))
+	}
+	if got[0].Name != "size" || len(got[0].Options) != 3 {
+		t.Fatalf("unexpected first dimension: %+v", got[0])
+	}
+	if got[1].Name != "color" {
+		t.Fatalf("unexpected second dimension: %+v", got[1])
+	}
+}
+
+func TestProductGetVariantMatrixSchemasEmpty(t *testing.T) {
+	product := &Product{}
+
+	got, err := product.GetVariantMatrixSchemas()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("expected empty slice, got %v", got)
+	}
+}
+
+func TestProductGetVariantMatrixSchemasSingleObjectCompat(t *testing.T) {
+	product := &Product{}
+
+	// Data written via the singular API must still be readable.
+	if err := product.SetVariantMatrixSchema(VariantMatrixSchema{Name: "size", Required: true, Options: []string{"S"}}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got, err := product.GetVariantMatrixSchemas()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 1 || got[0].Name != "size" {
+		t.Fatalf("expected single upgraded schema, got %+v", got)
+	}
+}

@@ -162,6 +162,42 @@ func (product *Product) HasVariantMatrixSchema() bool {
 	return dimJSON != "" && dimJSON != "null"
 }
 
+// SetVariantMatrixSchemas sets multiple variant matrix dimensions.
+// The dimensions are stored as a JSON array in the same column used by
+// SetVariantMatrixSchema; reading via GetVariantMatrixSchema returns
+// only the first dimension.
+func (product *Product) SetVariantMatrixSchemas(schemas []VariantMatrixSchema) error {
+	jsonBytes, err := json.Marshal(schemas)
+	if err != nil {
+		return err
+	}
+	product.Set(COLUMN_VARIANT_MATRIX_SCHEMA, string(jsonBytes))
+	return nil
+}
+
+// GetVariantMatrixSchemas returns all variant matrix dimensions.
+// It transparently upgrades data written by SetVariantMatrixSchema
+// (a single JSON object) to a one-element slice.
+func (product *Product) GetVariantMatrixSchemas() ([]VariantMatrixSchema, error) {
+	schemaJSON := product.Get(COLUMN_VARIANT_MATRIX_SCHEMA)
+	if schemaJSON == "" || schemaJSON == "null" {
+		return []VariantMatrixSchema{}, nil
+	}
+
+	var schemas []VariantMatrixSchema
+	if err := json.Unmarshal([]byte(schemaJSON), &schemas); err == nil {
+		return schemas, nil
+	}
+
+	// Backward compatibility: data written by SetVariantMatrixSchema is a
+	// single JSON object, not an array.
+	var single VariantMatrixSchema
+	if err := json.Unmarshal([]byte(schemaJSON), &single); err != nil {
+		return nil, err
+	}
+	return []VariantMatrixSchema{single}, nil
+}
+
 // HasStock returns true if the product quantity is greater than 0.
 func (product *Product) HasStock() bool {
 	return product.GetQuantityInt() > 0

@@ -773,6 +773,12 @@ type ProductInterface interface {
 
 	// GetVariantMatrixSchema returns the variant matrix schema configuration.
 	GetVariantMatrixSchema() (VariantMatrixSchema, error)
+	// SetVariantMatrixSchemas sets multiple variant matrix dimensions.
+	SetVariantMatrixSchemas(schemas []VariantMatrixSchema) error
+	// GetVariantMatrixSchemas returns all variant matrix dimensions.
+	// A schema written by SetVariantMatrixSchema is upgraded to a
+	// one-element slice.
+	GetVariantMatrixSchemas() ([]VariantMatrixSchema, error)
 	// SetVariantMatrixSchema sets the variant matrix schema configuration.
 	SetVariantMatrixSchema(schema VariantMatrixSchema) error
 	// HasVariantMatrixSchema returns true if a variant matrix schema is defined.
