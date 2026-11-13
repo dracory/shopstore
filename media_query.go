@@ -267,12 +267,6 @@ func (c *mediaQueryImplementation) SetSortDirection(sortDirection string) MediaQ
 	return c
 }
 
-func (c *mediaQueryImplementation) SetParentID(parentID string) MediaQueryInterface {
-	c.properties["parent_id"] = parentID
-
-	return c
-}
-
 func (c *mediaQueryImplementation) HasSoftDeletedIncluded() bool {
 	return c.hasProperty("soft_deleted_included")
 }
