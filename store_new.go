@@ -10,16 +10,17 @@ import (
 
 // NewStoreOptions define the options for creating a new block store
 type NewStoreOptions struct {
-	CategoryTableName      string
-	DiscountTableName      string
-	MediaTableName         string
-	OrderTableName         string
-	OrderLineItemTableName string
-	ProductTableName       string
-	SettingTableName       string
-	DB                     *sql.DB
-	AutomigrateEnabled     bool
-	DebugEnabled           bool
+	CategoryTableName        string
+	DiscountTableName        string
+	MediaTableName           string
+	OrderTableName           string
+	OrderLineItemTableName   string
+	ProductTableName         string
+	ProductCategoryTableName string
+	SettingTableName         string
+	DB                       *sql.DB
+	AutomigrateEnabled       bool
+	DebugEnabled             bool
 }
 
 // NewStore creates a new block store
@@ -48,6 +49,10 @@ func NewStore(opts NewStoreOptions) (*Store, error) {
 		return nil, errors.New("shop store: ProductTableName is required")
 	}
 
+	if opts.ProductCategoryTableName == "" {
+		return nil, errors.New("shop store: ProductCategoryTableName is required")
+	}
+
 	if opts.SettingTableName == "" {
 		return nil, errors.New("shop store: SettingTableName is required")
 	}
@@ -62,16 +67,17 @@ func NewStore(opts NewStoreOptions) (*Store, error) {
 	}
 
 	store := &Store{
-		categoryTableName:      opts.CategoryTableName,
-		discountTableName:      opts.DiscountTableName,
-		mediaTableName:         opts.MediaTableName,
-		orderTableName:         opts.OrderTableName,
-		orderLineItemTableName: opts.OrderLineItemTableName,
-		productTableName:       opts.ProductTableName,
-		settingTableName:       opts.SettingTableName,
-		automigrateEnabled:     opts.AutomigrateEnabled,
-		db:                     neatDB,
-		debugEnabled:           opts.DebugEnabled,
+		categoryTableName:        opts.CategoryTableName,
+		discountTableName:        opts.DiscountTableName,
+		mediaTableName:           opts.MediaTableName,
+		orderTableName:           opts.OrderTableName,
+		orderLineItemTableName:   opts.OrderLineItemTableName,
+		productTableName:         opts.ProductTableName,
+		productCategoryTableName: opts.ProductCategoryTableName,
+		settingTableName:         opts.SettingTableName,
+		automigrateEnabled:       opts.AutomigrateEnabled,
+		db:                       neatDB,
+		debugEnabled:             opts.DebugEnabled,
 	}
 
 	store.timeoutSeconds = 2 * 60 * 60 // 2 hours

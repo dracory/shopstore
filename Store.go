@@ -12,18 +12,19 @@ import (
 var _ StoreInterface = (*Store)(nil) // verify it extends the interface
 
 type Store struct {
-	categoryTableName      string
-	discountTableName      string
-	mediaTableName         string
-	orderTableName         string
-	orderLineItemTableName string
-	productTableName       string
-	settingTableName       string
-	db                     *neat.Database
-	timeoutSeconds         int64
-	automigrateEnabled     bool
-	debugEnabled           bool
-	sqlLogger              *slog.Logger
+	categoryTableName        string
+	discountTableName        string
+	mediaTableName           string
+	orderTableName           string
+	orderLineItemTableName   string
+	productTableName         string
+	productCategoryTableName string
+	settingTableName         string
+	db                       *neat.Database
+	timeoutSeconds           int64
+	automigrateEnabled       bool
+	debugEnabled             bool
+	sqlLogger                *slog.Logger
 }
 
 // logSql logs sql to the sql logger
@@ -57,6 +58,9 @@ func (store *Store) MigrateUp(ctx context.Context, tx ...*sql.Tx) error {
 	if err := store.productTableCreate(); err != nil {
 		return err
 	}
+	if err := store.productCategoryTableCreate(); err != nil {
+		return err
+	}
 	if err := store.settingTableCreate(); err != nil {
 		return err
 	}
@@ -88,6 +92,7 @@ func (store *Store) MigrateDown(ctx context.Context, tx ...*sql.Tx) error {
 	_ = store.db.Schema().DropIfExists(store.orderLineItemTableName)
 	_ = store.db.Schema().DropIfExists(store.orderTableName)
 	_ = store.db.Schema().DropIfExists(store.productTableName)
+	_ = store.db.Schema().DropIfExists(store.productCategoryTableName)
 	_ = store.db.Schema().DropIfExists(store.settingTableName)
 	return nil
 }
@@ -133,6 +138,10 @@ func (store *Store) OrderLineItemTableName() string {
 
 func (store *Store) ProductTableName() string {
 	return store.productTableName
+}
+
+func (store *Store) ProductCategoryTableName() string {
+	return store.productCategoryTableName
 }
 
 func (store *Store) SettingTableName() string {
@@ -264,6 +273,21 @@ func (store *Store) productTableCreate() error {
 		table.Text(COLUMN_VARIANT_MATRIX_VALUES)
 		table.Text(COLUMN_METAS)
 		table.Text(COLUMN_MEMO)
+		table.DateTime(COLUMN_CREATED_AT)
+		table.DateTime(COLUMN_UPDATED_AT)
+		table.DateTime(COLUMN_SOFT_DELETED_AT)
+	})
+}
+
+func (store *Store) productCategoryTableCreate() error {
+	if store.db.Schema().HasTable(store.productCategoryTableName) {
+		return nil
+	}
+	return store.db.Schema().Create(store.productCategoryTableName, func(table contractsschema.Blueprint) {
+		table.String(COLUMN_ID, 40)
+		table.Primary(COLUMN_ID)
+		table.String(COLUMN_PRODUCT_ID, 40)
+		table.String(COLUMN_CATEGORY_ID, 40)
 		table.DateTime(COLUMN_CREATED_AT)
 		table.DateTime(COLUMN_UPDATED_AT)
 		table.DateTime(COLUMN_SOFT_DELETED_AT)

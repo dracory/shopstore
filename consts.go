@@ -24,6 +24,7 @@ const CATEGORY_STATUS_INACTIVE = "inactive"
 
 const COLUMN_AMOUNT = "amount"
 const COLUMN_CODE = "code"
+const COLUMN_CATEGORY_ID = "category_id"
 const COLUMN_CREATED_AT = "created_at"
 const COLUMN_CUSTOMER_ID = "customer_id"
 const COLUMN_DESCRIPTION = "description"

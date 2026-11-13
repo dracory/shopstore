@@ -38,15 +38,16 @@ func initStore(filepath string) (StoreInterface, error) {
 	}
 
 	store, err := NewStore(NewStoreOptions{
-		DB:                     db,
-		CategoryTableName:      "shop_category",
-		DiscountTableName:      "shop_discount",
-		MediaTableName:         "shop_media",
-		OrderTableName:         "shop_order",
-		OrderLineItemTableName: "shop_order_line_item",
-		ProductTableName:       "shop_product",
-		SettingTableName:       "shop_setting",
-		AutomigrateEnabled:     true,
+		DB:                       db,
+		CategoryTableName:        "shop_category",
+		DiscountTableName:        "shop_discount",
+		MediaTableName:           "shop_media",
+		OrderTableName:           "shop_order",
+		OrderLineItemTableName:   "shop_order_line_item",
+		ProductTableName:         "shop_product",
+		ProductCategoryTableName: "shop_product_category",
+		SettingTableName:         "shop_setting",
+		AutomigrateEnabled:       true,
 	})
 
 	if err != nil {

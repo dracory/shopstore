@@ -838,6 +838,60 @@ type SettingInterface interface {
 	IsSoftDeleted() bool
 }
 
+// ProductCategoryInterface defines the contract for product-category link
+// entities (a many-to-many join between products and categories).
+type ProductCategoryInterface interface {
+	// DataObject methods
+
+	// Data returns a map of all field values for serialization.
+	Data() map[string]string
+	// DataChanged returns a map of only the fields that have been modified since load.
+	DataChanged() map[string]string
+	// MarkAsNotDirty resets the dirty state, clearing all change tracking.
+	MarkAsNotDirty()
+
+	// Setters and Getters
+
+	// GetCategoryID returns the linked category identifier.
+	GetCategoryID() string
+	// SetCategoryID sets the linked category identifier.
+	SetCategoryID(categoryID string) ProductCategoryInterface
+
+	// GetCreatedAt returns the creation timestamp as a string.
+	GetCreatedAt() string
+	// GetCreatedAtCarbon returns the creation timestamp as a Carbon instance.
+	GetCreatedAtCarbon() *carbon.Carbon
+	// SetCreatedAt sets the creation timestamp.
+	SetCreatedAt(createdAt string) ProductCategoryInterface
+
+	// GetID returns the unique identifier.
+	GetID() string
+	// SetID sets the unique identifier.
+	SetID(id string) ProductCategoryInterface
+
+	// GetProductID returns the linked product identifier.
+	GetProductID() string
+	// SetProductID sets the linked product identifier.
+	SetProductID(productID string) ProductCategoryInterface
+
+	// GetSoftDeletedAt returns the soft deletion timestamp.
+	GetSoftDeletedAt() string
+	// GetSoftDeletedAtCarbon returns the soft deletion timestamp as a Carbon instance.
+	GetSoftDeletedAtCarbon() *carbon.Carbon
+	// SetSoftDeletedAt sets the soft deletion timestamp.
+	SetSoftDeletedAt(deletedAt string) ProductCategoryInterface
+
+	// GetUpdatedAt returns the last update timestamp.
+	GetUpdatedAt() string
+	// GetUpdatedAtCarbon returns the last update timestamp as a Carbon instance.
+	GetUpdatedAtCarbon() *carbon.Carbon
+	// SetUpdatedAt sets the last update timestamp.
+	SetUpdatedAt(updatedAt string) ProductCategoryInterface
+
+	// IsSoftDeleted returns true if the link is soft deleted.
+	IsSoftDeleted() bool
+}
+
 // StoreInterface defines the contract for the shop store database operations.
 // Provides CRUD operations, soft deletion, counting, listing with pagination,
 // and variant management for all entity types (categories, discounts, media, orders, products).
@@ -867,6 +921,8 @@ type StoreInterface interface {
 	OrderLineItemTableName() string
 	// ProductTableName returns the database table name for products.
 	ProductTableName() string
+	// ProductCategoryTableName returns the database table name for product-category links.
+	ProductCategoryTableName() string
 	// SettingTableName returns the database table name for settings.
 	SettingTableName() string
 
@@ -1035,4 +1091,31 @@ type StoreInterface interface {
 	SettingSoftDeleteByID(ctx context.Context, settingID string) error
 	// SettingUpdate updates an existing setting in the database.
 	SettingUpdate(ctx context.Context, setting SettingInterface) error
+
+	// ProductCategory operations
+
+	// ProductCategoryCount returns the total count of product-category links matching the query options.
+	ProductCategoryCount(ctx context.Context, options ProductCategoryQueryInterface) (int64, error)
+	// ProductCategoryCreate inserts a new product-category link into the database.
+	ProductCategoryCreate(ctx context.Context, productCategory ProductCategoryInterface) error
+	// ProductCategoryDelete permanently deletes a product-category link from the database.
+	ProductCategoryDelete(ctx context.Context, productCategory ProductCategoryInterface) error
+	// ProductCategoryDeleteByID permanently deletes a product-category link by its ID.
+	ProductCategoryDeleteByID(ctx context.Context, id string) error
+	// ProductCategoryDeleteByProductID permanently deletes all category links for a product.
+	ProductCategoryDeleteByProductID(ctx context.Context, productID string) error
+	// ProductCategoryFindByID retrieves a product-category link by its unique ID.
+	ProductCategoryFindByID(ctx context.Context, id string) (ProductCategoryInterface, error)
+	// ProductCategoryIDs returns the IDs of all categories linked to a product.
+	ProductCategoryIDs(ctx context.Context, productID string) ([]string, error)
+	// ProductCategorySet replaces all category links for a product with the given category IDs.
+	ProductCategorySet(ctx context.Context, productID string, categoryIDs []string) error
+	// ProductCategoryList retrieves a list of product-category links matching the query options.
+	ProductCategoryList(ctx context.Context, options ProductCategoryQueryInterface) ([]ProductCategoryInterface, error)
+	// ProductCategorySoftDelete soft deletes a product-category link.
+	ProductCategorySoftDelete(ctx context.Context, productCategory ProductCategoryInterface) error
+	// ProductCategorySoftDeleteByID soft deletes a product-category link by its ID.
+	ProductCategorySoftDeleteByID(ctx context.Context, id string) error
+	// ProductCategoryUpdate updates an existing product-category link in the database.
+	ProductCategoryUpdate(ctx context.Context, productCategory ProductCategoryInterface) error
 }
